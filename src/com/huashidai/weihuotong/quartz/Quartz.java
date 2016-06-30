@@ -44,8 +44,8 @@ public class Quartz {
 	 */
 	@Scheduled(cron = "0 00 1 * * ?")
 	public void closeOrder(){
-		System.out.println("关闭未支付订单！");
 		List<ProductOrder> dueNotPay = productOrderService.getDueNotPay();
+		System.out.println(dueNotPay.size());
 		for (ProductOrder productOrder : dueNotPay) {
 			productOrderService.updateState(productOrder.getId(), ConstUtil.ORDER_CLOSE);
 		}

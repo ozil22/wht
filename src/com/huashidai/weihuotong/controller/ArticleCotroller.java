@@ -10,9 +10,9 @@ import com.huashidai.weihuotong.domain.Article;
 import com.huashidai.weihuotong.query.ArticleQuery;
 import com.huashidai.weihuotong.query.PageResult;
 import com.huashidai.weihuotong.service.IArticleService;
+import com.huashidai.weihuotong.system.MethodAnnotation;
+import com.huashidai.weihuotong.system.MethodAnnotation.ResourceType;
 import com.huashidai.weihuotong.utils.AjaxResult;
-import com.huashidai.weihuotong.utils.MethodAnnotation;
-import com.huashidai.weihuotong.utils.MethodAnnotation.ResourceType;
 
 @Controller
 @RequestMapping("/article")

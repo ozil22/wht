@@ -12,8 +12,8 @@ import com.huashidai.weihuotong.domain.ProductOrderItem;
 import com.huashidai.weihuotong.query.PageResult;
 import com.huashidai.weihuotong.query.ProductOrderQuery;
 import com.huashidai.weihuotong.service.IProductOrderService;
-import com.huashidai.weihuotong.utils.MethodAnnotation;
-import com.huashidai.weihuotong.utils.MethodAnnotation.ResourceType;
+import com.huashidai.weihuotong.system.MethodAnnotation;
+import com.huashidai.weihuotong.system.MethodAnnotation.ResourceType;
 
 @Controller
 @RequestMapping("/productOrder")

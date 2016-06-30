@@ -9,9 +9,9 @@ import com.huashidai.weihuotong.domain.ArticleComment;
 import com.huashidai.weihuotong.query.ArticleCommentQuery;
 import com.huashidai.weihuotong.query.PageResult;
 import com.huashidai.weihuotong.service.IArticleCommentService;
+import com.huashidai.weihuotong.system.MethodAnnotation;
+import com.huashidai.weihuotong.system.MethodAnnotation.ResourceType;
 import com.huashidai.weihuotong.utils.AjaxResult;
-import com.huashidai.weihuotong.utils.MethodAnnotation;
-import com.huashidai.weihuotong.utils.MethodAnnotation.ResourceType;
 
 @Controller
 @RequestMapping("/articleComment")

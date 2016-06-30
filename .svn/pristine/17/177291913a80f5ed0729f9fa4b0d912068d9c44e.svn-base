@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.huashidai.weihuotong.mapper.SystemExceptionMapper"> 
+	<insert id="save" parameterType="SystemException" useGeneratedKeys="true" keyProperty="id">
+		insert into t_systemException(opTime,opIP,function,exceptionDetail,ExceptionCode,params)
+		values(#{opTime},#{opIP},#{function},#{exceptionDetail},#{ExceptionCode},#{params})
+	</insert>
+	<select id="get" resultType="SystemException">
+		select * from t_systemException
+		where id=#{id}
+	</select>
+	<select id="getAll" resultType="SystemException">
+		select * from t_systemException
+	</select>
+	<!-- 公共的高级查询条件 -->
+	<sql id="whereSql">
+		<where>
+			<if test="startTime != null">
+				opTime>=#{startTime}			
+			</if>
+			<if test="endTime != null ">
+				and opTime&lt;=#{endTime}
+			</if>
+		</where>
+	</sql>
+	<!-- 高级查询 -->
+	<select id="query" resultType="SystemException" parameterType="SystemExceptionQuery">
+		select * from t_systemException
+		<include refid="whereSql"/>
+		order by opTime desc
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 查询总记录数 -->
+	<select id="queryTotal" resultType="long" parameterType="SystemExceptionQuery">
+		select count(id)
+			from t_systemException
+		<include refid="whereSql"/>
+	</select>
+</mapper> 

@@ -21,12 +21,6 @@
 		<property name="suffix" value=".jsp"></property>
 	</bean>
 
-
-
-
-
-
-
 	<!-- 拦截器 -->
 	<mvc:interceptors>
 		<mvc:interceptor>

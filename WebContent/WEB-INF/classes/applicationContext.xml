@@ -17,6 +17,12 @@
 
 	<!-- 开启全注解扫描 -->
 	<context:component-scan base-package="com.huashidai.weihuotong"></context:component-scan>
+	
+	<!-- 启动@AspectJ支持-->
+	<aop:aspectj-autoproxy/>
+	<!--通知spring使用cglib而不是jdk的来生成代理方法 AOP可以拦截到Controller-->  
+	<aop:aspectj-autoproxy proxy-target-class="true" />  
+	
 	<!-- 加载资源文件 -->
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -139,18 +145,6 @@
 		<property name="resolveLazily" value="true" />
 	</bean>
 
-	<!-- 配置系统日志 -->
-	<aop:config>
-		<!--配置切入点 -->
-		<aop:pointcut expression="execution(* com.huashidai.weihuotong.service..*.*(..))"
-			id="systemLogPointcut" />
-		<!-- 通知 实际上是定义横切逻辑，就是在连接点上做什么 -->
-		<aop:aspect ref="systemLogUtil">
-			<!-- 配置在切入后执行的方法 -->
-			<aop:after method="writeLog" pointcut-ref="systemLogPointcut" />
-		</aop:aspect>
-	</aop:config>
-
 	<!-- quartz配置 -->
 	<!-- task注解扫描 -->
 	<task:annotation-driven />
@@ -159,19 +153,7 @@
 		class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor" />
 	<context:component-scan base-package="com.huashidai.weihuotong.quartz" />
 
-	<!-- redis -->
-	<!-- 启动@AspectJ支持-->
-	<aop:aspectj-autoproxy/>  
-	<!-- 加载redis资源文件 -->
-<!-- 	<bean
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="locations">
-			<list>
-				<value>classpath:redis.properties</value>
-			</list>
-		</property>
-		<property name="ignoreUnresolvablePlaceholders" value="true" />
-	</bean> -->
+	<!-- redis配置 -->
 	<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
 		<!-- 最小空闲连接数,默认0 -->
 		<property name="minIdle" value="${redis.minIdle}" />

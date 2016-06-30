@@ -14,9 +14,9 @@ import com.huashidai.weihuotong.exception.LogicException;
 import com.huashidai.weihuotong.query.BaseQuery;
 import com.huashidai.weihuotong.query.PageResult;
 import com.huashidai.weihuotong.service.IBrandService;
+import com.huashidai.weihuotong.system.MethodAnnotation;
+import com.huashidai.weihuotong.system.MethodAnnotation.ResourceType;
 import com.huashidai.weihuotong.utils.AjaxResult;
-import com.huashidai.weihuotong.utils.MethodAnnotation;
-import com.huashidai.weihuotong.utils.MethodAnnotation.ResourceType;
 
 @Controller
 @RequestMapping("/brand")

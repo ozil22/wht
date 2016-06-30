@@ -1,0 +1,142 @@
+package com.huashidai.weihuotong.controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.huashidai.weihuotong.domain.Store;
+import com.huashidai.weihuotong.domain.StoreAuth;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.query.StoreQuery;
+import com.huashidai.weihuotong.service.IStoreAuthService;
+import com.huashidai.weihuotong.service.IStoreService;
+import com.huashidai.weihuotong.system.MethodAnnotation;
+import com.huashidai.weihuotong.system.MethodAnnotation.ResourceType;
+import com.huashidai.weihuotong.utils.AjaxResult;
+
+@Controller
+@RequestMapping("/store")
+public class StoreController {
+	@Autowired
+	IStoreService storeService;
+	@Autowired
+	IStoreAuthService storeAuthService;
+
+	/*
+	 * 显示页面的方法
+	 */
+	@MethodAnnotation(name = "主页", type = ResourceType.用户店铺)
+	@RequestMapping("/index")
+	public String index() {
+		return "/store/store";
+	}
+
+	/*
+	 * 获取所有店铺
+	 */
+	@MethodAnnotation(name = "列表", type = ResourceType.用户店铺)
+	@RequestMapping("/getAll")
+	@ResponseBody
+	public List<Store> getAll() {
+		List<Store> list = storeService.getAll();
+		return list;
+	}
+
+	/*
+	 * 查询店铺
+	 */
+	@MethodAnnotation(name = "查询", type = ResourceType.用户店铺)
+	@RequestMapping("/query")
+	@ResponseBody
+	public PageResult<Store> query(StoreQuery qu) {
+		PageResult<Store> result = storeService.query(qu);
+		return result;
+	}
+
+	/*
+	 * 审核成功
+	 */
+	@MethodAnnotation(name = "审核通过", type = ResourceType.用户店铺)
+	@RequestMapping("/success")
+	@ResponseBody
+	public AjaxResult success(Long id) {
+		AjaxResult ar;
+		try {
+			storeService.success(id);
+			ar = new AjaxResult();
+		} catch (LogicException e) {
+			ar = new AjaxResult(e.getMessage(), e.getErrorCode());
+		}
+		return ar;
+	}
+
+	/*
+	 * 审核失败
+	 */
+	@MethodAnnotation(name = "审核拒绝", type = ResourceType.用户店铺)
+	@RequestMapping("/failure")
+	@ResponseBody
+	public AjaxResult failure(Long id,String remark) {
+		AjaxResult ar;
+		try {
+			storeService.failure(id,remark);
+			ar = new AjaxResult();
+		} catch (LogicException e) {
+			ar = new AjaxResult(e.getMessage(), e.getErrorCode());
+		}
+		return ar;
+	}
+	/*
+	 * 停用
+	 */
+	@MethodAnnotation(name = "停用", type = ResourceType.用户店铺)
+	@RequestMapping("/leave")
+	@ResponseBody
+	public AjaxResult leave(Long id,String remark) {
+		AjaxResult ar;
+		try {
+			storeService.leave(id,remark);
+			ar = new AjaxResult();
+		} catch (LogicException e) {
+			ar = new AjaxResult(e.getMessage(), e.getErrorCode());
+		}
+		return ar;
+	}
+	/*
+	 * 启用
+	 */
+	@MethodAnnotation(name = "停用", type = ResourceType.用户店铺)
+	@RequestMapping("/up")
+	@ResponseBody
+	public AjaxResult up(Long id) {
+		AjaxResult ar;
+		try {
+			storeService.up(id);
+			ar = new AjaxResult();
+		} catch (LogicException e) {
+			ar = new AjaxResult(e.getMessage(), e.getErrorCode());
+		}
+		return ar;
+	}
+	/*
+	 * 获取认证信息
+	 */
+	@MethodAnnotation(name = "认证信息", type = ResourceType.用户店铺)
+	@RequestMapping("/storeAuth")
+	@ResponseBody
+	public Map<String,Object> storeAuth(Long storeId) {
+		Map<String,Object> map = new HashMap<String,Object>();
+		List<StoreAuth> rows = new ArrayList<StoreAuth>();
+		StoreAuth storeAuth = storeAuthService.getByStore(storeId);
+		rows.add(storeAuth);
+		map.put("rows", rows);
+		return map;
+	}
+}

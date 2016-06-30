@@ -42,10 +42,10 @@ public class ProductServiceImpl implements IProductService {
 	public void delete(Long id) {
 		Product product = productMapper.get(id);
 		Long goodsId = product.getGoods().getId();
+		productMapper.delete(id);
 		ProductQuery qu = new ProductQuery();
 		qu.setGoodsId(goodsId);
 		Long total = productMapper.queryTotal(qu);
-		productMapper.delete(id);
 		if (total == 0) {
 			goodsService.delete(goodsId, "店铺删除");
 		}

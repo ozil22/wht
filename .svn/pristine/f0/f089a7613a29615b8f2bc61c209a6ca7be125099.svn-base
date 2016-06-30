@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.huashidai.weihuotong.mapper.SystemLogMapper"> 
+	<insert id="save" parameterType="SystemLog" useGeneratedKeys="true" keyProperty="id">
+		insert into t_systemLog(opUser,opTime,opIP,function,description,params)
+		values(#{opUser},#{opTime},#{opIP},#{function},#{description},#{params})
+	</insert>
+	<select id="get" resultType="SystemLog">
+		select * from t_systemLog
+		where id=#{id}
+	</select>
+	<select id="getAll" resultType="SystemLog">
+		select * from t_systemLog
+	</select>
+	<!-- 公共的高级查询条件 -->
+	<sql id="whereSql">
+		<where>
+			<if test="startTime != null">
+				opTime>=#{startTime}			
+			</if>
+			<if test="endTime != null ">
+				and opTime&lt;=#{endTime}
+			</if>
+		</where>
+	</sql>
+	<!-- 高级查询 -->
+	<select id="query" resultType="SystemLog" parameterType="SystemLogQuery">
+		select * from t_systemLog
+		<include refid="whereSql"/>
+		order by opTime desc
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 查询总记录数 -->
+	<select id="queryTotal" resultType="long" parameterType="SystemLogQuery">
+		select count(id)
+			from t_systemLog
+		<include refid="whereSql"/>
+	</select>
+</mapper> 

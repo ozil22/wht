@@ -9,8 +9,8 @@ import com.huashidai.weihuotong.domain.SystemLog;
 import com.huashidai.weihuotong.query.PageResult;
 import com.huashidai.weihuotong.query.SystemLogQuery;
 import com.huashidai.weihuotong.service.ISystemLogService;
-import com.huashidai.weihuotong.utils.MethodAnnotation;
-import com.huashidai.weihuotong.utils.MethodAnnotation.ResourceType;
+import com.huashidai.weihuotong.system.MethodAnnotation;
+import com.huashidai.weihuotong.system.MethodAnnotation.ResourceType;
 
 @Controller
 @RequestMapping("/systemLog")

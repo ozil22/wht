@@ -10,10 +10,10 @@ import com.huashidai.weihuotong.exception.LogicException;
 import com.huashidai.weihuotong.query.PageResult;
 import com.huashidai.weihuotong.query.PromotionQuery;
 import com.huashidai.weihuotong.service.IPromotionService;
+import com.huashidai.weihuotong.system.MethodAnnotation;
+import com.huashidai.weihuotong.system.MethodAnnotation.ResourceType;
 import com.huashidai.weihuotong.utils.AjaxResult;
 import com.huashidai.weihuotong.utils.ConstUtil;
-import com.huashidai.weihuotong.utils.MethodAnnotation;
-import com.huashidai.weihuotong.utils.MethodAnnotation.ResourceType;
 
 @Controller
 @RequestMapping("/promotion")

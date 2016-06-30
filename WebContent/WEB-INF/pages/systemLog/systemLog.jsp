@@ -21,6 +21,7 @@
 			singleSelect:true,
 			fitColumns:true,
 			striped:true,//隔行换色
+			nowrap:false,
 			rownumbers:true,
 			pagination:true,//分页条
 			pageSize:20,
@@ -59,10 +60,12 @@
 		<thead>
 			<tr>
 				<!-- field：指定需要显示列对应JSON数据属性 -->
+				<th align="center" field="description"    width="20">操作信息</th>
+				<th align="center" field="params"    width="20">参数</th>
 				<th align="center" field="opTime" data-options="formatter:formatDateTime"  width="20">操作时间</th>
-				<th align="center" field="opUser"   width="20">操作用户</th>
-				<th align="center" field="opIP"    width="20">IP</th>
-				<th align="center" field="function"    width="60">操作信息</th>
+				<th align="center" field="opUser"   width="15">操作用户</th>
+				<th align="center" field="opIP"    width="15">IP</th>
+				<th align="center" field="function"    width="60">详细信息</th>
 			</tr>
 		</thead>
 	</table>

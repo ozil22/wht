@@ -16,8 +16,8 @@ import com.huashidai.weihuotong.query.PageResult;
 import com.huashidai.weihuotong.query.SystemAccountFlowQuery;
 import com.huashidai.weihuotong.service.ISystemAccountFlowService;
 import com.huashidai.weihuotong.service.ISystemAccountService;
-import com.huashidai.weihuotong.utils.MethodAnnotation;
-import com.huashidai.weihuotong.utils.MethodAnnotation.ResourceType;
+import com.huashidai.weihuotong.system.MethodAnnotation;
+import com.huashidai.weihuotong.system.MethodAnnotation.ResourceType;
 
 @Controller
 @RequestMapping("/systemAccount")

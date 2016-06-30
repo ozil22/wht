@@ -13,6 +13,8 @@ public class SystemLog implements Serializable{
 	private Date opTime;//操作时间
 	private String opIP;//操作IP
 	private String function;// 操作信息 全类名:方法名
+	private String params;// 参数
+	private String description;//方法描述
 	public Long getId() {
 		return id;
 	}
@@ -43,10 +45,23 @@ public class SystemLog implements Serializable{
 	public void setFunction(String function) {
 		this.function = function;
 	}
+	
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	
+	public String getParams() {
+		return params;
+	}
+	public void setParams(String params) {
+		this.params = params;
+	}
 	@Override
 	public String toString() {
 		return "SystemLog [id=" + id + ", opUser=" + opUser + ", opTime="
 				+ opTime + ", opIP=" + opIP + ", function=" + function + "]";
 	}
-	
 }
