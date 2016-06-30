@@ -1,0 +1,193 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.huashidai.weihuotong.domain.BannerImage;
+import com.huashidai.weihuotong.domain.DetailsImage;
+import com.huashidai.weihuotong.domain.Goods;
+import com.huashidai.weihuotong.domain.Product;
+import com.huashidai.weihuotong.domain.ProxyGoods;
+import com.huashidai.weihuotong.domain.User;
+import com.huashidai.weihuotong.domain.paramList.ProductList;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.mapper.BannerImageMapper;
+import com.huashidai.weihuotong.mapper.DetailsImageMapper;
+import com.huashidai.weihuotong.mapper.GoodsMapper;
+import com.huashidai.weihuotong.mapper.ProductMapper;
+import com.huashidai.weihuotong.mapper.ProxyGoodsMapper;
+import com.huashidai.weihuotong.query.GoodsQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.service.IGoodsService;
+import com.huashidai.weihuotong.utils.ConstUtil;
+import com.huashidai.weihuotong.utils.DateUtil;
+import com.huashidai.weihuotong.utils.FileUtil;
+import com.huashidai.weihuotong.utils.StateCode;
+
+@Service
+public class GoodsServiceImpl implements IGoodsService {
+	@Autowired
+	private GoodsMapper goodsMapper;
+	@Autowired
+	private ProductMapper productMapper;
+	@Autowired
+	private ProxyGoodsMapper proxyGoodsMapper;
+	@Autowired
+	private BannerImageMapper bannerImageMapper; 
+	@Autowired
+	private DetailsImageMapper detailsImageMapper; 
+
+	@Override
+	public PageResult<Goods> query(GoodsQuery gqu) {
+		PageResult<Goods> pr = new PageResult<Goods>();
+		// 统计查询
+		Long total = goodsMapper.queryTotal(gqu);
+		pr.setTotal(total.intValue());
+		// 分页查询
+		List<Goods> rows = goodsMapper.query(gqu);
+		pr.setRows(rows);
+		// 页数
+		pr.setPage(gqu.getCurrentPage());
+		pr.setSize(gqu.getPageSize());
+		return pr;
+	}
+
+	@Override
+	public Map<String, Object> enterGoods(Long goodsId) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		Goods goods = goodsMapper.get(goodsId);
+		if (goods == null) {
+			throw new LogicException("商品已下架！！", StateCode.NOTFOUND_GOODS);
+		}
+		map.put("bannerImages", goods.getBannerImages());
+		map.put("details", goods.getDetails());
+		map.put("proxyNum", goods.getProxyNum());
+		map.put("saleNum", goods.getSaleNum());
+		map.put("salePrice", goods.getSalePrice());
+		map.put("storeId", goods.getStore().getId());
+		map.put("storeName", goods.getStore().getName());
+		map.put("storeImage", goods.getStore().getHeadImage());
+		map.put("storePhone", goods.getStore().getPhone());
+		return map;
+	}
+
+
+	@Override
+	public Map<String, Object> queryMap(GoodsQuery gqu) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		// 店铺所有商品
+		PageResult<Goods> pageResult = query(gqu);
+		map.put("page", pageResult.getPage());
+		map.put("total", pageResult.getTotal());
+		ArrayList<Object> goodss = new ArrayList<Object>();
+		List<Goods> datas = pageResult.getRows();
+		for (Goods g : datas) {
+			Map<String, Object> goods = new HashMap<String, Object>();
+			goods.put("id", g.getId());
+			goods.put("image", g.getBannerImages().get(0));
+			goods.put("name", g.getName());
+			goods.put("salePrice", g.getSalePrice());
+			goods.put("saleNum", g.getSaleNum());
+			goodss.add(goods);
+		}
+		map.put("goods", goodss);
+		return map;
+	}
+
+	@Override
+	public void proxyGoods(Long goodsId, BigDecimal price, String details,
+			Long userId) {
+		ProxyGoods proxyGoods = new ProxyGoods();
+		proxyGoods.setPrice(price);
+		Goods goods = goodsMapper.get(goodsId);
+		if (StringUtils.isBlank(details)) {
+			details = goods.getDetails();
+		}
+		proxyGoods.setDetails(details);
+		proxyGoods.setGoods(goods);
+		proxyGoods.setUser(new User(userId));
+		//保存代理商品对象
+		proxyGoodsMapper.save(proxyGoods);
+		//修改商品转发量
+		goodsMapper.addProxyNum(1);
+	}
+
+	@Override
+	public List<Object> toBuyProduct(Long goodsId) {
+		List<Object> products = new ArrayList<Object>();
+		List<Product> pros = productMapper.getByGoods(goodsId);
+		for (Product pro : pros) {
+			Map<String,Object> product = new HashMap<String,Object>();
+			product.put("productId", pro.getId());
+			product.put("specification", pro.getSpecification());
+			product.put("inventoryNum", pro.getInventoryNum());
+			products.add(product);
+		}
+		return products;
+	}
+
+	@Override
+	public Map<String, Object> newGoods(Long storeId) {
+		GoodsQuery goodsQuery = new GoodsQuery();
+		goodsQuery.setUptime(DateUtil.getLastWeek(new Date()));
+		goodsQuery.setStoreId(storeId);
+		return queryMap(goodsQuery);
+	}
+
+	@Override
+	public void delete(Long id) {
+		Goods goods = goodsMapper.get(id);
+		if (goods.getState() != ConstUtil.GOODS_LEAVE) {
+			throw new LogicException("商品未下架,不能删除!", StateCode.NOTDELETE_GOODS);
+		}
+		goodsMapper.delete(id);
+		
+	}
+
+	@Override
+	public void leave(Long id) {
+		Goods goods = goodsMapper.get(id);
+		goods.setState(ConstUtil.GOODS_LEAVE);
+		goodsMapper.updateState(goods);
+	}
+	@Override
+	public void up(Long id) {
+		Goods goods = goodsMapper.get(id);
+		goods.setState(ConstUtil.GOODS_NORMAL);
+		goodsMapper.updateState(goods);
+	}
+
+	@Override
+	public void saveGoods(MultipartFile[] bannerImage,
+			MultipartFile[] detailsImage, ProductList products, Goods goods) throws IOException {
+		//保存商品
+		goods.setTime(new Date());
+		goodsMapper.save(goods);
+		//保存图片
+		for (MultipartFile banner : bannerImage) {
+			String src = FileUtil.saveFile(banner, "bannerImage");
+			BannerImage image = new BannerImage(src, goods);
+			bannerImageMapper.save(image);
+		}
+		for (MultipartFile details : detailsImage) {
+			String src = FileUtil.saveFile(details, "bannerImage");
+			DetailsImage image = new DetailsImage(src, goods);
+			detailsImageMapper.save(image);
+		}
+		//保存货品
+		for (Product product : products.getProducts()) {
+			product.setGoods(goods);
+			productMapper.save(product);
+		}
+	}
+}

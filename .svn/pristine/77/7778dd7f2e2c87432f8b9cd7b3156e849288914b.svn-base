@@ -1,0 +1,25 @@
+package com.huashidai.weihuotong.mapper;
+
+import java.util.List;
+
+import com.huashidai.weihuotong.domain.ProxyOrder;
+import com.huashidai.weihuotong.query.ProxyOrderQuery;
+
+public interface ProxyOrderMapper {
+
+	void save(ProxyOrder proxyOrder);
+
+	ProxyOrder get(Long id);
+
+	void delete(Long id);
+	
+	/**
+	 * 高级查询
+	 */
+	List<ProxyOrder> query(ProxyOrderQuery qu);
+	/**
+	 * 查询总数
+	 */
+	Long queryTotal(ProxyOrderQuery qu);
+
+}

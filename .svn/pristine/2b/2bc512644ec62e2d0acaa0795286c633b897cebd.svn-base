@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashidai.weihuotong.mapper.AccountFlowMapper">
+	<insert id="insert" parameterType="AccountFlow">
+		insert into t_accountflow (id, amount, account_id,
+		balance,note,freezedAmount,operateTime,accountActionType)
+		values (#{id}, #{amount}, #{account.id}, #{balance},
+		#{note},#{freezedAmount},#{operateTime},#{accountActionType})
+	</insert>
+
+	<delete id="delete" parameterType="long">
+		delete from t_accountflow
+		where id = #{id}
+	</delete>
+
+	<select id="get" resultType="AccountFlow" parameterType="long">
+		select *
+		from t_accountflow
+		where id = #{id}
+	</select>
+	<select id="getByAccount" resultType="AccountFlow" parameterType="long">
+		select *
+		from t_accountflow
+		where account_id = #{accountId}
+	</select>
+	
+	<sql id="wheresql">
+		<if test="accountId != -1">
+			a.account_id  = #{accountId}
+		</if>
+	</sql>
+	
+	<select id="query" resultType="AccountFlow" parameterType="AccountFlowQuery">
+		select a.* 
+		from t_accountflow a
+		<include refid="whereSql"/>
+		order by a.operateTime desc
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 获取总记录数 -->
+	<select id="queryTotal" resultType="long" parameterType="AccountFlowQuery">
+		select count(a.id)
+		from t_accountflow a
+		<include refid="whereSql"/>
+	</select>
+
+</mapper>

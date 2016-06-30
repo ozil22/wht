@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.PromotionMapper">
+
+	<insert id="save" parameterType="Promotion" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_promotion(image,contentType,contentId,beginTime,endTime,price,state,adPositionId_id,user_id) 
+					values(#{image},#{contentType},#{contentId},#{beginTime},#{endTime},#{price},#{state},
+					#{adPositionId.id},#{user.id})
+	</insert>
+	<!-- 修改 -->
+	<update id="update" parameterType="Promotion">
+		update t_promotion set 
+		image=#{image},
+		contentType=#{contentType},
+		contentId=#{contentId}
+		where id = #{id}
+	</update>
+	<!-- 修改状态 -->
+	<update id="updateState" parameterType="Promotion">
+		update t_promotion set 
+		state=#{state}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_promotion where id = #{id}
+	</delete>
+	
+	<select id="get" resultType="Promotion">
+		select * from t_promotion
+		where id=#{id}
+	</select>
+	<select id="getByAd" resultType="Promotion" parameterType="long">
+		select * from t_promotion
+		where adPositionId_id=#{adPositionId} and state = 1
+	</select>
+	
+	
+	<resultMap type="Promotion" id="PromotionMap">
+		<id column="id" property="id"/>
+		<result column="image" property="image"/>
+		<result column="contentType" property="contentType"/>
+		<result column="contentId" property="contentId"/>
+		<result column="beginTime" property="beginTime"/>
+		<result column="endTime" property="endTime"/>
+		<result column="price" property="price"/>
+		<result column="state" property="state"/>
+		<association property="adPositionId" javaType="AdPositionId">
+			<id column="aid" property="id"/>
+				<result column="atype" property="type"/>
+		</association>
+	</resultMap>
+	
+	<!-- 公共的高级查询条件 -->
+	<sql id="whereSql">
+		<where>
+			<if test="adPositionId != null and adPositionId != -1">
+				p.adPositionId_id = #{adPositionId}
+			</if>
+			<if test="goodsTypeId != null and goodsTypeId != -1 ">
+				and a.goodsType_id = #{goodsTypeId}
+			</if>
+			<if test="userId != null and userId != -1 ">
+				and p.user_id = #{userId}
+			</if>
+			<if test="adType != null and adType != -99 and adType != 0">
+				and a.type = #{adType}
+			</if>
+			<if test="adType == 0">
+				and a.type != 1
+			</if>
+			<if test="state != null and state != -99">
+				and p.state = #{state}
+			</if>
+			<if test="promotionDate != null and promotionDate == 0">
+				and curdate() > p.endTime
+			</if>
+			<if test="promotionDate != null and promotionDate == 1">
+				and (curdate() >= p.beginTime and p.endTime >= curdate())
+			</if>
+			<if test="promotionDate != null and promotionDate == 2">
+				and (p.beginTime > curdate() and p.endTime > curdate())
+			</if>
+			<if test="promotionDate != null and promotionDate == 3">
+				and p.endTime >= curdate()
+			</if>
+			
+		</where>
+	</sql>
+	<select id="query" resultMap="PromotionMap" parameterType="PromotionQuery">
+		select p.* ,a.id aid,a.type atype
+		from t_promotion p
+		left join t_adpositionid a
+		on(p.adPositionId_id = a.id)
+		<include refid="whereSql"/>
+		order by p.id asc,p.beginTime desc
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 获取总记录数 -->
+	<select id="queryTotal" resultType="long" parameterType="PromotionQuery">
+		select count(p.id)
+		from t_promotion p 
+		left join t_adpositionid a on(p.adPositionId_id = a.id)
+		<include refid="whereSql"/>
+	</select>
+</mapper>

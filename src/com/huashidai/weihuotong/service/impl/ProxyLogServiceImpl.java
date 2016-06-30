@@ -1,0 +1,64 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.ProxyLog;
+import com.huashidai.weihuotong.mapper.ProxyLogMapper;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.query.ProxyLogQuery;
+import com.huashidai.weihuotong.service.IProxyLogService;
+
+@Service
+public class ProxyLogServiceImpl implements IProxyLogService {
+	@Autowired
+	private ProxyLogMapper proxyLogMapper;
+
+	@Override
+	public PageResult<ProxyLog> query(ProxyLogQuery qu) {
+		// 统计查询
+		Long total = proxyLogMapper.queryTotal(qu);
+		// 分页查询
+		List<ProxyLog> rows = proxyLogMapper.query(qu);
+		return new PageResult<ProxyLog>(rows, qu.getPageSize(), qu.getCurrentPage(), total.intValue());
+	}
+
+	@Override
+	public Map<String, Object> queryMap(ProxyLogQuery qu) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		PageResult<ProxyLog> pageResult = query(qu);
+		map.put("total", pageResult.getTotalPage());
+		ArrayList<Object> proxyLogs = new ArrayList<Object>();
+		List<ProxyLog> datas = pageResult.getRows();
+		for (ProxyLog p : datas) {
+			Map<String, Object> proxyLog = new HashMap<String, Object>();
+			proxyLog.put("time", p.getTime());
+			proxyLog.put("storeName", p.getStoreName());
+			proxyLog.put("proxyType", p.getProxyType());
+			proxyLog.put("details", p.getDetails());
+			proxyLog.put("price", p.getPrice());
+			proxyLog.put("goodsId", p.getGoodsId());
+			proxyLog.put("image", p.getImage());
+			proxyLogs.add(proxyLog);
+		}
+		map.put("proxyLogs", proxyLogs);
+		return map;
+	}
+
+	@Override
+	public ProxyLog createProxyLog(Date time, Integer proxyType,
+			BigDecimal price, String image, String storeName, String details,
+			Long goodsId, Long userId) {
+		ProxyLog proxyLog = new ProxyLog(new Date(), proxyType, price, image, storeName, details, goodsId, userId);
+		proxyLogMapper.save(proxyLog);
+		return proxyLog;
+	}
+
+}

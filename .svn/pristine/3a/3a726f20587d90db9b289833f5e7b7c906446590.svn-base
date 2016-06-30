@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.huashidai.weihuotong.mapper.AddressMapper">
+
+	<insert id="save" parameterType="Address" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_address(name,phone,address,defaultAddress,city_id,user_id) 
+					values(#{name},#{phone},#{address},#{defaultAddress},#{city.id},#{user.id})
+	</insert>
+	
+	<update id="update" parameterType="Address">
+		update t_address set 
+		name=#{name},
+		phone=#{phone},
+		address=#{address},
+		city_id=#{city.id},
+		user_id=#{user.id}
+		where id = #{id}
+	</update>
+	<update id="updateDefault" parameterType="Address">
+		update t_address set 
+		defaultAddress=#{defaultAddress}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_address where id = #{id}
+	</delete>
+	
+	<select id="get" resultType="Address">
+		select * from t_address
+		where id=#{id}
+	</select>
+	
+	<select id="getByUser" resultType="Address" parameterType="long">
+		select * from t_address
+		where user_id = #{userId}
+	</select> 
+	<select id="getDefault" resultType="Address" parameterType="long">
+		select * from t_address
+		where user_id = #{userId}
+		and defaultAddress = 1
+	</select> 
+	
+</mapper>

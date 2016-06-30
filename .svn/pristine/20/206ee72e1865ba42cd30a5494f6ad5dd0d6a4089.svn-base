@@ -1,0 +1,67 @@
+package com.huashidai.weihuotong.domain;
+
+import java.math.BigDecimal;
+
+import com.huashidai.weihuotong.utils.ConstUtil;
+
+/**
+ * 购物车明细
+ * @author ozil
+ *
+ */
+public class ShoppingCartItem {
+	private Long id;
+	private Product product;//货品
+	private Integer num = 0;//数量
+	private BigDecimal price;//下单时价格
+	private BigDecimal amount = ConstUtil.ZERO;//小计
+	private ShoppingCart shoppingCart;//购物车
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public Product getProduct() {
+		return product;
+	}
+	public void setProduct(Product product) {
+		this.product = product;
+	}
+	public Integer getNum() {
+		return num;
+	}
+	public void setNum(Integer num) {
+		this.num = num;
+	}
+	
+	public BigDecimal getPrice() {
+		return price;
+	}
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+	public BigDecimal getAmount() {
+		if (this.getProduct() != null) {
+			return this.getPrice().multiply(new BigDecimal(this.getNum()));
+		}
+		return ConstUtil.ZERO;
+	}
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
+	}
+	public ShoppingCart getShoppingCart() {
+		return shoppingCart;
+	}
+	public void setShoppingCart(ShoppingCart shoppingCart) {
+		this.shoppingCart = shoppingCart;
+	}
+	@Override
+	public String toString() {
+		return "ShoppingCartItem [id=" + id + ", product=" + product + ", num="
+				+ num + ", amount=" + amount + ", shoppingCart=" + shoppingCart
+				+ "]";
+	}
+	
+	
+}

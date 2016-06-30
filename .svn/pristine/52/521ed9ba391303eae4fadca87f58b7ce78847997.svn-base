@@ -1,0 +1,52 @@
+package com.huashidai.weihuotong.mapper;
+
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.huashidai.weihuotong.domain.ProductOrder;
+import com.huashidai.weihuotong.query.ProductOrderQuery;
+
+public interface ProductOrderMapper {
+	/**
+	 * 保存
+	 */
+	void save(ProductOrder productOrder);
+	/**
+	 * 更新
+	 */
+	void update(ProductOrder productOrder);
+	/**
+	 * 修改状态
+	 */
+	void updateState(ProductOrder productOrder);
+	/**
+	 * 删除
+	 */
+	void delete(Long id);
+	/**
+	 * 获取单个
+	 */
+	ProductOrder get(Long id);
+	/**
+	 * 根据总订单号获取
+	 */
+	List<ProductOrder> getByTotalOrderNum(@Param("totalOrderNum")String totalOrderNum);
+	/**
+	 * 查询所有
+	 */
+	List<ProductOrder> getAll();
+	/**
+	 * 高级查询
+	 * @param qu
+	 * @return
+	 */
+	List<ProductOrder> query(ProductOrderQuery qu);
+	/**
+	 * 统计查询
+	 * @param qu
+	 * @return
+	 */
+	Long queryTotal(ProductOrderQuery qu);
+}

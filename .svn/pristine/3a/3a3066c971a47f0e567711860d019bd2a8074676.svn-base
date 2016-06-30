@@ -1,0 +1,79 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.Message;
+import com.huashidai.weihuotong.mapper.MessageMapper;
+import com.huashidai.weihuotong.query.MessageQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.service.IMessageService;
+import com.huashidai.weihuotong.utils.ConstUtil;
+
+@Service
+public class MessageServiceImpl implements IMessageService {
+	@Autowired
+	private MessageMapper messageMapper;
+
+	@Override
+	public void save(Message message) {
+		messageMapper.save(message);
+
+	}
+
+	@Override
+	public void delete(Long id) {
+		messageMapper.delete(id);
+	}
+
+	@Override
+	public Message get(Long id) {
+		return messageMapper.get(id);
+	}
+
+	@Override
+	public PageResult<Message> query(MessageQuery qu) {
+		// 统计查询
+		Long total = messageMapper.queryTotal(qu);
+		// 分页查询
+		List<Message> rows = messageMapper.query(qu);
+		return new PageResult<Message>(rows, qu.getPageSize(),
+				qu.getCurrentPage(), total.intValue());
+	}
+
+	@Override
+	public Map<String, Object> queryMap(MessageQuery qu) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		PageResult<Message> result = query(qu);
+		map.put("total", result.getTotalPage());
+		map.put("totalNum", result.getTotal());
+		List<Object> messages = new ArrayList<Object>();
+		for (Message m : result.getRows()) {
+			Map<String, Object> message = new HashMap<String, Object>();
+			message.put("id", m.getId());
+			message.put("isLook", m.getIsLook());
+			message.put("title", m.getTitle());
+			message.put("time", m.getTime());
+			messages.add(message);
+		}
+		map.put("messages",messages);
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> enterMessage(Long messageId) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		Message message = get(messageId);
+		map.put("content", message.getContent());
+		//修改为已查看
+		message.setIsLook(ConstUtil.MESSAGE_ISLOOK);
+		messageMapper.update(message);
+		return map;
+	}
+
+}

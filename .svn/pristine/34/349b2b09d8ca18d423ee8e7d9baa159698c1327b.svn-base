@@ -1,0 +1,48 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.DetailsImage;
+import com.huashidai.weihuotong.mapper.DetailsImageMapper;
+import com.huashidai.weihuotong.service.IDetailsImageService;
+
+@Service
+public class DetailsImageServiceImpl implements IDetailsImageService {
+	@Autowired
+	private DetailsImageMapper detailsImageMapper;
+
+	@Override
+	public void save(DetailsImage detailsImage) {
+		detailsImageMapper.save(detailsImage);
+	}
+
+	@Override
+	public void update(DetailsImage detailsImage) {
+		detailsImageMapper.update(detailsImage);
+	}
+
+	@Override
+	public void delete(Long id) {
+		detailsImageMapper.delete(id);
+	}
+
+	@Override
+	public DetailsImage get(Long id) {
+		return detailsImageMapper.get(id);
+	}
+
+	@Override
+	public List<DetailsImage> getAll() {
+		return detailsImageMapper.getAll();
+	}
+
+	@Override
+	public List<DetailsImage> getByGoods(Long goodsId) {
+		return detailsImageMapper.getByGoods(goodsId);
+	}
+	
+	
+}

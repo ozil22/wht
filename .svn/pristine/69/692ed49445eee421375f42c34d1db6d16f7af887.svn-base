@@ -1,0 +1,277 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+<script type="text/javascript">
+$(function(){
+	//缓存要用到的组件
+	var firstTypeCombobox = $("#firstTypeCombobox");//一级分类
+	var secondTypeCombobox = $("#secondTypeCombobox");//二级分类
+	var firstCombobox = $("#firstCombobox");//一级分类
+	var secondCombobox = $("#secondCombobox");//二级分类
+	var typeDataGrid = $("#typeDataGrid");//数据表格
+	var type_searchForm = $("#type_searchForm");//参数表单
+	var typeDialog = $("#typeDialog");//录入窗口
+	var typeForm = $("#typeForm");//录入表单
+	   
+	//初始化组件
+   firstTypeCombobox.combobox({
+	   url:'type/list',
+       valueField:'id',
+       textField:'name',
+       prompt:'一级分类',
+       onSelect:function(record){
+          //刷新数据，并清空当前输入的值
+          secondTypeCombobox.combobox({
+              url:'type/list?parentId='+record.id,
+              valueField:'id',
+              textField:'name',
+              prompt:'二级分类',
+          }).combobox('clear');
+       }
+   });
+   secondTypeCombobox.combobox({
+	   prompt:'二级分类',
+   });
+   //编辑窗口
+   firstCombobox.combobox({
+	   url:'type/list',
+       valueField:'id',
+       textField:'name',
+       prompt:'一级分类',
+       onSelect:function(record){
+          //刷新数据，并清空当前输入的值
+          secondCombobox.combobox({
+              url:'type/list?parentId='+record.id,
+              valueField:'id',
+              textField:'name',
+              prompt:'二级分类'
+          }).combobox('clear');
+       }
+   });
+   secondCombobox.combobox({
+	   prompt:'二级分类',
+   });
+	
+	
+	typeDataGrid.datagrid({//初始化数据表格
+		fit:true,
+		border:false,
+		url:'type/query',
+		singleSelect:true,
+		fitColumns:true,
+		striped:true,
+		rownumbers:true,
+		pagination:true,
+		pageSize:10,
+		pageList:[5,10,20,50],
+		toolbar:'#type_toolbar'
+	});
+	
+	//创建cmdType管理所有操作函数
+	var cmdType={
+		//高级查询
+	    type_search:function(){
+	    	var params = {};
+	    	var firstTypeId;
+	    	var secondTypeId;
+			var paramArr = type_searchForm.serializeArray();
+			console.debug(paramArr);
+		    $.each(paramArr,function(i,data){
+				if (data.name == 'firstTypeId') {
+					 firstTypeId = data.value;
+				}
+				if (data.name == 'secondTypeId') {
+					secondTypeId = data.value;
+				}
+		 	}); 
+	 		if (secondTypeId == false) {
+					params['parentId'] = firstTypeId;
+				}else{
+					params['parentId'] = secondTypeId;
+			}
+	 		typeDataGrid.datagrid("load",params);
+		},
+			
+		//新增
+		type_create:function(){
+			// 1.清空对话框数据
+			typeForm.form("clear");
+			// 2.打开添加对话框
+			typeDialog.dialog("open");
+			//3.设置下拉框不可用
+			firstCombobox.combobox('enable');
+			secondCombobox.combobox('enable');
+		},
+
+
+		//编辑
+		type_edit:function(){
+			// 1.获取选中行信息
+			var rowData = typeDataGrid.datagrid("getSelected");
+			// 2.判断
+			if(!rowData){
+				$.messager.alert("温馨提示","你没有选中任何数据","info");
+				return;
+			}
+			// 3.清空对话框数据
+			typeForm.form("clear");
+			// 4.打开添加对话框
+			typeDialog.dialog("open");
+			//5.设置下拉框不可用
+			firstCombobox.combobox('disable');
+			secondCombobox.combobox('disable');
+			// 6.把数据加载到对话框中,回显数据
+			typeForm.form("load",rowData);
+		},
+		//保存
+		type_save:function(){
+			var i = 0;
+			var a = 0;
+			// 把表单的参数，通过AJAX方式提交到后台
+			typeForm.form("submit",{
+				url:"/type/save",
+				onSubmit:function(params){
+					// 1、 获得选择的上级分类
+					var secondId = secondCombobox.combobox("getValues");
+					// 2、判断并拼接需要的参数
+					if (secondId == false) {
+						var firstId = firstCombobox.combobox("getValues");
+						params['parent.id'] = firstId;
+					}else{
+						params['parent.id'] = secondId;
+					}
+				},
+				success:function(data){ 
+					data = $.parseJSON(data);//转为json
+					if(data.success){
+						typeDialog.dialog("close");
+						$.messager.alert("温馨提示",data.message,"info",function(){
+							// 刷新表格
+							typeDataGrid.datagrid("reload");
+						});
+					}else{
+						$.messager.alert("温馨提示",data.message,"info");
+					}
+				}
+			});
+		},
+		//取消
+		type_cancel:function(){
+			console.log(123);
+			typeDialog.dialog("close");
+		},
+
+		//删除
+		type_del:function(){
+			// 1.获取选中行信息
+			var rowData = typeDataGrid.datagrid("getSelected");
+			console.debug(rowData);
+			// 2.判断
+			if(!rowData){
+				$.messager.alert("温馨提示","你没有选中任何数据","info");
+				return;
+			}
+			//提示用户是否删除
+			$.messager.confirm("温馨提示","是否确认删除【"+rowData.name+"】?",function(yes){
+				if(yes){
+					// 获取数据的唯一标示
+					var id = rowData.id;
+					// 发送AJAX请求，修改ID对应数据状态
+					$.get("/type/delete",{id:id},function(data){
+						if(data.success){
+							$.messager.alert("温馨提示",data.message,"info",function(){
+								typeDataGrid.datagrid("reload");
+							});
+						}
+					},"json");
+				}
+			});
+			
+		}, 
+
+		//刷新
+		type_refresh:function(){
+			typeDataGrid.datagrid("load");
+		},
+
+	};
+	//对页面上所有按钮做一次统一的监听
+	$("a[data-cmd]").on("click",function(){
+		//获取data-cmd属性的值
+		var cmd = $(this).data("cmd");//data-key="value"其实就是一个{key:value}类型的数据
+		if (cmd) {
+			cmdType[cmd]();//执行对应的方法
+		}
+	});
+});
+</script>
+	<!-- 数据表格 -->
+	<table id="typeDataGrid" >
+		<!-- 定义表格的表头  -->
+		<thead>
+			<tr>
+				<!-- field：指定需要显示列对应JSON数据属性 -->
+				<th field="pinYin" width="1" align="center">首字母</th>
+				<th field="name" width="3" align="center">名称</th>
+				<!-- formatter:格式化列显示内容 -->
+				<th field="image" width="3" data-options="formatter:formatFieldImg" align="center">图片</th>
+				<th field="parent" data-options="formatter:formatObjectName" width="3"
+					align="center">上级分类</th>
+			</tr>
+		</thead>
+	</table>
+
+	<!-- 工具条和搜索条件 -->
+	<div id="type_toolbar">
+		<div>
+			<form method="post" id="type_searchForm">
+				<a class="easyui-linkbutton" iconCls="icon-add"  data-cmd="type_create">添加</a> 
+				<a class="easyui-linkbutton" iconCls="icon-edit" data-cmd="type_edit">编辑</a> 
+				<a class="easyui-linkbutton" iconCls="icon-remove" data-cmd="type_del">删除</a> 
+				<a class="easyui-linkbutton" iconCls="icon-reload" data-cmd="type_refresh">刷新</a> 
+
+
+			   	<select id="firstTypeCombobox" name="firstTypeId" style="width: 100px"></select> 
+			    <select id="secondTypeCombobox" name="secondTypeId" style="width: 100px"> </select> 
+				<a class="easyui-linkbutton" iconCls="icon-search" data-cmd="type_search">搜索</a> 
+			</form>
+		</div>
+	</div>
+
+	<!-- 录入窗口 -->
+	<div id="typeDialog" class="easyui-dialog" style="width: 300px;height: 230px;"
+	data-options="title:'编辑商品分类',modal:true,iconCls:'icon-edit',buttons:'#type_bs',closed:true">
+			<form id="typeForm" method="post" enctype="multipart/form-data">
+			<input type="hidden" name="id"></input>
+			<div style="margin-top: 15px;margin-left: 35px" >
+						一级分类：
+						<select id="firstCombobox" style="width: 150px"> </select>
+			</div>		
+			<div style="margin-top: 10px;margin-left: 35px" >
+						二级分类：
+						<select id="secondCombobox" style="width: 150px"> </select>
+			</div>		
+			<div style="margin-top: 10px;margin-left: 35px" >
+			 			分类图片：
+			 			<input class="easyui-filebox" name="typeImage" style="width: 150px" >
+			</div>
+			<div style="margin-top: 10px;margin-left: 35px" >
+			 			分类名字：
+			 			<input  name="name"  class="easyui-textbox" data-options="required:true" style="width: 150px">
+			</div>		
+			</form>
+		</div>
+	<!-- 录入窗口按钮 -->
+	<div id="type_bs">
+		<a class="easyui-linkbutton" iconCls="icon-save" data-cmd="type_save">保存</a>
+		<a class="easyui-linkbutton" iconCls="icon-cancel" data-cmd="type_cancel">取消</a>
+	</div>
+
+</body>
+</html>

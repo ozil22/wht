@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.huashidai.weihuotong.mapper.BannerImageMapper"> 
+	
+	<insert id="save" parameterType="BannerImage" useGeneratedKeys="true" keyProperty="id">
+	 	insert into t_bannerImage(src,sort,goods_id)
+		values(#{src},#{sort},#{goods.id}) 
+	</insert>
+	
+	
+	<update id="update" parameterType="BannerImage">
+		update t_bannerImage set 
+			src=#{src},
+			sort=#{sort},
+			goods_id=#{goods.id},
+ 			where id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_bannerImage
+		where id=#{id}
+	</delete>
+	
+	<select id="get" resultType="BannerImage" parameterType="long">
+		 select * from t_bannerImage
+		where id=#{id}
+	</select>
+	
+	<select id="getByGoods" resultType="BannerImage" parameterType="long">
+		 select * from t_bannerImage
+		where goods_id=#{goodsId}
+	</select>
+	<select id="deleteByGoods" parameterType="long">
+		delete from t_bannerImage
+		where goods_id=#{goodsId}
+	</select>
+	
+	<select id="getAll" resultType="BannerImage">
+		 select * from t_bannerImage
+		 order by sort
+	</select>
+	
+</mapper> 

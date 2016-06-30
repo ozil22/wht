@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashidai.weihuotong.mapper.WithdrawMapper">
+	<insert id="save" parameterType="Withdraw">
+		insert into t_withdraw (type,amount, account_id,
+		name,accountAddress,accountName,time,state,remark)
+		values (#{type},#{amount}, #{account.id}, #{name},
+		#{accountAddress},#{accountName},#{time},#{state},#{remark})
+	</insert>
+
+	<delete id="delete" parameterType="long">
+		delete from t_withdraw
+		where id = #{id}
+	</delete>
+	<update id="update" parameterType="Withdraw">
+		update t_withdraw 
+		set state = #{state}
+			remark = #{remark}
+	</update>
+
+	<select id="get" resultMap="withdrawMap" parameterType="long">
+		select w.*,a.id aid,a.name aname 
+		from t_withdraw w
+		left join t_account a on w.account_id = a.id
+		where id = #{id}
+	</select>
+	<select id="getByAccount" resultType="Withdraw" parameterType="long">
+		select *
+		from t_withdraw
+		where account_id = #{accountId}
+	</select>
+	
+	<resultMap type="Withdraw" id="withdrawMap">
+		<id column="id" property="id"/>
+		<result column="type" property="type"/>
+		<result column="amount" property="amount"/>
+		<result column="name" property="name"/>
+		<result column="accountAddress" property="accountAddress"/>
+		<result column="accountName" property="accountName"/>
+		<result column="time" property="time"/>
+		<result column="state" property="state"/>
+		<association property="account" javaType="Account">
+			<id column="aid" property="id"/>
+			<result column="aname" property="name"/>
+		</association>
+	</resultMap>
+	
+	<sql id="whereSql">
+		<where>
+			<if test="accountId != -1">
+				w.account_id  = #{accountId}
+			</if>
+			<if test="name != null and name != ''">
+				w.name  = #{name}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="query" resultMap="withdrawMap" parameterType="WithdrawQuery">
+		select w.*,a.id aid,a.name aname 
+		from t_withdraw w
+		left join t_account a on w.account_id = a.id
+		<include refid="whereSql"/>
+		order by w.time desc
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 获取总记录数 -->
+	<select id="queryTotal" resultType="long" parameterType="WithdrawQuery">
+		select count(w.id)
+		from t_withdraw w
+		left join t_account a on w.account_id = a.id
+		<include refid="whereSql"/>
+	</select>
+
+</mapper>

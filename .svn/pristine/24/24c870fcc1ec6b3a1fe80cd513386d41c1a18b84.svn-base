@@ -1,0 +1,15 @@
+package com.huashidai.weihuotong.quartz;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+@Component
+public class TestQuartz {
+	  @Scheduled(cron="0/59 * *  * * ? ")   //每5秒执行一次  
+      public void myTest(){  
+            System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));  
+      } 
+}

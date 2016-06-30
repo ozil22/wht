@@ -1,0 +1,265 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.Address;
+import com.huashidai.weihuotong.domain.Goods;
+import com.huashidai.weihuotong.domain.Product;
+import com.huashidai.weihuotong.domain.ProductOrder;
+import com.huashidai.weihuotong.domain.ProductOrderItem;
+import com.huashidai.weihuotong.domain.Store;
+import com.huashidai.weihuotong.domain.TotalOrder;
+import com.huashidai.weihuotong.domain.User;
+import com.huashidai.weihuotong.domain.paramList.ProductOrderItemList;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.mapper.AddressMapper;
+import com.huashidai.weihuotong.mapper.ProductMapper;
+import com.huashidai.weihuotong.mapper.ProductOrderItemMapper;
+import com.huashidai.weihuotong.mapper.ProductOrderMapper;
+import com.huashidai.weihuotong.mapper.StoreMapper;
+import com.huashidai.weihuotong.mapper.TotalOrderMapper;
+import com.huashidai.weihuotong.service.IProductOrderService;
+import com.huashidai.weihuotong.utils.ConstUtil;
+import com.huashidai.weihuotong.utils.OrderNumUtil;
+import com.huashidai.weihuotong.utils.StateCode;
+
+@Service
+public class ProductOrderServiceImpl implements IProductOrderService {
+
+	@Autowired
+	private ProductMapper productMapper;
+	@Autowired
+	private ProductOrderMapper productOrderMapper;
+	@Autowired
+	private ProductOrderItemMapper productOrderItemMapper;
+	@Autowired
+	private AddressMapper addressMapper;
+	@Autowired
+	private StoreMapper storeMapper;
+	@Autowired
+	private TotalOrderMapper totalOrderMapper;
+
+	@Override
+	public Map<String, Object> submitOrder(List<Map<String, String>> maps) {
+		// 总订单
+		BigDecimal totalOrderPrice = ConstUtil.ZERO;
+		BigDecimal totalOrderPay = ConstUtil.ZERO;
+		TotalOrder totalOrder = new TotalOrder();
+		totalOrder
+				.setOrderNum(OrderNumUtil.getOrderNum(OrderNumUtil.TOTAL_PRE));
+		totalOrderMapper.save(totalOrder);
+		// 取出用户id
+		Map<String, String> userMap = maps.get(0);
+		Long userId = Long.valueOf(userMap.get("userId"));
+		maps.remove(0);
+		// 取出收货地址id
+		Map<String, String> addressMap = maps.get(0);
+		Long addressId = Long.valueOf(addressMap.get("addressId"));
+		// 获取收货信息
+		Address address = addressMapper.get(addressId);
+		maps.remove(0);
+
+		while (maps.size() > 0) {
+			// 取出集合中第一个
+			Map<String, String> productMap = maps.get(0);
+			Long productId = Long.valueOf(productMap.get("productId"));
+			Product product = productMapper.get(productId);
+			Long storeId = product.getGoods().getStore().getId();
+			// 获取商家信息
+			Store store = storeMapper.get(storeId);
+			// 生成一个商品订单
+			ProductOrder productOrder = new ProductOrder();
+			productOrder.setAddress(address);
+			productOrder.setBuyTime(new Date());
+			productOrder.setUser(new User(userId));
+			productOrder.setStore(store);
+			productOrder.setOrderNum(OrderNumUtil.getOrderNum(storeId,
+					OrderNumUtil.ORDER_PRE));
+			productOrder.setTotalOrder(totalOrder);
+
+			productOrderMapper.save(productOrder);
+
+			BigDecimal totalPrice = ConstUtil.ZERO;// 订单总价
+			BigDecimal postage = new BigDecimal(10000);// 邮费
+
+			// 遍历集合,将店铺相同的放入订单
+			for (Iterator<Map<String, String>> it = maps.iterator(); it
+					.hasNext();) {
+				Map<String, String> map = it.next();
+				Long proId = Long.valueOf(map.get("productId"));
+				Product pro = productMapper.get(proId);
+				Goods goods = pro.getGoods();
+				Long stoId = goods.getStore().getId();
+				if (stoId == storeId) {
+					// 生成单个订单明细
+					BigDecimal price = new BigDecimal(map.get("price"));
+					BigDecimal amount = new BigDecimal(map.get("amount"));
+					Integer num = Integer.valueOf(map.get("num"));
+					// 判断库存
+					if (pro.getInventoryNum() < num) {
+						productOrderItemMapper.delete(productOrder.getId());
+						totalOrderMapper.delete(totalOrder.getId());
+						throw new LogicException(goods.getName()
+								+ pro.getSpecification() + "库存不足!",
+								StateCode.NONUM_GOODS);
+					}
+					// 更新库存
+					int updateNum = productMapper.updateNum(product);
+					if (updateNum == 0) {
+						productOrderItemMapper.delete(productOrder.getId());
+						totalOrderMapper.delete(totalOrder.getId());
+						throw new LogicException(goods.getName()
+								+ pro.getSpecification() + "库存不足!",
+								StateCode.NONUM_GOODS);
+					}
+
+					ProductOrderItem item = new ProductOrderItem(price, num,
+							amount, productOrder, product);
+					productOrderItemMapper.save(item);
+
+					// 累加订单总价
+					totalPrice = totalPrice.add(amount);
+					// 计算邮费,以最低价为邮费
+					if (postage.compareTo(goods.getPostage()) == 1) {
+						postage = goods.getPostage();
+					}
+					// 从集合去掉这条数据
+					it.remove();
+				}
+			}
+			// 设置订单其他信息
+			productOrder.setMessage("收货人:" + address.getName() + ";电话:"
+					+ address.getPhone() + ";地址:" + address.getAddress()
+					+ ";商家:" + store.getName());
+			productOrder.setTotalPrice(totalPrice.add(postage));
+			productOrder.setPayPrice(totalPrice.add(postage));
+			productOrder.setPostage(postage);
+			productOrderMapper.update(productOrder);
+			// 累加总订单价格
+			totalOrderPrice = totalOrderPrice.add(productOrder.getTotalPrice());
+			totalOrderPay = totalOrderPay.add(productOrder.getPayPrice());
+		}
+		totalOrder.setTotalPrice(totalOrderPrice);
+		totalOrder.setPayPrice(totalOrderPay);
+		totalOrderMapper.update(totalOrder);
+
+		// 封装返回的订单数据
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("totalPrice", totalOrderPrice);
+		map.put("payPrice", totalOrderPay);
+		map.put("orderNum", totalOrder.getOrderNum());
+
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> submitOrder(ProductOrderItemList items,
+			Long userId, Long addressId) {
+		// 总订单
+		BigDecimal totalOrderPrice = ConstUtil.ZERO;
+		BigDecimal totalOrderPay = ConstUtil.ZERO;
+		TotalOrder totalOrder = new TotalOrder();
+		totalOrder
+				.setOrderNum(OrderNumUtil.getOrderNum(OrderNumUtil.TOTAL_PRE));
+		totalOrderMapper.save(totalOrder);
+		// 获取收货信息
+		Address address = addressMapper.get(addressId);
+
+		List<ProductOrderItem> productOrderItems = items.getProductOrderItems();
+		while (productOrderItems.size() > 0) {
+			// 取出集合中第一个
+			ProductOrderItem item = productOrderItems.get(0);
+			Long productId = item.getProduct().getId();
+			Product product = productMapper.get(productId);
+			Long storeId = product.getGoods().getStore().getId();
+			// 获取商家信息
+			Store store = storeMapper.get(storeId);
+			// 生成一个商品订单
+			ProductOrder productOrder = new ProductOrder();
+			productOrder.setAddress(address);
+			productOrder.setBuyTime(new Date());
+			productOrder.setUser(new User(userId));
+			productOrder.setStore(store);
+			productOrder.setOrderNum(OrderNumUtil.getOrderNum(storeId,
+					OrderNumUtil.ORDER_PRE));
+			productOrder.setTotalOrder(totalOrder);
+
+			productOrderMapper.save(productOrder);
+
+			BigDecimal totalPrice = ConstUtil.ZERO;// 订单总价
+			BigDecimal postage = new BigDecimal(10000);// 邮费
+
+			// 遍历集合,将店铺相同的放入订单
+			for (Iterator<ProductOrderItem> it = productOrderItems.iterator(); it
+					.hasNext();) {
+				ProductOrderItem poi = it.next();
+				Long proId = poi.getProduct().getId();
+				Product pro = productMapper.get(proId);
+				Goods goods = pro.getGoods();
+				Long stoId = goods.getStore().getId();
+				if (stoId == storeId) {
+					// 判断库存
+					if (pro.getInventoryNum() < poi.getNum()) {
+						productOrderItemMapper.delete(productOrder.getId());
+						totalOrderMapper.delete(totalOrder.getId());
+						throw new LogicException(goods.getName()
+								+ pro.getSpecification() + "库存不足!",
+								StateCode.NONUM_GOODS);
+					}
+					// 更新库存
+					int updateNum = productMapper.updateNum(product);
+					if (updateNum == 0) {
+						productOrderItemMapper.delete(productOrder.getId());
+						totalOrderMapper.delete(totalOrder.getId());
+						throw new LogicException(goods.getName()
+								+ pro.getSpecification() + "库存不足!",
+								StateCode.NONUM_GOODS);
+					}
+
+					poi.setProductOrder(productOrder);
+					productOrderItemMapper.save(poi);
+
+					// 累加订单总价
+					totalPrice = totalPrice.add(poi.getAmount());
+					// 计算邮费,以最低价为邮费
+					if (postage.compareTo(goods.getPostage()) == 1) {
+						postage = goods.getPostage();
+					}
+					// 从集合去掉这条数据
+					it.remove();
+				}
+			}
+			// 设置订单其他信息
+			productOrder.setMessage("收货人:" + address.getName() + ";电话:"
+					+ address.getPhone() + ";地址:" + address.getAddress()
+					+ ";商家:" + store.getName());
+			productOrder.setTotalPrice(totalPrice.add(postage));
+			productOrder.setPayPrice(totalPrice.add(postage));
+			productOrder.setPostage(postage);
+			productOrderMapper.update(productOrder);
+			// 累加总订单价格
+			totalOrderPrice = totalOrderPrice.add(productOrder.getTotalPrice());
+			totalOrderPay = totalOrderPay.add(productOrder.getPayPrice());
+		}
+		totalOrder.setTotalPrice(totalOrderPrice);
+		totalOrder.setPayPrice(totalOrderPay);
+		totalOrderMapper.update(totalOrder);
+
+		// 封装返回的订单数据
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("totalPrice", totalOrderPrice);
+		map.put("payPrice", totalOrderPay);
+		map.put("orderNum", totalOrder.getOrderNum());
+
+		return map;
+	}
+
+}

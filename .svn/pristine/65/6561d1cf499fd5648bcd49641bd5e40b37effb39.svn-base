@@ -1,0 +1,54 @@
+package com.huashidai.weihuotong.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.huashidai.weihuotong.domain.Type;
+import com.huashidai.weihuotong.query.GoodsQuery;
+
+public interface ITypeService {
+	/**
+	 * 添加
+	 */
+	void save(Type type);
+	/**
+	 * 更新
+	 */
+	void update(Type type);
+	/**
+	 * 删除
+	 */
+	void delete(Long id);
+	/**
+	 * 获取单个
+	 */
+	Type get(Long id);
+	/**
+	 * 查询所有
+	 */
+	List<Type> getAll();
+	/**
+	 * 根据父类型id获取
+	 */
+	List<Type> getByParent(Long parentId);
+	/**
+	 * 获取所有一级类型
+	 */
+	List<Object> getParentType();
+	
+	/**
+	 * 获取一级分类下的所有分类明细
+	 */
+	List<Object> getItemByParent(Long parentId);
+	/**
+	 * 获取下级分类
+	 */
+	List<Object> typesByParent(Long parentId);
+	
+	/**
+	 * 进入分类
+	 * @param goodsQuery 商品查询条件
+	 * @return
+	 */
+	Map<String,Object> enterType(GoodsQuery goodsQuery);
+}

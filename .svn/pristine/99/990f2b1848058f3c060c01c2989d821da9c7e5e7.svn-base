@@ -1,0 +1,47 @@
+package com.huashidai.weihuotong.service;
+
+import java.util.List;
+
+import com.huashidai.weihuotong.domain.Employee;
+import com.huashidai.weihuotong.domain.Permission;
+import com.huashidai.weihuotong.query.BaseQuery;
+import com.huashidai.weihuotong.query.PageResult;
+
+public interface IPermissionService {
+
+	/**
+	 * 新增一个权限
+	 */
+	void save(Permission permission);
+	/**
+	 * 修改一个一个权限
+	 */
+	void update(Permission permission);
+	/**
+	 * 删除一个权限
+	 */
+	void delete(Long id);
+	/**
+	 * 获得所有的权限列表
+	 */
+	List<Permission> getAll();
+	
+	/**
+	 * 权限高级查询
+	 * @param gqu
+	 * @return
+	 */
+	PageResult<Permission> query(BaseQuery qu);
+	/**
+	 * 根据id的值获得单个权限信息
+	 */
+	Permission get(Long id);
+	/**
+	 * 返回所有的权限列表
+	 */
+	List<Permission> getAllPermission();
+	
+	Permission getPermissionByResources(String resourceName);
+	
+	List<Permission> getUserPermission(Employee emp);
+}

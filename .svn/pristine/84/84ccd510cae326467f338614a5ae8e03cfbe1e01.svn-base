@@ -1,0 +1,51 @@
+package com.huashidai.weihuotong.quartz;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import com.huashidai.weihuotong.domain.ProductOrder;
+import com.huashidai.weihuotong.service.IProductOrderService;
+import com.huashidai.weihuotong.utils.ConstUtil;
+
+@Component
+public class Quartz {
+	@Autowired
+	private IProductOrderService productOrderService;
+
+	@Scheduled(cron = "0/59 * *  * * ? ")
+	// 每59秒执行一次
+	public void myTest() {
+		System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+				.format(new Date()));
+	}
+	/**
+	 * 关闭未支付的订单
+	 * 每天1点执行
+	 */
+	@Scheduled(cron = "0 00 1 * * ?")
+	public void closeOrder(){
+		List<ProductOrder> dueNotPay = productOrderService.getDueNotPay();
+		for (ProductOrder productOrder : dueNotPay) {
+			productOrderService.updateState(productOrder.getId(), ConstUtil.ORDER_CLOSE);
+		}
+		
+	}
+	/**
+	 * 完成未收货的订单
+	 * 每天2点执行
+	 */
+	@Scheduled(cron = "0 00 2 * * ?")
+	public void finishOrder(){
+		List<ProductOrder> dueNotPay = productOrderService.getDueNotFinish();
+		for (ProductOrder productOrder : dueNotPay) {
+			productOrderService.completeOrder(productOrder);
+		}
+		
+	}
+	
+}

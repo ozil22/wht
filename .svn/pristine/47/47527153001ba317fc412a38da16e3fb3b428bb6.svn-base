@@ -1,0 +1,106 @@
+package com.huashidai.weihuotong.domain;
+
+import java.math.BigDecimal;
+import java.util.Date;
+
+import com.huashidai.weihuotong.utils.ConstUtil;
+/**
+ * 商品订单
+ * @author ozil
+ *
+ */
+public class ProductOrder {
+	private Long id;
+	private Date buyTime;//购买时间
+	private String orderNum;//订单号
+	private Address address;//收货信息
+	private BigDecimal postage = ConstUtil.ZERO;//运费
+	private BigDecimal totalPrice;//商品总价
+	private BigDecimal payPrice;// 实际付款金额
+	private Integer state = 0;//订单状态(0 待付款,1 待发货,2待收货,3完成,4交易关闭,5 维权中)
+	private String message;//收货地址和商家信息(收货人,电话,地址,商家名)
+	private User user;//关联的用户
+	private Store store;//关联的商家
+	private TotalOrder totalOrder;//总订单
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public Date getBuyTime() {
+		return buyTime;
+	}
+	public void setBuyTime(Date buyTime) {
+		this.buyTime = buyTime;
+	}
+	public String getOrderNum() {
+		return orderNum;
+	}
+	public void setOrderNum(String orderNum) {
+		this.orderNum = orderNum;
+	}
+	public Address getAddress() {
+		return address;
+	}
+	public void setAddress(Address address) {
+		this.address = address;
+	}
+	public BigDecimal getPostage() {
+		return postage;
+	}
+	public void setPostage(BigDecimal postage) {
+		this.postage = postage;
+	}
+	public BigDecimal getTotalPrice() {
+		return totalPrice;
+	}
+	public void setTotalPrice(BigDecimal totalPrice) {
+		this.totalPrice = totalPrice;
+	}
+	public BigDecimal getPayPrice() {
+		return payPrice;
+	}
+	public void setPayPrice(BigDecimal payPrice) {
+		this.payPrice = payPrice;
+	}
+	public Integer getState() {
+		return state;
+	}
+	public void setState(Integer state) {
+		this.state = state;
+	}
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	public User getUser() {
+		return user;
+	}
+	public void setUser(User user) {
+		this.user = user;
+	}
+	public Store getStore() {
+		return store;
+	}
+	public void setStore(Store store) {
+		this.store = store;
+	}
+	public TotalOrder getTotalOrder() {
+		return totalOrder;
+	}
+	public void setTotalOrder(TotalOrder totalOrder) {
+		this.totalOrder = totalOrder;
+	}
+	@Override
+	public String toString() {
+		return "ProductOrder [id=" + id + ", buyTime=" + buyTime
+				+ ", orderNum=" + orderNum + ", address=" + address
+				+ ", postage=" + postage + ", totalPrice=" + totalPrice
+				+ ", payPrice=" + payPrice + ", state=" + state + ", message="
+				+ message + ", user=" + user + ", store=" + store
+				+ ", totalOrder=" + totalOrder + "]";
+	}
+}

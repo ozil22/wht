@@ -1,0 +1,25 @@
+package com.huashidai.weihuotong.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.huashidai.weihuotong.domain.paramList.ProductOrderItemList;
+
+
+public interface IProductOrderService {
+	/**
+	 * 提交订单
+	 * @param maps 
+	 * @return
+	 */
+	Map<String,Object> submitOrder(List<Map<String, String>> maps);
+	/**
+	 * 提交订单
+	 * @param items 订单明细集合
+	 * @param userId 用户id
+	 * @param addressId 地址id
+	 * @return
+	 */
+	Map<String, Object> submitOrder(ProductOrderItemList items, Long userId,
+			Long addressId);
+}

@@ -1,0 +1,134 @@
+//package com.huashidai.weihuotong.controller;
+//
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.Map;
+//
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.stereotype.Controller;
+//import org.springframework.web.bind.annotation.RequestMapping;
+//import org.springframework.web.bind.annotation.ResponseBody;
+//
+//import com.huashidai.weihuotong.domain.Employee;
+//import com.huashidai.weihuotong.domain.SystemDictionaryItem;
+//import com.huashidai.weihuotong.domain.User;
+//import com.huashidai.weihuotong.query.UserQuery;
+//import com.huashidai.weihuotong.service.IEmployeeService;
+//import com.huashidai.weihuotong.service.ISystemDictionaryItemService;
+//import com.huashidai.weihuotong.service.IUserService;
+//import com.huashidai.weihuotong.utils.MethodAnnotation;
+//import com.huashidai.weihuotong.utils.MethodAnnotation.ResourceType;
+//
+//
+//@Controller
+//public class UserController {
+//	
+//	@Autowired
+//	IUserService UserService;
+//	
+//	@Autowired
+//	IEmployeeService employeeService;
+//	
+//	@Autowired
+//	ISystemDictionaryItemService systemDictionaryItemService;
+//	
+//	@MethodAnnotation(name="账户主页",type=ResourceType.账户管理)
+//	@RequestMapping("/User/index")
+//	public String index(){
+//		return "User/User";//跳转User页面
+//	}
+//	@MethodAnnotation(name="账户列表",type=ResourceType.账户管理)
+//	@RequestMapping("/UserList")
+//	@ResponseBody
+//	public List<User> list(UserQuery qu){
+//	//	List<User> list = UserService.getAll();
+//	//	return list;
+//	}
+//	
+//	//保存和更新
+//	@MethodAnnotation(name="账户编辑",type=ResourceType.账户管理)
+//	@RequestMapping("/User_save")
+//	@ResponseBody
+//	public Map<String, Object> save(User User) {
+//		Map<String,Object> map = new HashMap<>();//创建一个map来装返回的信息
+//		try {
+//			//判断是新建还是更新
+//			if (User != null && User.getId() != null) {
+//				Employee employee = new Employee();
+//				employee.setId(148L);
+//				UserService.update(User);
+//				map.put("success",true);//添加返回的信
+//				map.put("msg","恭喜您,更新成功!");//添加返回的信息
+//			}else {
+//				Employee employee = new Employee();
+//				employee.setId(148L);
+//				UserService.save(User);
+//				map.put("success",true);
+//				map.put("msg","恭喜您,保存成功!");
+//			}
+//			return map;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			map.put("success",false);
+//			map.put("msg","保存失败!");
+//			return map; //返回失败的信息
+//		}
+//	}
+//	
+////	@RequestMapping("/User_delete")
+////	@ResponseBody
+////	public String delete(Long id){
+////		if (id != null) {
+////			UserService.delete(id);
+////		}
+////		return "success";
+////	}
+//	
+//	//删除
+//	@MethodAnnotation(name="账户删除",type=ResourceType.账户管理)
+//	@RequestMapping("/User_delete")
+//	@ResponseBody
+//	public Map<String, Object> delete(Long id) {
+//		Map<String, Object> map = new HashMap<>();//创建一个map来装返回的信息
+//		try {
+//			if (id != null) {
+//				UserService.delete(id);
+//				map.put("success", true);//添加返回的信息
+//				map.put("msg", "恭喜您,删除成功!");//添加返回的信息
+//			}
+//			return map;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			map.put("success", false);
+//			map.put("msg", "删除失败!");
+//			return map;
+//		}
+//	}
+//	@RequestMapping("/User_move")
+//	@ResponseBody
+//	public Map<String, Object> move(Long id) {
+//		Map<String, Object> map = new HashMap<>();//创建一个map来装返回的信息
+//		try {
+//			if (id != null) {
+//				System.out.println(id);
+//				Employee employee = new Employee();
+//				employee.setId(148L);
+//				UserService.delete(id);
+//				map.put("success", true);//添加返回的信息
+//				map.put("msg", "恭喜您,移交成功!");//添加返回的信息
+//			}
+//			return map;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			map.put("success", false);
+//			map.put("msg", "移交失败!");
+//			return map;
+//		}
+//	}
+//	
+//	@RequestMapping("/User_systemDictionaryItem")
+//	@ResponseBody
+//	public List<SystemDictionaryItem> getSystemDic(){
+//		return systemDictionaryItemService.getAll();
+//	}
+//}

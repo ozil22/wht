@@ -1,0 +1,267 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+<script type="text/javascript">
+
+//新增
+function create(){
+	// 1.清空对话框数据
+	$("#ef").form("clear");
+	// 2.打开添加对话框
+	$("#employeeDialog").dialog("open");
+}
+
+
+//编辑
+function edit(){
+	// 1.获取选中行信息
+	var rowData = $("#employeeDataGrid").datagrid("getSelected");
+	// 2.判断
+	if(!rowData){
+		$.messager.alert("温馨提示","你没有选中任何数据","info");
+		return;
+	}
+	// 3.清空对话框数据
+	$("#ef").form("clear");
+	// 4.打开添加对话框
+	$("#employeeDialog").dialog("open");
+	// 5.特殊数据处理
+		var roleArr=[];
+		$.each(rowData.roles,function(i,role){
+			roleArr.push(role.id);
+		});
+		rowData['roleArr']=roleArr;
+	// 6.把数据加载到对话框中,回显数据
+	$("#ef").form("load",rowData);
+}
+	
+
+//停用
+function leave(){
+	// 1.获取选中行信息
+	var rowData = $("#employeeDataGrid").datagrid("getSelected");
+	// 2.判断
+	if(!rowData){
+		$.messager.alert("温馨提示","你没有选中任何数据","info");
+		return;
+	}
+	if(rowData.state==-1){
+		$.messager.alert("温馨提示","请不要重复停用！！","warning");
+		return;
+	}
+	$.messager.confirm("温馨提示","是否确认停用【"+rowData.realName+"】账户??",function(yes){
+		if(yes){
+			// 获取数据的唯一标示
+			var id = rowData.id;
+			// 发送AJAX请求，修改ID对应数据状态
+			$.get("/employee_leave",{id:id},function(data){
+				console.debug(data);
+				if(data.success){
+					$.messager.alert("温馨提示",data.message,"info",function(){
+						$("#employeeDataGrid").datagrid("reload");
+					});
+				}
+			},"json");
+		}
+	});
+}
+
+//删除
+function del(){
+	// 1.获取选中行信息
+	var rowData = $("#employeeDataGrid").datagrid("getSelected");
+	console.debug(rowData);
+	// 2.判断
+	if(!rowData){
+		$.messager.alert("温馨提示","你没有选中任何数据","info");
+		return;
+	}
+	//alert(rowData.state);
+	if(rowData.state==0){
+		$.messager.alert("温馨提示","不能删除未停用账户！！","warning");
+		return;
+	}
+	//提示用户是否删除
+	$.messager.confirm("温馨提示","是否确认删除【"+rowData.realName+"】账户??",function(yes){
+		if(yes){
+			// 获取数据的唯一标示
+			var id = rowData.id;
+			// 发送AJAX请求，修改ID对应数据状态
+			$.get("/employee_delete",{id:id},function(data){
+				console.debug(data);
+				if(data.success){
+					$.messager.alert("温馨提示",data.message,"info",function(){
+						$("#employeeDataGrid").datagrid("reload");
+					});
+				}
+			},"json");
+		}
+	});
+	
+}
+
+//刷新
+function refresh(){
+	$("#employeeDataGrid").datagrid("reload");
+}	
+
+//保存
+function save(){
+	// 把表单的参数，通过AJAX方式提交到后台
+	$("#ef").form("submit",{
+		url:"/employee/save",
+		onSubmit:function(params){
+			// 1、 获得role多选框的内容
+			//console.debug($("#rolesArr").combobox("getValue"));
+			//console.debug($("#rolesArr").combobox("getValues"));
+			var roleArr = $("#rolesArr").combobox("getValues");
+			
+			// 2、 按照内容，拼装需要的结构
+			$.each(roleArr,function(i,roleId){
+				params['roles['+i+'].id'] = roleId;
+			});
+			// 如果在这里写出，会覆盖原始的表单验证方法
+			//return $("#ef").form("validate");
+		},
+		success:function(data){//data只是json字符串，需要手动转 
+			data = $.parseJSON(data);
+			if(data.success){
+				$("#employeeDialog").dialog("close");
+				$.messager.alert("温馨提示",data.message,"info",function(){
+					// 刷新表格
+					$("#employeeDataGrid").datagrid("load");
+				});
+			}else{
+				$.messager.alert("温馨提示",data.message,"info",function(){
+					if(data.errorCode==-104){
+						$.messager.alert("温馨提示","该账户名已存在！！","warning");
+					}
+				});
+			}
+		}
+	});
+}
+
+//取消
+function cancel(){
+	$("#employeeDialog").dialog("close");
+}
+
+//高级查询
+function emp_doSearch(){
+	console.debug("emp_doSearch!!");
+	var paramObj = {};
+	var paramArr = $("#dept_department-searchForm").serializeArray();
+	console.debug(paramArr);
+	 $.each(paramArr,function(i,data){
+		 //console.debug(arguments);
+		 paramObj[data.name] = data.value;
+	 }); 
+	 $("#employeeDataGrid").datagrid("load",paramObj);
+}
+//查询所有
+function getAll(){
+	// 清除查询表单数据
+	$("#dept_department-searchForm").form("clear");
+	// 不带参加载数据
+	$("#employeeDataGrid").datagrid("load",{});
+}
+
+</script>
+	<table id="employeeDataGrid" class="easyui-datagrid" style="width: 600px;height: 300px;"
+		data-options="
+			fit:true,
+			border:false,
+			url:'employee/query',
+			singleSelect:true,
+			fitColumns:true,
+			striped:true,
+			rownumbers:true,
+			pagination:true,
+			pageSize:5,
+			pageList:[5,10,20,50],
+			toolbar:'#employee_toolbar'
+		"
+	>
+		<!--
+			定义表格的表头 
+		 -->
+		<thead>
+			<tr>
+				<!-- field：指定需要显示列对应JSON数据属性 -->
+				<th field="id" 		width="30">ID</th>
+				<th field="username"    width="70">账户账号</th>
+				<th field="realName"   width="70">姓名</th>
+				<!-- formatter:格式化列显示内容 -->
+				<th field="role"   width="70" data-options="formatter:formatObjectName">角色</th>
+				<th field="state"  width="50" data-options="formatter:formatEmployeeState">状态</th>
+			</tr>
+		</thead>
+	</table>
+	
+	 <div id="employee_toolbar">
+	 	<div>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="create();">添加</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit();">编辑</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut" plain="true" onclick="leave();">停用</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="del();">删除</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-reload" plain="true" onclick="refresh();">刷新</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-reload" plain="true" onclick="getAll()">查看所有</a>
+	 	</div>
+	 	<div>
+		 	<form method="post" id="dept_department-searchForm">
+				关键字： <input name="searchKey"  style="width:100px">
+				状态：
+				 <select name="state" class="easyui-combobox" panelHeight="auto" style="width:80px">
+						<option value="-99">--未选择--</option>
+						<option value="0">正常</option>
+						<option value="-1">停用</option>
+				</select>
+				<a href="#" class="easyui-linkbutton" iconCls="icon-search" onclick="emp_doSearch()">搜索</a> 
+		 	</form>
+		 </div> 
+	</div>
+	
+	<!-- 新增或编辑表格 -->
+	<div id="employeeDialog" class="easyui-dialog" style="width: 280px;height: 350px;padding: 20px;"
+		data-options="modal:true,title:'账户录入',iconCls:'icon-ok',buttons:'#employee_bs',closed:true" >
+		<form id="ef" action="employee_save" method="post">
+			<input type="hidden" name="id">
+			<input type="hidden" name="state">
+			 <div style="margin-top: 10px;">
+			 	账&nbsp;&nbsp;号：<input type="text" name="username"  class="easyui-validatebox" data-options="required:true,validType:'length[5,10]'">
+			 </div>
+			 <div style="margin-top: 10px;">
+			 	密&nbsp;&nbsp;码：<input type="text" name="password"  class="easyui-validatebox" data-options="required:true,validType:'length[6,10]'">
+			 </div>
+			 <div style="margin-top: 10px;">
+			 	姓&nbsp;&nbsp;名：<input type="text" name="realName"  class="easyui-validatebox" data-options="required:true,validType:'length[2,10]'">
+			 </div>
+			 <div style="margin-top: 10px;">
+			 	角&nbsp;&nbsp;色：<input class="easyui-combobox" 
+				    				id="rolesArr"
+						            name="roleArr"
+						            data-options="
+						                    url:'/role/list',
+						                    method:'get',
+						                    valueField:'id',
+						                    textField:'name',
+						                    multiple:true,
+						                    panelHeight:'auto'
+						            ">
+			 </div>
+		</form>
+	</div>
+	<div id="employee_bs">
+		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save();">保存</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel"  onclick="cancel();">取消</a>
+	</div>
+	
+</body>
+</html>

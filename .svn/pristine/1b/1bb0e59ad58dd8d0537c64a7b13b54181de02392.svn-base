@@ -1,0 +1,67 @@
+/*
+Navicat MySQL Data Transfer
+
+Source Server         : lanche
+Source Server Version : 50171
+Source Host           : 211.149.241.17:3306
+Source Database       : yueche
+
+Target Server Type    : MYSQL
+Target Server Version : 50171
+File Encoding         : 65001
+
+Date: 2016-05-06 16:10:42
+*/
+
+SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for province
+-- ----------------------------
+DROP TABLE IF EXISTS `province`;
+CREATE TABLE `province` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `num` int(11) DEFAULT NULL,
+  `carorg` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `lsp` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- ----------------------------
+-- Records of province
+-- ----------------------------
+INSERT INTO `province` VALUES ('1', '北京市', '1', 'beijing', '京');
+INSERT INTO `province` VALUES ('2', '天津市', '0', null, null);
+INSERT INTO `province` VALUES ('3', '上海市', '0', 'shanghai', '沪');
+INSERT INTO `province` VALUES ('4', '重庆市', '37', 'chongqing', '渝');
+INSERT INTO `province` VALUES ('5', '河北省', '0', 'hebei', '冀');
+INSERT INTO `province` VALUES ('6', '山西省', '0', 'shanxi', '晋');
+INSERT INTO `province` VALUES ('7', '台湾省', '0', null, null);
+INSERT INTO `province` VALUES ('8', '辽宁省', '0', null, null);
+INSERT INTO `province` VALUES ('9', '吉林省', '0', 'jilin', '吉');
+INSERT INTO `province` VALUES ('10', '黑龙江省', '0', 'heilongjiang', '黑');
+INSERT INTO `province` VALUES ('11', '江苏省', '0', 'jiangsu', '苏');
+INSERT INTO `province` VALUES ('12', '浙江省', '0', 'zhejiang', '浙');
+INSERT INTO `province` VALUES ('13', '安徽省', '0', 'anhui', '皖');
+INSERT INTO `province` VALUES ('14', '福建省', '0', 'fujian', '闽');
+INSERT INTO `province` VALUES ('15', '江西省', '0', null, null);
+INSERT INTO `province` VALUES ('16', '山东省', '0', 'shandong', '鲁');
+INSERT INTO `province` VALUES ('17', '河南省', '0', 'henan', '豫');
+INSERT INTO `province` VALUES ('18', '湖北省', '0', 'hubei', '鄂');
+INSERT INTO `province` VALUES ('19', '湖南省', '0', 'hunan', '湘');
+INSERT INTO `province` VALUES ('20', '广东省', '0', 'guangdong', '粤');
+INSERT INTO `province` VALUES ('21', '甘肃省', '0', 'gansu', '甘');
+INSERT INTO `province` VALUES ('22', '四川省', '323', 'sichuan', '川');
+INSERT INTO `province` VALUES ('24', '贵州省', '0', 'guizhou', '贵');
+INSERT INTO `province` VALUES ('25', '海南省', '0', 'hainan', '琼');
+INSERT INTO `province` VALUES ('26', '云南省', '31', 'yunnan', '云');
+INSERT INTO `province` VALUES ('27', '青海省', '0', 'qinghai', '青');
+INSERT INTO `province` VALUES ('28', '陕西省', '31', null, null);
+INSERT INTO `province` VALUES ('29', '广西壮族自治区', '0', null, null);
+INSERT INTO `province` VALUES ('30', '西藏自治区', '0', null, null);
+INSERT INTO `province` VALUES ('31', '宁夏回族自治区', '0', 'ningxia', '宁');
+INSERT INTO `province` VALUES ('32', '新疆维吾尔自治区', '0', 'xinjiang', '新');
+INSERT INTO `province` VALUES ('33', '内蒙古自治区', '0', null, null);
+INSERT INTO `province` VALUES ('34', '澳门特别行政区', '0', null, null);
+INSERT INTO `province` VALUES ('35', '香港特别行政区', '0', null, null);

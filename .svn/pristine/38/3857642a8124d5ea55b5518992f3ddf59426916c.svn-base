@@ -1,0 +1,13 @@
+package com.huashidai.weihuotong.service;
+
+import java.util.Map;
+
+
+public interface IAccountService {
+	/**
+	 * 获取用户的账户信息
+	 * @param userId
+	 * @return
+	 */
+	Map<String,Object> getByUser(Long userId);
+}

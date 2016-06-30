@@ -1,0 +1,300 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+<script type="text/javascript">
+$(function(){
+	//缓存要用到的组件
+	var promotionDataGrid = $("#promotionDataGrid");//数据表格
+	var promotionGoodsTypeIdCombobox = $("#promotionGoodsTypeIdCombobox");//商品类型
+	var promotion_searchForm = $("#promotion_searchForm");//搜索表单
+	var goodsTypeCombobox = $("#goodsTypeCombobox");//商品类型
+	var promotionLeaveDialog = $("#promotionLeaveDialog");//下架原因窗口
+	var promotionLeaveForm = $("#promotionLeaveForm");//下架原因表单
+	var promotionDeleteDialog = $("#promotionDeleteDialog");//删除原因窗口
+	var promotionDeleteForm = $("#promotionDeleteForm");//删除原因表单
+
+   //数据表格
+    promotionDataGrid.datagrid({
+    	fit:true,
+		border:false,
+		url:'promotion/query',
+		singleSelect:true,
+		fitColumns:true,
+		striped:true,
+		pagination:true,
+		pageSize:20,
+		pageList:[5,10,20,50],
+		toolbar:'#promotion_toolbar',
+	});
+	
+	$.ajax({ 
+		url: 'type/list',
+		dataType: 'json', 
+		success: function(typeData){ 
+			typeData.push({'id':'0','name':'首页'});
+			//搜索
+			promotionGoodsTypeIdCombobox.combobox({
+		        prompt:'商品类型',
+		        valueField:'id',
+		        textField:'name',
+		        data:typeData
+		    });
+        }
+	});
+    
+	//创建cmdType管理所有操作函数
+	var cmdPromotion={
+		//高级查询
+	    promotion_search:function(){
+	    	var params = {};
+			var paramArr = promotion_searchForm.serializeArray();
+		    $.each(paramArr,function(i,data){
+		    	params[data.name] = data.value;
+		 	}); 
+	 		promotionDataGrid.datagrid("load",params);
+		},
+		//审核通过
+		 promotion_success:function(){
+			// 1.获取选中行信息
+			var rowData = promotionDataGrid.datagrid("getSelected");
+			// 2.判断
+			if(!rowData){
+				$.messager.alert("温馨提示","你没有选中任何商品！！","info");
+				return;
+			}
+			if(rowData.state!=0){
+				$.messager.alert("温馨提示","只能操作下架状态！！","warning");
+				return;
+			}
+			$.messager.confirm("温馨提示","是否确认上架该广告?",function(yes){
+				if(yes){
+					// 获取数据的唯一标示
+					var id = rowData.id;
+					// 发送AJAX请求，修改ID对应数据状态
+					$.get("/promotion/success",{id:id},function(data){
+						if(data.success){
+							$.messager.alert("温馨提示",data.message,"info",function(){
+								promotionDataGrid.datagrid("reload");
+							});
+						}
+					},"json");
+				}
+			});
+		},
+		//下架
+		promotion_failure:function(){
+			// 1.获取选中行信息
+			var rowData = promotionDataGrid.datagrid("getSelected");
+			// 2.判断
+			if(!rowData){
+				$.messager.alert("温馨提示","你没有选中任何商品！！","info");
+				return;
+			}
+			if(rowData.state!=1){
+				$.messager.alert("温馨提示","只能操作正常状态！！","warning");
+				return;
+			}
+			$.messager.confirm("温馨提示","是否确认下架该广告?",function(yes){
+				if(yes){
+					// 清空对话框数据
+					promotionLeaveForm.form("clear");
+					//打开添加对话框
+					promotionLeaveDialog.dialog("open");
+					// 获取数据的唯一标示
+					var id = rowData.id;
+					//回显数据
+					rowData['id']=id;
+					// 把数据加载到对话框中,回显数据
+					promotionLeaveForm.form("load",rowData);
+				}
+			});
+		},	
+		//确定下架
+		promotionLeave_ok:function(){
+			// 把表单的参数，通过AJAX方式提交到后台
+			promotionLeaveForm.form("submit",{
+				url:"/promotion/failure",
+				success:function(data){//data只是json字符串，需要手动转 
+					data = $.parseJSON(data);
+					if(data.success){
+						$.messager.alert("温馨提示",data.message,"info",function(){
+							//关闭对话框
+							promotionLeaveDialog.dialog("close");
+							promotionDataGrid.datagrid("reload");
+						});
+					}
+				}
+			});
+		},
+		//取消下架
+		promotionLeave_cancel:function(){
+			promotionLeaveDialog.dialog("close");
+		},
+		//删除
+		promotion_del:function(){
+			// 1.获取选中行信息
+			var rowData = promotionDataGrid.datagrid("getSelected");
+			console.debug(rowData);
+			// 2.判断
+			if(!rowData){
+				$.messager.alert("温馨提示","你没有选中任何数据","info");
+				return;
+			}
+			if(rowData.state!=0){
+				$.messager.alert("温馨提示","只能操作下架状态！！","warning");
+				return;
+			}
+			//提示用户是否删除
+			$.messager.confirm("温馨提示","是否确认删除该广告?",function(yes){
+				if(yes){
+					// 清空对话框数据
+					promotionDeleteForm.form("clear");
+					//打开添加对话框
+					promotionDeleteDialog.dialog("open");
+					// 获取数据的唯一标示
+					var id = rowData.id;
+					//回显数据
+					rowData['id']=id;
+					// 把数据加载到对话框中,回显数据
+					promotionDeleteForm.form("load",rowData);
+				}
+			});
+			
+		},
+		//确定删除
+		promotionDelete_ok:function(){
+			// 把表单的参数，通过AJAX方式提交到后台
+			promotionLeaveForm.form("submit",{
+				url:"/promotion/delete",
+				success:function(data){//data只是json字符串，需要手动转 
+					data = $.parseJSON(data);
+					$.messager.alert("温馨提示",data.message,"info",function(){
+						//关闭对话框
+						promotionDeleteDialog.dialog("close");
+						promotionDataGrid.datagrid("reload");
+					});
+				}
+			});
+		},
+		//取消删除
+		promotionDelete_cancel:function(){
+			promotionDeleteDialog.dialog("close");
+		},
+		
+		//刷新
+		promotion_refresh:function(){
+			promotionDataGrid.datagrid("reload");
+		},	
+	}
+	
+	//对页面上所有按钮做一次统一的监听
+	$("a[data-cmd]").on("click",function(){
+		//获取data-cmd属性的值
+		var cmd = $(this).data("cmd");//data-key="value"其实就是一个{key:value}类型的数据
+		if (cmd) {
+			cmdPromotion[cmd]();//执行对应的方法
+		}
+	});
+});
+//查看广告网页
+function showWebpage(cotentId){
+	$('#webpageWindow').window({ 
+		 title : '广告网页',
+         width :  600,  
+         height :  400,  
+         content : '<iframe scrolling="yes" frameborder="0"  src="/app/enterWebPage?cotentId='+cotentId+'" style="width:100%;height:98%;"></iframe>',  
+         modal :true,  
+         shadow : false,  
+         cache : false,  
+         closed : false,  
+         collapsible : false,  
+         resizable : false,  
+         loadingMessage : '正在加载数据，请稍等片刻......' ,
+	});  
+}
+</script>
+	<table id="promotionDataGrid" style="width: 600px;height: 300px;">
+		<!--
+			定义表格的表头 
+		 -->
+		<thead>
+			<tr>
+				<th align="center" field="id"  width="10" >ID</th>
+				<th align="center" field="image"   width="20" data-options="formatter:formatImg">广告图片</th>
+				<th align="center" field="beginTime"   width="20" data-options="formatter:formatTime">开始时间</th>
+				<th align="center" field="endTime"   width="20" data-options="formatter:formatTime">结束时间</th>
+				<th align="center" field="price"   width="20">价格</th>
+				<th align="center" field="contentType"   width="20" data-options="formatter:formatPromotionType">跳转类型</th>
+				<th align="center" field="contentId"   width="20" data-options="formatter:formatPromotionContent">广告网页</th>
+				<th align="center" field="adPositionId"   width="20" data-options="formatter:formatadPositionId">广告位</th>
+				<th align="center" field="state"   width="20" data-options="formatter:formatPromotionState">状态</th>
+			</tr>
+		</thead>
+	</table>
+	
+	 <div id="promotion_toolbar">
+	 	<div>
+		 	<form method="post" id="promotion_searchForm">
+		 	<a class="easyui-linkbutton" iconCls="icon-ok" data-cmd="promotion_success">上架</a> 
+				<a class="easyui-linkbutton" iconCls="icon-no" data-cmd="promotion_failure">下架</a> 
+			<a class="easyui-linkbutton" iconCls="icon-remove" data-cmd="promotion_del">删除</a>
+			<a class="easyui-linkbutton" iconCls="icon-reload"  data-cmd="promotion_refresh">刷新</a>
+		 
+				<select class="easyui-combobox" name="state" data-options="prompt:'状态'" style="width: 100px">
+					<option value="-99"></option>
+					<option value="-1">未付款</option>
+					<option value="0">已下架</option>
+					<option value="1">已通过</option>
+				</select> 
+				<select class="easyui-combobox" name="adType" data-options="prompt:'广告类型'" style="width: 100px">
+					<option value="-99"></option>
+					<option value="1">banner广告位</option>
+					<option value="0">非banner广告位</option>
+					<option value="2">宽广告位</option>
+					<option value="3">窄广告位</option>
+				</select> 
+				<input id="promotionGoodsTypeIdCombobox" name="goodsTypeId" style="width: 100px"/>
+				<a class="easyui-linkbutton" iconCls="icon-search" data-cmd="promotion_search">搜索</a>
+		 	</form>
+		 </div> 
+	</div>
+	
+	<!-- 下架原因 -->
+	<div id="promotionLeaveDialog" class="easyui-dialog" style="width: 400px;height: 280px;padding: 20px;"
+		data-options="modal:true,title:'下架原因',iconCls:'icon-edit',buttons:'#promotionLeave_bs',closed:true" >
+		<form id="promotionLeaveForm"  method="post">
+			<input type="hidden" name="id">
+			 <div style="margin-top: 0px;">
+			 	<input type="text" name="remark"  class="easyui-textbox" style="width:340px;height:180px" data-options="required:true,multiline:true">
+			 </div>
+		</form>
+	</div>
+	<div id="promotionLeave_bs">
+		<a class="easyui-linkbutton" iconCls="icon-save" data-cmd="promotionLeave_ok">确定</a>
+		<a class="easyui-linkbutton" iconCls="icon-cancel"  data-cmd="promotionLeave_cancel">取消</a>
+	</div>
+	<!-- 删除原因-->
+	<div id="promotionDeleteDialog" class="easyui-dialog" style="width: 400px;height: 280px;padding: 20px;"
+		data-options="modal:true,title:'删除原因',iconCls:'icon-edit',buttons:'#promotionDelete_bs',closed:true" >
+		<form id="promotionDeleteForm"  method="post">
+			<input type="hidden" name="id">
+			 <div style="margin-top: 0px;">
+			 	<input type="text" name="remark"  class="easyui-textbox" style="width:340px;height:180px" data-options="required:true,multiline:true">
+			 </div>
+		</form>
+	</div>
+	<div id="promotionDelete_bs">
+		<a class="easyui-linkbutton" iconCls="icon-save" data-cmd="promotionDelete_ok">确定</a>
+		<a class="easyui-linkbutton" iconCls="icon-cancel"  data-cmd="promotionDelete_cancel">取消</a>
+	</div>
+	
+	<!-- 广告网页窗口 -->
+	<div id="webpageWindow"></div>
+</body>
+</html>

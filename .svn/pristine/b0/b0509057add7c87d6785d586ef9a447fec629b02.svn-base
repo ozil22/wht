@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashidai.weihuotong.mapper.AccountMapper" >
+  <insert id="save" parameterType="Account" useGeneratedKeys="true" keyProperty="id">
+    insert into t_account (name,balance,freezedAmount, 
+	    proxyIncome, saleIncome, user_id,version)
+	    values (#{name},#{balance}, #{freezedAmount},
+	    #{proxyIncome}, #{saleIncome},#{user.id},#{version})
+  </insert>
+  
+  <update id="update" parameterType="Account" >
+    update t_account set
+    	balance = #{balance},
+    	freezedAmount = #{freezedAmount},
+    	proxyIncome = #{proxyIncome},
+    	saleIncome = #{saleIncome},
+    	version=version+1
+	where id = #{id}
+		and version=#{version}
+  </update>
+  
+  <delete id="delete" parameterType="long" >
+    delete from t_account
+    where id = #{id}
+  </delete>
+  
+  <select id="get" resultType="Account" parameterType="long" >
+    select *
+    from t_account
+       where id = #{id}
+  </select>
+  <select id="getByUser" resultType="Account" parameterType="long" >
+    select *
+    from t_account
+     where user_id = #{userId}
+  </select>
+  <select id="getByStore" resultType="Account" parameterType="long" >
+    select *
+    from t_account a
+    left join t_user u on a.user_id = u.id 
+     where u.store_id = #{storeId}
+  </select>
+  
+  <sql id="whereSql">
+		<where>
+			<if test="userId != -1">
+				a.user_id  = #{userId}
+			</if>
+			<if test="name != null and name != ''">
+				a.name  = #{name}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="query" resultType="Account" parameterType="AccountQuery">
+		select a.* 
+		from t_account a
+		left join t_user u on a.user_id = u.id
+		<include refid="whereSql"/>
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 获取总记录数 -->
+	<select id="queryTotal" resultType="long" parameterType="AccountQuery">
+		select count(a.id)
+		from t_account a
+		left join t_user u on a.user_id = u.id
+		<include refid="whereSql"/>
+	</select>
+  
+</mapper>

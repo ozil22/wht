@@ -1,0 +1,156 @@
+package com.huashidai.weihuotong.domain;
+
+import java.io.Serializable;
+
+import com.huashidai.weihuotong.utils.ConstUtil;
+
+/**
+ * 店铺
+ * 
+ * @author ozil
+ *
+ */
+public class Store implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1820440895535807436L;
+	private Long id;
+	private String name;// 店名
+	private String intro;// 简介
+	private String linkman;// 联系人(经营者)
+	private String phone;// 联系电话
+	private String qq;// QQ号
+	private String headImage;// 店铺头像
+	private Integer saleNum = 0;// 店铺销量
+	private Integer hot = 0;// 热度(收藏量)
+	private Integer secured = 1;// 担保交易
+	private Integer margin = 0;// 保证金保障
+	
+	private City city;// 所在地
+
+	/**
+	 * 店铺状态 -2 停用 -1 审核失败 0 待审核 1 正常
+	 */
+	private Integer state = ConstUtil.STORE_PENDING;
+
+	public Store(Long id) {
+		this.id = id;
+	}
+
+	public Store() {
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getLinkman() {
+		return linkman;
+	}
+
+	public void setLinkman(String linkman) {
+		this.linkman = linkman;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getQq() {
+		return qq;
+	}
+
+	public void setQq(String qq) {
+		this.qq = qq;
+	}
+
+	public City getCity() {
+		return city;
+	}
+
+	public void setCity(City city) {
+		this.city = city;
+	}
+
+	public Integer getState() {
+		return state;
+	}
+
+	public void setState(Integer state) {
+		this.state = state;
+	}
+
+	public String getHeadImage() {
+		return headImage;
+	}
+
+	public void setHeadImage(String headImage) {
+		this.headImage = headImage;
+	}
+
+	public Integer getSaleNum() {
+		return saleNum;
+	}
+
+	public void setSaleNum(Integer saleNum) {
+		this.saleNum = saleNum;
+	}
+
+	public Integer getSecured() {
+		return secured;
+	}
+
+	public void setSecured(Integer secured) {
+		this.secured = secured;
+	}
+
+	public Integer getMargin() {
+		return margin;
+	}
+
+	public void setMargin(Integer margin) {
+		this.margin = margin;
+	}
+
+	public String getIntro() {
+		return intro;
+	}
+
+	public void setIntro(String intro) {
+		this.intro = intro;
+	}
+
+	public Integer getHot() {
+		return hot;
+	}
+
+	public void setHot(Integer hot) {
+		this.hot = hot;
+	}
+
+	@Override
+	public String toString() {
+		return "Store [id=" + id + ", name=" + name + ", intro=" + intro
+				+ ", linkman=" + linkman + ", phone=" + phone + ", qq=" + qq
+				+ ", headImage=" + headImage + ", saleNum=" + saleNum
+				+ ", secured=" + secured + ", margin=" + margin + ", city="
+				+ city + ",  state=" + state + "]";
+	}
+}

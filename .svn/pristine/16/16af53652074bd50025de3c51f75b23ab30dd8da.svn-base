@@ -1,0 +1,62 @@
+package com.huashidai.weihuotong.domain;
+
+import java.io.Serializable;
+import java.util.Date;
+
+/**
+ * 意见反馈
+ * 
+ * @author ozil
+ */
+public class Recommendation implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1087622123768387963L;
+	private Long id;
+	private String content; // 内容
+	private String contact;// 联系方式
+	private Date time;//反馈时间
+	private User user;// 所属账号
+	private RecommendationType recommendationType;//反馈类型
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public User getUser() {
+		return user;
+	}
+	public void setUser(User user) {
+		this.user = user;
+	}
+	public String getContent() {
+		return content;
+	}
+	public void setContent(String content) {
+		this.content = content;
+	}
+	public String getContact() {
+		return contact;
+	}
+	public void setContact(String contact) {
+		this.contact = contact;
+	}
+	public Date getTime() {
+		return time;
+	}
+	public void setTime(Date time) {
+		this.time = time;
+	}
+	public RecommendationType getRecommendationType() {
+		return recommendationType;
+	}
+	public void setRecommendationType(RecommendationType recommendationType) {
+		this.recommendationType = recommendationType;
+	}
+	
+
+	
+}

@@ -1,0 +1,63 @@
+package com.huashidai.weihuotong.pay;
+
+
+public class ChargeParam {
+
+	private String order_no;//支付订单 (订单号开头1、2、 3、 4、 5、 6、)
+	private Double amount;//支付金额
+	private String channel;//支付方式(微信: wx )
+	private String currency="cny";//支付币种
+	private String client_ip="";//IP
+	private String subject;//商品的标题不超过16个汉字  32个字符
+	private String body;//商品内容  不超过64个汉字 128个字符
+	public String getOrder_no() {
+		return order_no;
+	}
+	public void setOrder_no(String order_no) {
+		this.order_no = order_no;
+	}
+	public Double getAmount() {
+		return amount;
+	}
+	public void setAmount(Double amount) {
+		this.amount = amount*100;
+	}
+	public String getChannel() {
+		return channel;
+	}
+	public void setChannel(String channel) {
+		this.channel = channel;
+	}
+	public String getCurrency() {
+		return currency;
+	}
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+	public String getClient_ip() {
+		return client_ip;
+	}
+	public void setClient_ip(String client_ip) {
+		this.client_ip = client_ip;
+	}
+	public String getSubject() {
+		return subject;
+	}
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
+	public String getBody() {
+		return body;
+	}
+	public void setBody(String body) {
+		this.body = body;
+	}
+	
+	@Override
+	public String toString() {
+		return "PingPay [order_no=" + order_no + ", amount=" + amount
+				+ ", channel=" + channel + ", currency=" + currency
+				+ ", client_ip=" + client_ip + ", subject=" + subject
+				+ ", body=" + body + "]";
+	}
+}

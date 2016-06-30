@@ -1,0 +1,227 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+	<script type="text/javascript">
+$(function(){
+	//缓存要用到的组件
+	var goodsStateCombobox = $("#goodsStateCombobox");//状态下拉列表
+	var goodsStoreCombobox = $("#goodsStoreCombobox");//店铺下拉列表
+	var goodsNameSearchbox = $("#goodsNameSearchbox");//关键字搜索框
+	var goodsDataGrid = $("#goodsDataGrid");//商品数据表格
+	var goods_searchForm = $("#goods_searchForm");//参数表单
+	//初始化组件
+	goodsStoreCombobox.combobox({
+        url:'/store/getAll',
+        method:'get',
+        valueField:'id',
+        textField:'name',
+        panelHeight:'auto',
+        prompt:'选择店铺'
+	});
+	goodsNameSearchbox.searchbox({
+		prompt:'店铺名',
+		searcher:function(){ 
+			var paramObj = {};
+			var paramArr = goods_searchForm.serializeArray();
+			 $.each(paramArr,function(i,data){
+				 paramObj[data.name] = data.value;
+			 }); 
+			goodsDataGrid.datagrid("load",paramObj);
+		}
+	});
+	goodsDataGrid.datagrid({//初始化数据表格
+		fit:true,
+		border:false,
+		url:'goods/query',
+		singleSelect:true,
+		fitColumns:true,
+		striped:true,
+		rownumbers:true,
+		pagination:true,
+		pageSize:10,
+		pageList:[5,10,20,50],
+		toolbar:'#goods_toolbar'
+	});
+	
+	//创建cmdGoods管理所有操作函数
+	var cmdGoods={
+		//下架
+		 goods_leave:function(){
+			// 1.获取选中行信息
+			var rowData = goodsDataGrid.datagrid("getSelected");
+			// 2.判断
+			if(!rowData){
+				$.messager.alert("温馨提示","你没有选中任何商品！！","info");
+				return;
+			}
+			if(rowData.state==0){
+				$.messager.alert("温馨提示","请不要重复下架！！","warning");
+				return;
+			}
+			$.messager.confirm("温馨提示","是否确认下架【"+rowData.name+"】?",function(yes){
+				if(yes){
+					// 获取数据的唯一标示
+					var id = rowData.id;
+					// 发送AJAX请求，修改ID对应数据状态
+					$.get("/goods/leave",{id:id},function(data){
+						if(data.success){
+							$.messager.alert("温馨提示",data.message,"info",function(){
+								goodsDataGrid.datagrid("reload");
+							});
+						}
+					},"json");
+				}
+			});
+		},
+		//上架
+		goods_up:function(){
+			// 1.获取选中行信息
+			var rowData = goodsDataGrid.datagrid("getSelected");
+			// 2.判断
+			if(!rowData){
+				$.messager.alert("温馨提示","你没有选中任何商品！！","info");
+				return;
+			}
+			if(rowData.state==1){
+				$.messager.alert("温馨提示","请不要重复上架！！","warning");
+				return;
+			}
+			$.messager.confirm("温馨提示","是否确认上架【"+rowData.name+"】?",function(yes){
+				if(yes){
+					// 获取数据的唯一标示
+					var id = rowData.id;
+					// 发送AJAX请求，修改ID对应数据状态
+					$.get("/goods/up",{id:id},function(data){
+						if(data.success){
+							$.messager.alert("温馨提示",data.message,"info",function(){
+								goodsDataGrid.datagrid("reload");
+							});
+						}
+					},"json");
+				}
+			});
+		},
+
+		//删除
+		goods_del:function(){
+			// 1.获取选中行信息
+			var rowData = goodsDataGrid.datagrid("getSelected");
+			console.debug(rowData);
+			// 2.判断
+			if(!rowData){
+				$.messager.alert("温馨提示","你没有选中任何数据","info");
+				return;
+			}
+			if(rowData.state==1){
+				$.messager.alert("温馨提示","不能删除未下架商品！！","warning");
+				return;
+			}
+			//提示用户是否删除
+			$.messager.confirm("温馨提示","是否确认删除【"+rowData.name+"】?",function(yes){
+				if(yes){
+					// 获取数据的唯一标示
+					var id = rowData.id;
+					// 发送AJAX请求，修改ID对应数据状态
+					$.get("/goods/delete",{id:id},function(data){
+						if(data.success){
+							$.messager.alert("温馨提示",data.message,"info",function(){
+								goodsDataGrid.datagrid("reload");
+							});
+						}
+					},"json");
+				}
+			});
+			
+		}, 
+
+		//刷新
+		goods_refresh:function(){
+			goodsDataGrid.datagrid("reload");
+		},
+
+	};
+	//对页面上所有按钮做一次统一的监听
+	$("a[data-cmd]").on("click",function(){
+		//获取data-cmd属性的值
+		var cmd = $(this).data("cmd");//data-key="value"其实就是一个{key:value}类型的数据
+		if (cmd) {
+			cmdGoods[cmd]();//执行对应的方法
+		}
+	});
+});
+//商品详情图片
+function showImg(goodsId){
+	$('#imageWindow').window({ 
+		 title : '图文详情',
+         width :  600,  
+         height :  400,  
+         content : '<iframe scrolling="yes" frameborder="0"  src="/app/detailsImages?goodsId='+goodsId+'" style="width:100%;height:98%;"></iframe>',  
+         modal :true,  
+         shadow : false,  
+         cache : false,  
+         closed : false,  
+         collapsible : false,  
+         resizable : false,  
+         loadingMessage : '正在加载数据，请稍等片刻......' ,
+	});  
+}
+</script>
+	<!-- 数据表格 -->
+	<table id="goodsDataGrid" >
+		<!-- 定义表格的表头  -->
+		<thead>
+			<tr>
+				<!-- field：指定需要显示列对应JSON数据属性 -->
+				<th field="name" width="100" align="center">名称</th>
+				<!-- formatter:格式化列显示内容 -->
+				<th field="bannerImages" data-options="formatter:formatImg"
+					width="50" align="center">图片</th>
+				<th field="brand" data-options="formatter:formatObjectName"
+					width="60" align="center">品牌</th>
+				<th field="type" data-options="formatter:formatObjectName" width="50"
+					align="center">类型</th>
+				<th field="store" data-options="formatter:formatObjectName"
+					width="70" align="center">商家</th>
+				<th field="state" data-options="formatter:formatGoodsState"
+					width="50" align="center">状态</th>
+				<th field="id" data-options="formatter:formatGoodsDetails"
+					width="40" align="center">商品详情</th>
+				<th field="salePrice" width="40" align="center">价格</th>
+				<th field="postage" width="40" align="center">邮费</th>
+				<th field="proxyNum" width="40" align="center">分销量</th>
+				<th field="saleNum" width="40" align="center">销量</th>
+			</tr>
+		</thead>
+	</table>
+
+	<!-- 工具条和搜索条件 -->
+	<div id="goods_toolbar">
+		<div>
+			<form method="post" id="goods_searchForm">
+				<a class="easyui-linkbutton" iconCls="icon-edit"  data-cmd="goods_leave">下架</a> 
+				<a class="easyui-linkbutton" iconCls="icon-add" data-cmd="goods_up">上架</a> 
+				<a class="easyui-linkbutton" iconCls="icon-remove" data-cmd="goods_del">删除</a> 
+				<a class="easyui-linkbutton" iconCls="icon-reload" data-cmd="goods_refresh">刷新</a> 
+
+			   	 <select class="easyui-combobox" name="state" style="width: 100px">
+					<option value="-99" ><font color="gray">选择状态</font></option>
+					<option value="1">销售中</option>
+					<option value="0">已下架</option>
+				</select> 
+				<select id="goodsStoreCombobox" name="storeId" style="width: 100px"></select> 
+				 <input id="goodsNameSearchbox" name="goodsName" style="width: 100px" ></input>
+			</form>
+		</div>
+	</div>
+
+	<!-- 商品详情窗口 -->
+	<div id="imageWindow"></div>
+
+</body>
+</html>

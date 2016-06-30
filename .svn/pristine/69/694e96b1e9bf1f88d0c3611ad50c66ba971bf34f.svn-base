@@ -1,0 +1,19 @@
+package com.huashidai.weihuotong.mapper;
+
+import java.util.List;
+
+import com.huashidai.weihuotong.domain.SystemAccount;
+
+public interface SystemAccountMapper {
+
+	void save(SystemAccount systemAccount);
+
+	void update(SystemAccount systemAccount);
+
+	void delete(Long id);
+
+	SystemAccount get(Long id);
+
+	List<SystemAccount> getAll();
+
+}

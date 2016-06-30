@@ -1,0 +1,322 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+		<link rel="stylesheet" type="text/css" href="/easyui/themes/default/easyui.css">
+		<link rel="stylesheet" type="text/css" href="/easyui/themes/icon.css">
+		<link rel="stylesheet" type="text/css" media="screen" href="/jquery-validate/css/screen.css" />
+		<script type="text/javascript" src="/easyui/jquery.min.js"></script>
+		<script type="text/javascript" src="/easyui/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="/easyui/locale/easyui-lang-zh_CN.js"></script>
+</head>
+<body>	
+<script type="text/javascript">
+var format = function(time, format) {
+	var t = new Date(time);
+	var tf = function(i) {
+		return (i < 10 ? '0' : '') + i;
+	};
+	return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function(a) {
+		switch (a) {
+		case 'yyyy':
+			return tf(t.getFullYear());
+			break;
+		case 'MM':
+			return tf(t.getMonth() + 1);
+			break;
+		case 'dd':
+			return tf(t.getDate());
+			break;
+		}
+		;
+	});
+};
+
+//格式化函数，返回值就是要显示的内容；
+	 function formatTime(val,row){
+		
+		return format(val, 'yyyy-MM-dd');
+		
+	};
+	 function formatPotentialUser(val,row){
+		
+		 return val ? val.name : "<font> </font>";
+		
+	};	
+	 function formatPlanType(val,row){
+		
+		 return val ? val.name : "<font> </font>";
+		
+	}; 	
+	 function formatInputUser(val,row){
+		
+		 return val ? val.username : "<font> </font>";
+		
+	}; 	
+
+
+	$(function(){
+// 		js部分：
+// 		   在页面加载完毕后！！
+// 		    1、 声明当前页面，需要用到的组件名称
+		var UserDevPlanDatagrid,UserDevPlanDialog,UserDevPlanForm,UserDevPlanSearchForm;
+// 		    2、 缓存页面组件
+		UserDevPlanDatagrid = $("#UserDevPlanDatagrid");
+		UserDevPlanDialog=$("#UserDevPlanDialog");
+		UserDevPlanForm=$("#UserDevPlanForm");
+		UserDevPlanSearchForm=$("#UserDevPlanSearchForm");
+// 		    3、 初始化组件
+// 		    4、 创建一个cmdObj命令对象，来管理所有的操作函数
+		var cmdObject = {
+				addUserDevPlan:function(){
+					//清空添加表单
+					UserDevPlanForm.form("clear");
+					//设置对话框标题
+					UserDevPlanDialog.dialog("setTitle","添加客户计划");
+					//打开对话框
+					UserDevPlanDialog.dialog("open");
+					
+				},
+				
+				editUserDevPlan:function(){
+					//获取选中行
+					var rowData = UserDevPlanDatagrid.datagrid("getSelected");
+					//判断
+					if(!rowData){
+						$.messager.alert("温馨提示","您没有选中任何数据,请选择数据","info");
+						return;
+					}
+					
+					//清空表单
+					UserDevPlanForm.form("clear");
+					//设置对话框标题
+					UserDevPlanDialog.dialog("setTitle","更改客户计划");
+					//打开对话框
+					UserDevPlanDialog.dialog("open");
+					
+					if(rowData.potentialUser)
+						rowData["potentialUser.id"] = rowData.potentialUser.id;
+					if(rowData.planType)
+						rowData["planType.id"] = rowData.potentialUser.id;
+					//回显数据
+					UserDevPlanForm.form("load",rowData);
+				},
+				
+				removeUserDevPlan:function(){
+					//获取选中行
+					var rowData = UserDevPlanDatagrid.datagrid("getSelected");
+					//判断
+					if(!rowData){
+						$.messager.alert("温馨提示","您没有选中任何数据,请选择数据","info");
+						return;
+					}
+					
+					//fn(b): 当用户点击“确定”按钮的时侯将传递一个true值给回调函数，否则传递一个false值。 
+					$.messager.confirm("确认框","是否确定删除信息",function(b){
+						if(b){
+							var id = rowData.id;
+							$.post("UserDevPlan_delete",{id:id},function(data){
+								if(data.success){
+									$.messager.alert("温馨提示",data.msg,"info");
+									//刷新表格
+									UserDevPlanDatagrid.datagrid("reload");
+								}else{
+									$.messager.alert("温馨提示",data.msg,"info");
+								}
+							});
+						}
+					});
+				},
+				
+				refeshUserDevPlan:function(){
+					UserDevPlanDatagrid.datagrid("reload");
+				},
+				
+				
+				btuSave_UserDevPlan:function(){
+					UserDevPlanForm.form("submit",{
+						onSubmit:function(){
+							return $(this).form("validate");
+						},
+						success:function(data){
+// 							alert(data);
+							//console.debug(data);
+							data = $.parseJSON(data);   //data为json格式
+							if(data.success){
+								UserDevPlanDialog.dialog("close");
+								$.messager.alert("温馨提示","成功","info",function(){
+									UserDevPlanDatagrid.datagrid("reload");
+								});
+							}
+							else{
+								UserDevPlanDialog.dialog("close");
+								$.messager.alert("温馨提示",data.msg,"warning");
+							}
+						}
+					});
+				},
+				
+				btuCanel_UserDevPlan:function(){
+					UserDevPlanDialog.dialog("close");
+				},
+				//高级查询
+				UserDevPlanSearch:function(){
+					var paramObj = UserDevPlanSearchForm.serializeJson();
+					console.debug(paramObj);
+					UserDevPlanDatagrid.datagrid("load",paramObj);
+				},
+				getAll:function(){
+					// 清除查询表单数据
+					UserDevPlanSearchForm.form("clear");
+					// 不带参加载数据
+					UserDevPlanDatagrid.datagrid("load",{});
+				}
+		};
+		
+		//提供一个吧from参数封装到json对象的方法
+		$.fn.serializeJson=function(){
+			//声明一个对象,用来封装form的过滤参数
+			var parmarObj = {};
+			//获取form参数数组
+			var parmarArray = $(this).serializeArray();
+			
+			$.each(parmarArray,function(i,data){
+				parmarObj[data.name] = data.value;
+			});
+			return parmarObj;
+		};
+		
+// 		    5、 统一对页面所有的按钮，做一次监听
+		$("a[data-cmd]").on("click",function(){
+			var cmd = $(this).data("cmd");
+			if(cmd){
+				cmdObject[cmd]();    //cmdObject["addUserDevPlan"]();   相当于调用此函数
+			}
+		});
+	});
+</script>
+		
+
+	<table class="easyui-datagrid" style="width:500px;height:300px;" id="UserDevPlanDatagrid"
+	  data-options="singleSelect:true,
+		url:'/UserDevPlanQuery',
+		fit:true,
+		fitColumns:true,
+		pagination:true,
+		rownumbers:true,
+		toolbar:'#UserDevPlan_tool'" 
+		>
+		<thead>
+			<tr>
+				<th field="planTime"    width="100" formatter="formatTime">计划时间</th>
+				<th field="planSubject"   width="100">计划主题</th>
+				<th field="planDetiails"  width="100">计划内容</th>
+				<th field="potentialUser"  width="100" formatter="formatPotentialUser">潜在客户</th>
+				<th field="planType"  width="100" formatter="formatPlanType">计划邀约方式</th>
+				<th field="inputUser"  width="100" formatter="formatInputUser">录入人</th>
+				<th field="inputTime"  width="100" formatter="formatTime">录入时间</th>
+<!-- 				formatter="formatInputTime" -->
+			</tr>
+		</thead>
+	</table>
+	
+	<div id="UserDevPlan_tool">
+		<div>
+			<a data-cmd="addUserDevPlan" href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" plain="true">新建</a>
+			<a data-cmd="editUserDevPlan" href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-edit" plain="true">编辑</a>
+			<a data-cmd="removeUserDevPlan" href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+			<a data-cmd="refeshUserDevPlan" href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-reload" plain="true">刷新</a>
+			<a data-cmd="getAll" href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-reload" plain="true">查看所有</a>
+		</div>
+		<div>
+			<form id="UserDevPlanSearchForm" method="post">
+			潜在客户: 
+			<select id="UserDevPlanGird" name="potentialUserId"
+							class="easyui-combogrid" style="width: 120px"
+							data-options="
+							panelWidth: 300,
+							idField: 'id',
+							textField: 'name',
+							url: 'potentialUser/list',
+							method: 'get',
+							pagination:true,
+							columns: [[
+								{field:'name',title:'姓名',width:1},
+								{field:'remark',title:'客户描述',width:2}
+							]],
+							fitColumns: true
+						">
+						</select>
+			 <a href="#" class="easyui-linkbutton" iconCls="icon-search" data-cmd="UserDevPlanSearch">搜索</a>
+			 </form>
+		</div>
+	</div>
+	
+	<div id="UserDevPlanDialog" class="easyui-dialog" style="width: 250px;height:280px;"
+		data-options="
+			modal:true,
+			title:'潜在客户计划录入', 
+			closed:true, 
+ 			buttons:'#UserDevPlan_btu' 
+		"> 
+		<form action="UserDevPlan_save" id="UserDevPlanForm" method="post" >
+			<table align="center">
+ 			<tr>
+				<td>
+					<input type="hidden" name="id"/>
+				</td>
+			</tr>
+				<tr>
+					<td>计划主题</td>
+					<td>
+						<input name="planSubject" type="text" required="required"></input>  
+					</td>
+				</tr>
+				<tr>
+					<td>潜在客户</td>
+					<td>
+						<select name="potentialUser.id"
+							class="easyui-combogrid" style="width: 120px"
+							data-options="
+							panelWidth: 300,
+							idField: 'id',
+							textField: 'name',
+							url: 'potentialUser/list',
+							method: 'get',
+							pagination:true,
+							columns: [[
+								{field:'name',title:'姓名',width:1},
+								{field:'remark',title:'客户描述',width:2}
+							]],
+							fitColumns: true
+						">
+					</select>
+					</td>
+				</tr>
+			<tr>
+				<td>计划方式</td>
+				<td>
+					  <input class="easyui-combobox" id="salaryLevel" name="planType.id" 
+					  data-options="valueField:'id',textField:'name',url:'/systemDictionaryItem/list?id=4',panelHeight:'auto'">
+				</td>
+			</tr>
+				<tr>
+					<td>计划内容</td>
+					<td>
+						<input name="planDetiails" type="text" style="height:60px;"></input>  
+					</td>
+				</tr>
+			</table>
+		</form>
+	</div>
+	
+	<div id="UserDevPlan_btu">
+		<a class="easyui-linkbutton"  data-cmd="btuSave_UserDevPlan" data-options="iconCls:'icon-add'">保存</a>
+		<a class="easyui-linkbutton"  data-cmd="btuCanel_UserDevPlan" data-options="iconCls:'icon-cancel'" >取消</a>
+	</div>
+	
+</body>
+</html>

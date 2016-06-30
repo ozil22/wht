@@ -1,0 +1,20 @@
+package com.huashidai.weihuotong.query;
+
+
+public class StoreQuery extends BaseQuery {
+	private String storeName;// 商品名,模糊查询
+
+	public String getStoreName() {
+		return storeName;
+	}
+
+	public void setStoreName(String storeName) {
+		this.storeName = storeName;
+	}
+
+	@Override
+	public String toString() {
+		return "StoreQuery [storeName=" + storeName + "]";
+	}	
+	
+}

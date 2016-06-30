@@ -1,0 +1,31 @@
+package com.huashidai.weihuotong.mapper;
+
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.huashidai.weihuotong.domain.PromotionOrder;
+
+public interface PromotionOrderMapper {
+	/**
+	 * 保存
+	 */
+	void save(PromotionOrder promotionOrder);
+	/**
+	 * 修改状态
+	 */
+	void updateState(PromotionOrder promotionOrder);
+	/**
+	 * 删除
+	 */
+	void delete(Long id);
+	/**
+	 * 获取单个
+	 */
+	PromotionOrder get(Long id);
+	/**
+	 * 根据总订单号获取
+	 */
+	List<PromotionOrder> getByTotalOrderNum(@Param("totalOrderNum")String totalOrderNum);
+}

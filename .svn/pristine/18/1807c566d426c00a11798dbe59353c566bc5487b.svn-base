@@ -1,0 +1,33 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.Account;
+import com.huashidai.weihuotong.mapper.AccountMapper;
+import com.huashidai.weihuotong.service.IAccountService;
+
+@Service
+public class AccountServiceImpl implements IAccountService {
+	@Autowired
+	private AccountMapper accountMapper;
+
+	@Override
+	public Map<String, Object> getByUser(Long userId) {
+		Account account = accountMapper.getByUser(userId);
+		if (account != null) {
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put("id", account.getId());
+			map.put("freezedAmount", account.getFreezedAmount());
+			map.put("balance", account.getBalance());
+			map.put("proxyIncome", account.getProxyIncome());
+			map.put("saleIncome", account.getSaleIncome());
+			return map;
+		}
+		return null;
+	}
+	
+}

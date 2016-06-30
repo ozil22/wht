@@ -1,0 +1,130 @@
+ul{list-style: none;}
+.main{width: 100%;z-index: 2;}
+input,textarea,select{-webkit-appearance:none; /*去除input默认样式*/ outline: none;border: none;}
+.login-gint{
+    background: #fff;
+    padding: 12px 0;
+    line-height: 20px;
+    border-bottom: 1px solid #E5E5E5;
+    font-size: 1.6rem;
+    color: #ff5f28;
+     width: 100%;
+     text-align: center;
+}
+.btn-address{width: 100%;}
+.btn-addressbtn{width: 100%; background: #FF5236;}
+.address {
+	width: 98%;
+    
+    line-height: 40px;
+    color: #ff5f28;
+    border: 1px solid #ff5f28;
+    margin: 10px auto;
+    text-align: center;
+    font-size: 1.4rem;
+}
+.address1{width: 98%;
+    height: 40px;
+    line-height: 40px;
+    color: #ff5f28;
+   
+    font-size: 1.4rem;}
+.bgfffCon{width: 96%;margin: 0 auto;padding: 2rem 0;}
+.J_cartItems{border-top:1px solid #E5E5E5;border-bottom:1px solid #E5E5E5;}
+.J_cartItems{width: 100%;background: #fff;margin: 10px 0;}
+.J_cartItemsCon{width: 96%;margin: 0 auto;height: 5rem;}
+.sp_ps{margin-left: 1.2rem;
+       font-size: 1.4rem;line-height: 50px;}
+.sp_gt{float: right;font-size: 1.4rem;line-height: 50px;}
+.sp_right{float: right;color: #ff5f28;}
+.J_1{height: 4rem;font-size: 1.2rem;}
+.sp_ps1{line-height: 40px;} 
+.J_cartItems1{margin: 0px; width: 100%;background: #fff;border-bottom: 0px;}
+.J_cartItems11{border-bottom: 1px solid #E5E5E5;}
+.J_2{font-size: 1.2rem;width: 96%;margin: 0 auto;}
+.J_2_p1{padding-left: 12px;margin-top: 5px;/*border: 1px solid #ff5f28;*/}
+.J_2_p11{padding-top:8px;}
+.J_2_p12{color:#ccc;padding: 8px 0;}
+.jsp1{font-size: 1.2rem;}
+.jsp2{font-size: 1.2rem;float: right;}
+.jsp22{color: #ff5f28;}
+.w5{width: 92%;margin: 0 auto;display: block;border: 1px solid #ccc;padding: 5px 0;padding-left:4px;}
+.z_zhifubao,.z_xinyongqia{background: #ff7f32;text-align: center;font-size: 1.6rem; color: #fff;height: 40px;
+							margin-top: 3rem;}
+.btzw{border-radius: 0.2rem;-webkit-border-radius: 0.2rem;-moz-border-radius: 0.2rem;}
+.J_payments{width: 98%;margin: 0 auto;z-index: 2;}
+.zf{padding-left:1rem;line-height: 40px;}
+.z_xinyongqia{background: #16caea;margin-top: 1.0rem;}
+.margBT05{font-size: 11px;margin-top: 10px;color: #cbcbcb;text-align: center;}
+.login{width: 100%;height:100%;background: url(../img/transparency.png);
+		position: fixed;left: 0;top: 0;display: none;z-index: 3;}
+.login_Con{width:96%;height:200px; margin: 50% auto;background: #fff;z-index: 5;}
+.hd{color: #333;;
+	height: 50px;
+    line-height: 50px;
+    padding: 0 10px;
+    background: #F5F5F5;
+    border-bottom: 1px solid #E5E5E5;
+}
+.hd h3 {
+    line-height: 50px;
+    font-size: 15px;
+    text-align: center;
+}
+
+.close{float: right; color:#DDDDDD;font-size:1.8rem;}
+.bd{width: 96%;margin: 10px auto;height: 90px;/*border: 1px solid red;*/}
+
+.bd1{width: 100%;height: 40px;border: 1px solid #e8e8e8;}
+.phone{width: 96%;height: 38px;border: none;padding: 0 4px;}
+
+.bd2{position: relative;width: 100%;height: 40px;border: 1px solid #e8e8e8;border-top: 0px;}
+.password1{width: 54%;float: left;border: none;padding: 0 4px;height: 38px;}
+.password2{width: 46%;border: none;background: red;margin-right: -0;
+           position: absolute;top:0;right: 0px;background: #ff5f28;padding: 0 4px;
+           border-color: #ff5f28;
+			color: #fff;height: 40px;
+			font-size: 1.4em;}
+.form-action{color: #999;width: 100%;padding: 12px 10px;font-size: 1.2rem;}
+.form-action a{font-size: 1.3rem; color: #016afa;}
+.S_address{background-color: #ececec;z-index: 6;position: fixed;left: 0;top: 0;display: none;width: 100%;height:100%;}
+.S_aheade{background: #fff;width: 100%;}
+.xiangzuo{float: left;width: 1.0rem;padding-left: 10px;padding-top: 5px;}
+.S_asp1{font-size: 1.2rem;display: block;text-align: center;padding: 10px;}
+.borB1Sccc{border-bottom: 1px solid #ccc}
+.dispInB{display: inline-block;width: 25%;/*background: red;*/padding: 1rem 0;margin-left:8%;text-align: right;}
+.margBT06{margin-top: 0.5rem;margin-bottom: 0.5rem;background: #fff;font-size: 1.2rem;}
+.verticalTop{vertical-align: top}
+.z_resuleMoreAddre{text-indent: 10px;}
+.z_orderInfoBoxRightLastPrice{border: 0px;}
+.w30{width: 15%;border-radius: 0px;}
+
+.content{width: 98%;margin: 0 auto;padding: 1rem 0;font-size: 1.6rem;background: #fff;border-bottom: 1px solid #EDEDED;}
+.abtn{padding: 1rem 0;width: 98%;margin: 0 auto;font-size: 1.6rem;background: #fff;}
+.abtn img{width: 1.26rem;height: 1.33rem;}
+input[type=checkbox]{
+	font-size: 18px;
+    margin: 0px 0 0;
+    /*margin-left: 2%;*/   	
+    line-height: 1.43435;
+	}
+.abtnl{width: 30%;float: left;}
+.dele{margin-left: 1.5rem;}
+.headCon{background: #fff;padding: 1.5rem 0;font-size: 1.6rem;
+border-bottom: 1px solid #EDEDED;width: 100%;margin-bottom: 1rem;}
+.head{width: 94%;margin: 0 auto;/*border: 1px solid green;*/text-align: center;}
+.headimgl{width: 1rem;max-height: 3rem;padding-right: 1rem;float: left;}
+.headimgll{width: 1rem;max-height: 3rem;padding-right: 1rem;float: left;}
+.search{width:70%;/*width: 0px;*/
+		loat: left;
+		position: relative;
+		
+		/*overflow: hidden;*/}
+
+.seaTxt{width: 99%;height: 2.5rem;float: left;position: relative;border: 0px;
+border-radius: 20px;text-indent: 30px;background: #F2F2F2;}
+.seaBut{background: url(../img/22.png) no-repeat;width: 1.66rem;height: 1.66rem;background-size:100% 100% ;
+position: absolute;left: 5px;top: 0.6rem;border: 0px;}
+.gouwuche{height: 2.53rem;float: right;padding-right:5%;}
+.person{height: 2.0rem;float: right;}
+.chooseaddress{z-index: 5;position: fixed;left: 0;top: 0;display: none;width: 100%;height:100%;background: #fff;}

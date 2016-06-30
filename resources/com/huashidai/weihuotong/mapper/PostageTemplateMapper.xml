@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.huashidai.weihuotong.mapper.PostageTemplateMapper">
+
+	<insert id="save" parameterType="PostageTemplate" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_postageTemplate(name,one,other,freeNumber,area,store_id) 
+					values(#{name},#{one},#{other},#{freeNumber},#{area},#{store.id})
+	</insert>
+	
+	<update id="update" parameterType="PostageTemplate">
+		update t_postageTemplate set 
+		name=#{name},
+		one=#{one},
+		other=#{other},
+		freeNumber=#{freeNumber},
+		area=#{area},
+		store_id=#{store.id}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_postageTemplate where id = #{id}
+	</delete>
+	
+	<select id="get" resultType="PostageTemplate">
+		select * from t_postageTemplate
+		where id=#{id}
+	</select>
+	
+	<select id="getByStore" resultType="PostageTemplate" parameterType="long">
+		select * from t_postageTemplate
+		where store_id = #{storeId}
+	</select> 
+	
+</mapper>

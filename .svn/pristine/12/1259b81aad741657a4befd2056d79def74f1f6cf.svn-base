@@ -1,0 +1,50 @@
+package com.huashidai.weihuotong.mapper;
+
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.huashidai.weihuotong.domain.Product;
+import com.huashidai.weihuotong.query.ProductQuery;
+
+public interface ProductMapper {
+	/**
+	 * 保存
+	 */
+	void save(Product product);
+	/**
+	 * 更新
+	 */
+	void update(Product product);
+	/**
+	 * 删除
+	 */
+	void delete(Long id);
+	/**
+	 * 获取单个(包含关联对象信息)
+	 */
+	Product get(Long id);
+	/**
+	 * 查询所有
+	 */
+	List<Product> getAll();
+	/**
+	 * 查询该商品的所有不同规格的货品
+	 */
+	List<Product> getByGoods(@Param("goodsId")Long goodsId);
+	
+	/**
+	 * 更新库存
+	 */
+	int updateNum(Product product);
+	
+	/**
+	 * 高级查询
+	 */
+	List<Product> query(ProductQuery qu);
+	/**
+	 * 查询总数
+	 */
+	Long queryTotal(ProductQuery qu);
+}

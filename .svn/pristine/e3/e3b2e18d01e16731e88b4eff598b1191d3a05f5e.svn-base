@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.ProductOrderMapper">
+
+	<insert id="save" parameterType="ProductOrder" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_productOrder(buyTime,orderNum,postage,state,totalPrice,message,payPrice,
+					address_id,user_id,store_id,totalOrder_id) 
+					values(#{buyTime},#{orderNum},#{postage},#{state},#{totalPrice},#{message},#{payPrice},
+					#{address.id},#{user.id},#{store.id},#{totalOrder.id})
+	</insert>
+	<!-- 修改-->
+	<update id="update" parameterType="ProductOrder">
+		update t_productOrder set 
+		postage=#{postage},
+		totalPrice=#{totalPrice},
+		message=#{message},
+		address_id=#{address.id},
+		payPrice=#{payPrice}
+		where id = #{id}
+	</update>
+	<!-- 修改状态 -->
+	<update id="updateState" parameterType="ProductOrder">
+		update t_productOrder set 
+		state=#{state}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_productOrder where id = #{id}
+	</delete>
+	
+	<select id="get" resultType="ProductOrder" parameterType="long">
+		select *
+		from t_productOrder  
+		where id=#{id}
+	</select>
+	
+	<select id="getAll" resultType="ProductOrder">
+		select * from t_productOrder
+	</select>
+	
+	<!-- 公共的高级查询条件 -->
+	<sql id="whereSql">
+		<where>
+			<if test="userName!=null and userName!=''">
+				(u.username like concat('%',#{userName},'%') or u.nickname like concat('%',#{userName},'%'))
+			</if>
+			<if test="storeName!=null and storeName!=''">
+				and s.name like concat('%',#{storeName},'%')
+			</if>
+			<if test="state!=-99">
+				and p.state = #{state}
+			</if>
+			<if test="orderNum!=null and orderNum!=''">
+				and p.orderNum = #{orderNum}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="query" resultType="ProductOrder" parameterType="ProductOrderQuery">
+		select p.*
+		from t_productOrder p 
+		left join t_user u on p.user_id = u.id
+		left join t_store s on p.store_id = s.id
+		<include refid="whereSql"/>
+		order by p.buyTime 
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<select id="queryTotal" resultType="long" parameterType="ProductOrderQuery">
+		select count(p.id)
+		from t_productOrder p 
+		left join t_user u on p.user_id = u.id
+		left join t_store s on p.store_id = s.id
+		<include refid="whereSql"/>
+	</select>
+</mapper>

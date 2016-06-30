@@ -1,0 +1,59 @@
+package com.huashidai.weihuotong.query;
+
+import org.springframework.util.StringUtils;
+
+
+public class UserQuery {
+	private String nameSearch;
+	
+	public String getNameSearch() {
+		if(StringUtils.hasLength(nameSearch)){
+			return nameSearch;
+		}
+		return null;
+	}
+
+	public void setNameSearch(String nameSearch) {
+		this.nameSearch = nameSearch;
+	}
+
+	
+	@Override
+	public String toString() {
+		return "UserQuery [nameSearch=" + nameSearch + ", pageSize=" + pageSize
+				+ ", currentPage=" + currentPage + "]";
+	}
+
+	//======================分页===================
+	private Integer pageSize = 10;//当前条数
+	private Integer currentPage = 1;   //当前页
+	
+	//查询数据库中的索引
+	public Integer getStart(){
+		return (currentPage - 1) * pageSize;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	public Integer getCurrentPage() {
+		return currentPage;
+	}
+
+	public void setCurrentPage(Integer currentPage) {
+		this.currentPage = currentPage;
+	}
+	
+	//easyui组件
+	public void setPage(Integer page) {
+		this.currentPage = page;
+	}
+	public void setRows(Integer rows) {
+		this.pageSize = rows;
+	}
+}

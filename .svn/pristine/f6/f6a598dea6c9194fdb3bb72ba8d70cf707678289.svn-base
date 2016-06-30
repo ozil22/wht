@@ -1,0 +1,133 @@
+package com.huashidai.weihuotong.controller;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.huashidai.weihuotong.domain.Employee;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.query.EmployeeQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.service.IEmployeeService;
+import com.huashidai.weihuotong.service.IMenuService;
+import com.huashidai.weihuotong.utils.AjaxResult;
+
+@Controller
+@RequestMapping("/employee")
+public class EmployeeCotroller {
+	
+	@Autowired
+	IEmployeeService employeeService;
+	
+	@Autowired
+	IMenuService menuService;
+	
+	/**
+	 * 在菜单栏中点击用户管理的之后,进入到这个页面的跳转
+	 * @return
+	 */
+	@RequestMapping("/index")
+	public String employee() {
+		return "employee/employee";
+	}
+
+	/**
+	 * 在页面加载完毕以后,向后台发送的一个需要数据的ajax请求,向前台返回一个json对象的数据
+	 * @param req
+	 * @return
+	 */
+	@RequestMapping("/result")
+	@ResponseBody
+	public List<Employee> employeeResult(HttpServletRequest req) {
+		List<Employee> list = employeeService.getAll();
+		return list;
+	}
+	/**
+	 * 高级查询+分页
+	 * @param req
+	 * @return
+	 */
+	@RequestMapping("/query")
+	@ResponseBody
+	public PageResult<Employee> employeeQuery(EmployeeQuery equ) {
+		PageResult<Employee> list = employeeService.empQuery(equ);
+		return list;
+	}
+	/**
+	 * 添加后台账户
+	 * @param User
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping("/save")
+	@ResponseBody
+	public AjaxResult save(Employee employee){
+		// 准备返回对象
+		AjaxResult ar;
+		
+		try{
+			if(employee.getId()==null){
+				// 调用业务逻辑
+				employeeService.save(employee);
+				// 封装返回结果
+				ar = new AjaxResult("账户添加成功！！");
+			}else{
+				// 调用业务逻辑
+				employeeService.update(employee);
+				// 封装返回结果
+				ar = new AjaxResult("账户修改成功！！");
+			}
+			
+		}catch (LogicException e) {
+			// 封装返回结果
+			ar = new AjaxResult("账户保存失败:" + e.getMessage(),e.getErrorCode());
+		}
+		// 返回
+		return ar;
+	}
+	
+	/**
+	 * 在页面加载完毕以后,向后台发送的一个需要数据的ajax请求,向前台返回一个json对象的数据
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping("/delete")
+	@ResponseBody
+	public AjaxResult delete(Long id){
+		AjaxResult ar ;
+		try{
+			employeeService.delete(id);
+
+			ar= new AjaxResult("账户删除成功！！");
+		}catch (LogicException e) {
+			
+			ar= new AjaxResult("账户删除失败:" + e.getMessage(),e.getErrorCode());
+		}
+		return ar;
+	} 
+	
+	/**
+	 * 
+	 * 停用操作
+	 */
+	@RequestMapping("/leave")
+	@ResponseBody
+	public AjaxResult leave(Long id){
+		AjaxResult ar ;
+		try{
+			employeeService.leave(id);
+
+			ar= new AjaxResult("账户停用成功！！");
+		}catch (LogicException e) {
+			
+			ar= new AjaxResult("账户停用失败:" + e.getMessage(),e.getErrorCode());
+		}
+		return ar;
+	} 
+	
+}

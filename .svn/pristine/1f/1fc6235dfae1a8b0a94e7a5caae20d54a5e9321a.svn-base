@@ -1,0 +1,38 @@
+package com.huashidai.weihuotong.domain;
+
+public class UserImage {
+	private Long id;
+	private String src;//图片路径
+	private Integer sort;//图片位置
+	//关联的app用户
+	private User user;
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public String getSrc() {
+		return src;
+	}
+	public void setSrc(String src) {
+		this.src = src;
+	}
+	public Integer getSort() {
+		return sort;
+	}
+	public void setSort(Integer sort) {
+		this.sort = sort;
+	}
+	public User getUser() {
+		return user;
+	}
+	public void setUser(User user) {
+		this.user = user;
+	}
+	@Override
+	public String toString() {
+		return "UserImage [id=" + id + ", src=" + src + ", sort=" + sort
+				+ ", user=" + user + "]";
+	}
+}

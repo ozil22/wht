@@ -1,0 +1,50 @@
+/*
+Navicat MySQL Data Transfer
+
+Source Server         : localhost
+Source Server Version : 50528
+Source Host           : localhost:3306
+Source Database       : wht
+
+Target Server Type    : MYSQL
+Target Server Version : 50528
+File Encoding         : 65001
+
+Date: 2016-05-05 17:12:42
+*/
+
+SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for t_goods
+-- ----------------------------
+DROP TABLE IF EXISTS `t_goods`;
+CREATE TABLE `t_goods` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(120) NOT NULL,
+  `goodsNum` varchar(50) DEFAULT NULL,
+  `details` text NOT NULL,
+  `price` decimal(10,0) DEFAULT NULL,
+  `salePrice` decimal(10,0) NOT NULL,
+  `postage` decimal(10,0) NOT NULL,
+  `state` int(11) DEFAULT NULL,
+  `proxyNum` int(11) DEFAULT NULL,
+  `saleNum` int(11) DEFAULT NULL,
+  `time` datetime NOT NULL,
+  `brand_id` bigint(20) NOT NULL,
+  `type_id` bigint(20) NOT NULL,
+  `store_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of t_goods
+-- ----------------------------
+INSERT INTO `t_goods` VALUES ('1', '2016韩版女夏装新款宽松V领露肩休闲短袖T恤', 'A32133', '详情', '100', '10', '10', '1', '0', '0', '2016-03-01 10:46:25', '1', '1', '1');
+INSERT INTO `t_goods` VALUES ('2', '2016韩版女夏装新款宽松V领露肩休闲短袖T恤', 'A32133', '详情', '100', '10', '10', '1', '0', '0', '2016-03-01 10:46:25', '1', '1', '1');
+INSERT INTO `t_goods` VALUES ('3', '2016韩版女夏装新款宽松V领露肩休闲短袖T恤', 'A32133', '详情', '100', '10', '10', '1', '0', '0', '2016-03-01 10:46:25', '1', '1', '1');
+INSERT INTO `t_goods` VALUES ('4', '2016韩版女夏装新款宽松V领露肩休闲短袖T恤', 'A32133', '详情', '100', '10', '10', '1', '0', '0', '2016-03-01 10:46:25', '1', '1', '1');
+INSERT INTO `t_goods` VALUES ('5', '2016韩版女夏装新款宽松V领露肩休闲短袖T恤', 'A32133', '详情', '100', '10', '10', '1', '0', '0', '2016-03-01 10:46:25', '1', '1', '1');
+INSERT INTO `t_goods` VALUES ('6', '2016韩版女夏装新款宽松V领露肩休闲短袖T恤', 'A32133', '详情', '100', '10', '10', '1', '0', '0', '2016-03-01 10:46:25', '1', '1', '1');
+INSERT INTO `t_goods` VALUES ('7', '2016韩版女夏装新款宽松V领露肩休闲短袖T恤', 'A32133', '详情', '100', '10', '10', '1', '0', '0', '2016-03-01 10:46:25', '1', '1', '1');
+INSERT INTO `t_goods` VALUES ('8', '2016韩版女夏装新款宽松V领露肩休闲短袖T恤', 'A32133', '详情', '100', '10', '10', '1', '0', '0', '2016-03-01 10:46:25', '1', '1', '1');

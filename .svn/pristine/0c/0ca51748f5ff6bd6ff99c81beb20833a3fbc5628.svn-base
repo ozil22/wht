@@ -1,0 +1,235 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+<script type="text/javascript">
+$(function(){
+	//缓存要用到的组件
+	var userSearchbox = $("#userSearchbox");//搜索框
+	var userDataGrid = $("#userDataGrid");//数据表格
+	var user_searchForm = $("#user_searchForm");//参数表单
+	//搜索框
+	userSearchbox.searchbox({
+		prompt:'关键字',
+		searcher:function(){ 
+			var paramObj = {};
+			var paramArr = user_searchForm.serializeArray();
+			 $.each(paramArr,function(i,data){
+				 paramObj[data.name] = data.value;
+			 }); 
+			 userDataGrid.datagrid("load",paramObj);
+		}
+	});
+   //数据表格
+    userDataGrid.datagrid({
+    	fit:true,
+		border:false,
+		url:'user/query',
+		singleSelect:true,
+		fitColumns:true,
+		striped:true,
+		rownumbers:true,
+		pagination:true,
+		pageSize:5,
+		pageList:[5,10,20,50],
+		toolbar:'#user_toolbar'
+	});
+	
+	//创建cmdType管理所有操作函数
+	var cmdEmployee={
+		
+		//停用
+		user_leave:function(){
+			// 1.获取选中行信息
+			var rowData = userDataGrid.datagrid("getSelected");
+			// 2.判断
+			if(!rowData){
+				$.messager.alert("温馨提示","你没有选中任何数据","info");
+				return;
+			}
+			if(rowData.state==0){
+				$.messager.alert("温馨提示","请不要重复停用！！","warning");
+				return;
+			}
+			var name = (rowData.nickname ==false ? rowData.username : rowData.nickname);
+			$.messager.confirm("温馨提示","是否确认停用【"+name+"】账户??",function(yes){
+				if(yes){
+					// 获取数据的唯一标示
+					var id = rowData.id;
+					// 发送AJAX请求，修改ID对应数据状态
+					$.get("/user/leave",{id:id},function(data){
+						console.debug(data);
+						if(data.success){
+							$.messager.alert("温馨提示",data.message,"info",function(){
+								userDataGrid.datagrid("reload");
+							});
+						}
+					},"json");
+				}
+			});
+		},
+		//启用
+		user_leave:function(){
+			// 1.获取选中行信息
+			var rowData = userDataGrid.datagrid("getSelected");
+			// 2.判断
+			if(!rowData){
+				$.messager.alert("温馨提示","你没有选中任何数据","info");
+				return;
+			}
+			if(rowData.state==1){
+				$.messager.alert("温馨提示","请不要重复启用！！","warning");
+				return;
+			}
+			var name = (rowData.nickname ==false ? rowData.username : rowData.nickname);
+			$.messager.confirm("温馨提示","是否确认启用【"+name+"】账户??",function(yes){
+				if(yes){
+					// 获取数据的唯一标示
+					var id = rowData.id;
+					// 发送AJAX请求，修改ID对应数据状态
+					$.get("/user/up",{id:id},function(data){
+						console.debug(data);
+						if(data.success){
+							$.messager.alert("温馨提示",data.message,"info",function(){
+								userDataGrid.datagrid("reload");
+							});
+						}
+					},"json");
+				}
+			});
+		},
+		
+		//删除
+		user_del:function(){
+			// 1.获取选中行信息
+			var rowData = userDataGrid.datagrid("getSelected");
+			console.debug(rowData);
+			// 2.判断
+			if(!rowData){
+				$.messager.alert("温馨提示","你没有选中任何数据","info");
+				return;
+			}
+			//alert(rowData.state);
+			if(rowData.state!=0){
+				$.messager.alert("温馨提示","不能删除未停用账户！！","warning");
+				return;
+			}
+			//提示用户是否删除
+			var name = (rowData.nickname ==false ? rowData.username : rowData.nickname);
+			$.messager.confirm("温馨提示","是否确认删除【"+name+"】账户??",function(yes){
+				if(yes){
+					// 获取数据的唯一标示
+					var id = rowData.id;
+					// 发送AJAX请求，修改ID对应数据状态
+					$.get("/user/delete",{id:id},function(data){
+						console.debug(data);
+						if(data.success){
+							$.messager.alert("温馨提示",data.message,"info",function(){
+								userDataGrid.datagrid("reload");
+							});
+						}
+					},"json");
+				}
+			});
+			
+		},
+		
+		//刷新
+		user_refresh:function(){
+			userDataGrid.datagrid("reload");
+		},	
+		//取消
+		user_cancel:function(){
+			userDialog.dialog("close");
+		}
+	}
+	
+	//对页面上所有按钮做一次统一的监听
+	$("a[data-cmd]").on("click",function(){
+		//获取data-cmd属性的值
+		var cmd = $(this).data("cmd");//data-key="value"其实就是一个{key:value}类型的数据
+		if (cmd) {
+			cmdEmployee[cmd]();//执行对应的方法
+		}
+	});
+});
+</script>
+	<table id="userDataGrid" style="width: 600px;height: 300px;">
+		<!--
+			定义表格的表头 
+		 -->
+		<thead>
+			<tr>
+				<!-- field：指定需要显示列对应JSON数据属性 -->
+				<th field="headImage"  width="20" data-options="formatter:formatFieldImg">头像</th>
+				<th field="username"   width="20">账号</th>
+				<th field="nickname"   width="20">昵称</th>
+				<th field="email"      width="20">邮箱</th>
+				<th field="myCode"   width="20">邀请码</th>
+				<th field="useCode"   width="20">注册码</th>
+				<th field="turnover"   width="20">成交量</th>
+				<th field="amount"   width="20">成交金额</th>
+				<th field="userType"   width="20" data-options="formatter:formatUserType">账户类型</th>
+				<th field="store"   width="20" data-options="formatter:formatObjectName">店铺</th>
+				<th field="state"      width="10" data-options="formatter:formatUserState">状态</th>
+			</tr>
+		</thead>
+	</table>
+	
+	 <div id="user_toolbar">
+	 	<div>
+		 	<form method="post" id="user_searchForm">
+			<a class="easyui-linkbutton" iconCls="icon-add"  data-cmd="user_create">添加</a>
+			<a class="easyui-linkbutton" iconCls="icon-remove" data-cmd="user_del">删除</a>
+			<a class="easyui-linkbutton" iconCls="icon-edit"  data-cmd="user_edit">编辑</a>
+			<a class="easyui-linkbutton" iconCls="icon-redo"  data-cmd="user_leave">启用</a>
+			<a class="easyui-linkbutton" iconCls="icon-undo"  data-cmd="user_leave">停用</a>
+			<a class="easyui-linkbutton" iconCls="icon-reload"  data-cmd="user_refresh">刷新</a>
+		 
+				<select class="easyui-combobox" name="state" style="width: 100px">
+					<option value="-99" ><font color="gray">状态</font></option>
+					<option value="1">正常</option>
+					<option value="0">停用</option>
+				</select> 
+				<select class="easyui-combobox" name="userType" style="width: 100px">
+					<option value="-1" ><font color="gray">类型</font></option>
+					<option value="1">商家</option>
+					<option value="0">代理</option>
+				</select> 
+				<input id="userSearchbox" name="searchKey" style="width: 100px" ></input>
+		 	</form>
+		 </div> 
+	</div>
+	
+	<!-- 新增或编辑表格 -->
+	<div id="userDialog" class="easyui-dialog" style="width: 250px;height: 230px;padding: 20px;"
+		data-options="modal:true,title:'账户编辑',iconCls:'icon-edit',buttons:'#user_bs',closed:true" >
+		<form id="userForm"  method="post">
+			<input type="hidden" name="id">
+			<input type="hidden" name="state">
+			 <div style="margin-top: 0px;">
+			 	账&nbsp;&nbsp;号：<input type="text" name="username"  class="easyui-textbox" data-options="required:true">
+			 </div>
+			 <div style="margin-top: 10px;">
+			 	密&nbsp;&nbsp;码：<input type="text" id="emp_password" name="password"  class="easyui-textbox" data-options="required:true">
+			 </div>
+			 <div style="margin-top: 10px;">
+			 	姓&nbsp;&nbsp;名：<input type="text" name="realName"  class="easyui-textbox" data-options="required:true">
+			 </div>
+			 <div style="margin-top: 10px;">
+			 	角&nbsp;&nbsp;色：<input id="roleCombobox" name="roleArr" >
+			 </div>
+		</form>
+	</div>
+	<div id="user_bs">
+		<a class="easyui-linkbutton" iconCls="icon-save" data-cmd="user_save">保存</a>
+		<a class="easyui-linkbutton" iconCls="icon-cancel"  data-cmd="user_cancel">取消</a>
+	</div>
+	
+</body>
+</html>

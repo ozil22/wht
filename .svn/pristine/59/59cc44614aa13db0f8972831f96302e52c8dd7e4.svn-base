@@ -1,0 +1,62 @@
+package com.huashidai.weihuotong.domain;
+
+/**
+ * 货品(商品的不同规格)
+ * 
+ * @author ozil
+ *
+ */
+public class Product {
+	private Long id;
+	private String specification;// 规格
+	private Integer inventoryNum;// 库存
+	private Long version = 0l;
+	// 商品
+	private Goods goods;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getSpecification() {
+		return specification;
+	}
+
+	public void setSpecification(String specification) {
+		this.specification = specification;
+	}
+
+	public Integer getInventoryNum() {
+		return inventoryNum;
+	}
+
+	public void setInventoryNum(Integer inventoryNum) {
+		this.inventoryNum = inventoryNum;
+	}
+
+	public Goods getGoods() {
+		return goods;
+	}
+
+	public void setGoods(Goods goods) {
+		this.goods = goods;
+	}
+
+	public Long getVersion() {
+		return version;
+	}
+
+	public void setVersion(Long version) {
+		this.version = version;
+	}
+
+	@Override
+	public String toString() {
+		return "Product [id=" + id + ", specification=" + specification
+				+ ", inventoryNum=" + inventoryNum + ", goods=" + goods + "]";
+	}
+}

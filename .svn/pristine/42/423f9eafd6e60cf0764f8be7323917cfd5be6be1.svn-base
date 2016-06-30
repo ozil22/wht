@@ -1,0 +1,98 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+<script type="text/javascript">
+$(function(){
+	//缓存要用到的组件
+	var accountSearchbox = $("#accountSearchbox");//搜索框
+	var accountDataGrid = $("#accountDataGrid");//数据表格
+	var account_searchForm = $("#account_searchForm");//参数表单
+	//搜索框
+	accountSearchbox.searchbox({
+		prompt:'账户名',
+		searcher:function(){ 
+			var paramObj = {};
+			var paramArr = account_searchForm.serializeArray();
+			 $.each(paramArr,function(i,data){
+				 paramObj[data.name] = data.value;
+			 }); 
+			 accountDataGrid.datagrid("load",paramObj);
+		}
+	});
+   //数据表格
+    accountDataGrid.datagrid({
+    	fit:true,
+		border:false,
+		url:'account/query',
+		singleSelect:true,
+		fitColumns:true,
+		striped:true,
+		pagination:true,
+		pageSize:20,
+		pageList:[5,10,20,50],
+		toolbar:'#account_toolbar',
+		view: detailview,    
+	    detailFormatter:function(index,row){    
+	        return '<div id="userAccount-' + index + '" style="padding:5px"></div>';    
+	    },    
+	    onExpandRow: function(index,row){
+	        $('#userAccount-'+index).datagrid({    
+	        	url:'account/accountFlow?accountId='+row.id,  
+	        	fitColumns:true,
+	            loadMsg:'数据加载中,请稍后...',
+	            height:'auto',
+	            rownumbers:true,
+	    		pagination:true,
+	            pageSize:5,
+	    		pageList:[5,10,20,50],
+     			columns:[[  
+     			         {field:'accountActionType',title:'流水类型',formatter:formatFlowType,width:20,align:"center"},  
+                         {field:'amount',title:'金额',width:10,align:"center"},  
+                         {field:'operateTime',title:'时间',formatter:formatDateTime,width:30,align:"center"},  
+                         {field:'note',title:'备注',width:40,align:"center"} 
+                 ]],
+               onResize:function(){
+                	 accountDataGrid.datagrid('fixDetailRowHeight',index);
+					},
+					onLoadSuccess:function(){
+						setTimeout(function(){
+							accountDataGrid.datagrid('fixDetailRowHeight',index);
+						},0);
+				}
+	        }); 
+	        accountDataGrid.datagrid('fixDetailRowHeight',index);
+	    }   
+	});
+	
+});
+</script>
+	<table id="accountDataGrid" style="width: 600px;height: 300px;">
+		<thead>
+			<tr>
+				<!-- field：指定需要显示列对应JSON数据属性 -->
+				<th field="name"   width="20" align="center">账户名</th>
+				<th field="balance"   width="20" align="center">可用余额</th>
+				<th field="freezedAmount"      width="20" align="center">冻结余额</th>
+				<th field="proxyIncome"   width="20" align="center">代理收益</th>
+				<th field="saleIncome"   width="20" align="center">销售收益</th>
+			</tr>
+		</thead>
+	</table>
+	
+	 <div id="account_toolbar">
+	 	<div>
+		 	<form method="post" id="account_searchForm">
+				<input id="accountSearchbox" name="name" style="width: 200px" ></input>
+		 	</form>
+		 </div> 
+	</div>
+	
+	
+</body>
+</html>

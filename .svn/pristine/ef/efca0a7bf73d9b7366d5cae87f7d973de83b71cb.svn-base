@@ -1,0 +1,368 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+   
+<script type="text/javascript">
+$(function(){
+   //1.获取所有需要用到的组件
+   var deptDg,deptDlg,deptFm,deptmanagerComboGird,deptComboTree,deptSearchForm;
+   
+   //2."缓存"页面组件
+   deptDg = $("#dept_dg");
+   deptDlg = $("#dept_dlg");
+   deptFm = $("#dept_fm");
+   
+   deptmanagerComboGird = $("#dept_managerComboGird");
+   deptComboTree = $("#dept_parentDept");
+   deptSearchForm = $("#dept_department-searchForm");
+   
+   console.debug(deptmanagerComboGird);
+   //3.初始化组件
+// 	var gride = deptmanagerComboGird.combogrid('grid');
+// 	var pager = gride.datagrid("getPager");
+// 	pager.pagination({
+// 		 showPageList: false, // 隐藏分页长度选中下拉框
+// 		 showRefresh: false,  // 隐藏刷新按钮
+// 		 displayMsg: ''  // 清除右边的提示消息
+// 	});
+
+	//获取上级部门下拉树的数据
+	deptComboTree.combotree({
+		url:'/dept_getTreeData',
+		method:'get'
+		//,required:true
+	});
+   
+   //4.创建一个cmdF命令对象，来管理所有的操作函数
+   var cmdF = {
+		   //新建
+		   dept_create:function(){
+			   //alert(1);
+			   //1.清空对话框数据
+			   deptFm.form("clear");
+			   //2.修改标题
+			   deptDlg.dialog("setTitle","添加部门信息");
+			   //3.打开对话框
+			   deptDlg.dialog("open");
+		   },
+		   //编辑
+		   dept_edit:function(){
+			   //获取选中的行
+			   var rowData = deptDg.datagrid("getSelected");
+			   if (!rowData) {
+					$.messager.alert("温馨提示","没有选中任何数据","info");
+					return;
+			   }
+			   //清空对话框数据
+			   deptFm.form("clear");
+			   //修改标题
+			   deptDlg.dialog("setTitle","编辑部门信息");
+			   //打开对话框
+			   deptDlg.dialog("open");
+			   //特殊数据处理
+			   // 对象属性的回显兼容
+			   if(rowData.manager){
+					rowData["manager.id"] = rowData.manager.id;
+			   }
+		       if(rowData.parent){
+					rowData["parent.id"] = rowData.parent.id;
+		       }
+			   console.debug(rowData);
+				/*
+				 *  在表单中，回显数据
+				            表单的load遵循同名匹配！！！
+				 */
+			   //回显
+			   deptFm.form("load",rowData);
+		   },
+		   //停用
+		   dept_stop:function(){
+			   //获取选中的行
+			   var rowData = deptDg.datagrid("getSelected");
+			   if (!rowData) {
+					$.messager.alert("温馨提示","没有选中任何数据","info");
+					return;
+			   }
+			   if(rowData.state==-1){
+					$.messager.alert("温馨提示","请不要重复停用！！","warning");
+					return;
+				}
+			   $.messager.confirm("温馨提示","是否确认停用【"+rowData.name+"】部门??",function(yes){
+					if(yes){
+						// 获取数据的唯一标示
+						var id = rowData.id;
+						// 发送AJAX请求，修改ID对应数据状态
+						$.get("/department_stop",{id:id},function(data){
+							console.debug(data);
+							if(data.success){
+								$.messager.alert("温馨提示",data.message,"info",function(){
+									deptDg.datagrid("reload");
+								});
+							}
+						},"json");
+					}
+				});
+		   },
+		   //删除
+		   dept_del:function(){
+			   //获取选中的行
+			   var rowData = deptDg.datagrid("getSelected");
+			   if (!rowData) {
+					$.messager.alert("温馨提示","没有选中任何数据","info");
+					return;
+			   }
+			   if(rowData.state==0){
+					$.messager.alert("温馨提示","不能删除未停用部门！！","warning");
+					return;
+				}
+			   $.messager.confirm("温馨提示","是否确认删除【"+rowData.name+"】部门??",function(yes){
+					if(yes){
+						// 获取数据的唯一标示
+						var id = rowData.id;
+						// 发送AJAX请求，修改ID对应数据状态
+						$.get("/department_delete",{id:id},function(data){
+							console.debug(data);
+							if(data.success){
+								$.messager.alert("温馨提示",data.message,"info",function(){
+									deptDg.datagrid("reload");
+								});
+							}
+						},"json");
+					}
+				});
+		   },
+		   //刷新
+		   dept_refresh:function(){
+			   deptDg.datagrid("reload");
+		   },
+		   //保存
+		   dept_save:function(){
+			   deptFm.form("submit",{
+					url:"/department_save",
+					onSubmit:function(){// 如果在这里写出，会覆盖原始的表单验证方法
+						//return $("#ef").form("validate");
+					},
+					success:function(data){//data只是json字符串，需要手动转 
+						data = $.parseJSON(data);
+						if(data.success){
+							deptDlg.dialog("close");
+							$.messager.alert("温馨提示",data.message,"info",function(){
+								// 刷新表格
+								deptDg.datagrid("load");
+							});
+						}else{
+							$.messager.alert("温馨提示",data.message,"info",function(){
+								if(data.errorCode==-103){
+									// 根据错误码，做响应
+								}
+							});
+						}
+					}
+				});
+		   },
+		   //取消
+		   dept_cancel:function(){
+			   deptDlg.dialog("close");
+		   },
+		   //查询按钮监听
+		   dept_doSearch:function(){
+			   console.debug("doSearch!!");
+			   /*
+				 * 怎么获取json结构数据 ？？？
+				 */
+				 // 获取表单组件
+				 // 在表单组件上获取查询参数
+				// console.debug(deptSearchForm.serializeArray()); 
+				// console.debug(deptSearchForm.serialize());
+			   // 声明一个对象，用来封装form的过滤参数
+				var paramObj = {};
+				 
+				 // 获取form参数数组
+				 var paramArr = deptSearchForm.serializeArray();
+				 // 遍历
+				 $.each(paramArr,function(i,data){
+					 //console.debug(arguments);
+					 paramObj[data.name] = data.value;
+				 }); 
+			   
+				// 使用datagrid去过滤查询
+				deptDg.datagrid("load",paramObj);
+		   },
+		   getAll:function(){
+				// 清除查询表单数据
+				deptSearchForm.form("clear");
+				// 不带参加载数据
+				deptDg.datagrid("load",{});
+		   }
+   };
+   //5.统一对页面所有的按钮,做一次监听
+   $("a[data-cmd]").on("click",function(){
+		 //console.debug($(this));
+		 var cmd = $(this).data("cmd");
+		 if (cmd) {
+			cmdF[cmd]();//cmdF["create"]()
+		}
+   });
+	
+});
+   
+</script>
+<script type="text/javascript">
+	function managerFormatter(value,row,index){
+		//console.debug(arguments);
+		return value?value.realName:"";
+	}
+	function parentFormatter(v,r,i){
+		return v?v.name:"";
+		
+	}
+	function stateFormatter(v,r,i){
+		switch (v) {
+			case -1:
+				return "<font color='red'>停用</font>";
+				break;
+	
+			default:
+				return "<font color='green'>正常</font>";
+				break;
+		}
+	}
+</script>    
+        
+        <table id="dept_dg" class="easyui-datagrid"
+        		data-options="
+					url:'/deptQuery',
+					fit:true,
+					border:false,
+					singleSelect:true,
+					fitColumns:true,
+					striped:true,
+					rownumbers:true,
+					pagination:true,
+					pageSize:5,
+					pageList:[5,10,20,50],
+					toolbar:'#dept_toolbar'
+				"
+        >
+            <thead>
+                <tr>
+                    <th field="sn" width="50">部门编号</th>
+                    <th field="name" width="50">部门名称</th>
+                    <th field="manager" width="50" formatter="managerFormatter">部门经理</th>
+                    <th field="parent" width="50" formatter="parentFormatter">上级部门</th>
+<!--                     <th field="dirPath" width="50">dirPath</th> -->
+                    <th field="state" width="50" formatter="stateFormatter">状态</th>
+                </tr>
+            </thead>
+        </table>
+        <div id="dept_toolbar">
+            <div>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" data-cmd="dept_create">添加</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-cmd="dept_edit">编辑</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut" plain="true" data-cmd="dept_stop">停用</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" data-cmd="dept_del">删除</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-reload" plain="true" data-cmd="dept_refresh">刷新</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-reload" plain="true" data-cmd="getAll">查看所有</a>
+	 		</div>
+	 		<div>
+			 	<form method="post" id="dept_department-searchForm">
+					关键字: <input name="searchKey"  style="width:100px">
+					部门经理:
+					<select id="dept_managerComboGird" name="managerId" class="easyui-combogrid" style="width:155px;" data-options="
+										panelWidth: 420,
+										idField: 'id',
+										textField: 'realName',
+										url: '/empQuery',
+										method: 'get',
+										pagination:true,
+										columns: [[
+											{field:'realName',title:'真实姓名',width:1},
+											{field:'tel',title:'电话号码',width:2},
+											{field:'email',title:'电子邮件',width:2},
+										]],
+										fitColumns: true
+										">
+					</select>
+					状态：
+					 <select name="state" class="easyui-combobox" panelHeight="auto" style="width:80px">
+							<option value="-99">--未选择--</option>
+							<option value="0">正常</option>
+							<option value="-1">停用</option>
+					</select>
+					<a href="#" class="easyui-linkbutton" iconCls="icon-search" data-cmd="dept_doSearch">搜索</a> 
+			 	</form>
+			 </div>
+        </div>
+        <!-- 录入表格 -->
+        <div id="dept_dlg" class="easyui-dialog" style="width:350px;height:280px;padding:10px 20px"
+                closed="true" buttons="#dept_dlg-buttons" modal="true">
+            <form id="dept_fm" method="post" novalidate>
+            	<input type="hidden" name="id"/>
+                <div class="fitem">
+                    <label>部门编号:</label>
+                    <input name="sn" class="easyui-validatebox" required="true">
+                </div>
+                <div class="fitem">
+                    <label>部门名称:</label>
+                    <input name="name" class="easyui-validatebox" required="true">
+                </div>
+                <div class="fitem">
+                    <label>部门经理:</label>
+                    <select name="manager.id" class="easyui-combogrid" style="width:147px" data-options="
+				            panelWidth: 420,
+				            idField: 'id',
+				            textField: 'realName',
+				            url: '/empQuery',
+				            method: 'get',
+				            pagination:true,
+				            columns: [[
+				                {field:'realName',title:'真实姓名',width:1},
+				                {field:'tel',title:'电话',width:2},
+				                {field:'email',title:'邮箱',width:2}
+				            ]],
+				            fitColumns: true
+				        ">
+				    </select>
+                </div>
+                <div class="fitem">
+                    <label>上级部门:</label>
+                    <input id="dept_parentDept" name="parent.id" class="easyui-combotree" style="width:147px;">
+                </div>
+                <!-- <div class="fitem">
+                    <label>dirPath:</label>
+                    <input name="dirPath" class="easyui-validatebox" validType="email">
+                </div> -->
+            </form>
+        </div>
+        <div id="dept_dlg-buttons">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" data-cmd="dept_save">保存</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" data-cmd="dept_cancel">取消</a>
+        </div>
+       
+    <style type="text/css">
+        #dept_fm{
+            margin:0;
+            padding:10px 30px;
+        }
+        .ftitle{
+            font-size:14px;
+            font-weight:bold;
+            padding:5px 0;
+            margin-bottom:10px;
+            border-bottom:1px solid #ccc;
+        }
+        .fitem{
+            margin-bottom:5px;
+        }
+        .fitem label{
+            display:inline-block;
+            width:80px;
+        }
+    </style>
+    </body>
+    </html>

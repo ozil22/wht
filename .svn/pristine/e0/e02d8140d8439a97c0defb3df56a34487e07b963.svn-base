@@ -1,0 +1,107 @@
+package com.huashidai.weihuotong.app;
+
+/**
+ * 商品相关的接口
+ */
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.huashidai.weihuotong.domain.City;
+import com.huashidai.weihuotong.domain.Province;
+import com.huashidai.weihuotong.mapper.CityMapper;
+import com.huashidai.weihuotong.mapper.ProvinceMapper;
+import com.huashidai.weihuotong.utils.AppResult;
+import com.huashidai.weihuotong.utils.RandomUtil;
+import com.huashidai.weihuotong.utils.SMSUtil;
+
+@Controller
+@RequestMapping("/app")
+public class CommonAPP {
+	@Autowired
+	private ProvinceMapper provinceMapper;
+	@Autowired
+	private CityMapper cityMapper;
+
+	/**
+	 * 省份
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/province")
+	@ResponseBody
+	public AppResult province() {
+
+		AppResult appResult = null;
+		try {
+			List<Object> provinces = new ArrayList<>();
+			List<Province> all = provinceMapper.getAll();
+			for (Province p : all) {
+				Map<String, Object> province = new HashMap<String, Object>();
+				province.put("id", p.getId());
+				province.put("name", p.getName());
+				provinces.add(province);
+			}
+			appResult = new AppResult(provinces);
+		} catch (Exception e) {
+			appResult = new AppResult();
+		}
+		return appResult;
+	}
+
+	/**
+	 * 城市
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/city")
+	@ResponseBody
+	public AppResult city(Long provinceId) {
+
+		AppResult appResult = null;
+		try {
+			List<Object> citys = new ArrayList<>();
+			List<City> byProvince = cityMapper.getByProvince(provinceId);
+			for (City c : byProvince) {
+				Map<String, Object> city = new HashMap<String, Object>();
+				city.put("id", c.getId());
+				city.put("name", c.getName());
+				citys.add(city);
+			}
+			appResult = new AppResult(citys);
+		} catch (Exception e) {
+			appResult = new AppResult();
+		}
+		return appResult;
+	}
+
+	/**
+	 * 短信验证码
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/randomCode")
+	@ResponseBody
+	public AppResult randomCode(String phone) {
+		AppResult appResult = null;
+		String templateId = "23425";
+		String randomNum = RandomUtil.randomNum(6);
+		String param = randomNum + ",5";
+		try {
+			SMSUtil.sendSMS(templateId, phone, param);
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put("randomCode", randomNum);
+			appResult = new AppResult(map);
+		} catch (Exception e) {
+			appResult = new AppResult();
+		}
+		return appResult;
+	}
+
+}

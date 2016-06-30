@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.ProxyOrderMapper">
+
+	<insert id="save" parameterType="ProxyOrder" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_proxyOrder(buyTime,orderNum,proxyPrice,productOrderNum,
+					user_id,customer_id,store_id) 
+					values(#{buyTime},#{orderNum},#{proxyPrice},#{productOrderNum},
+					#{user.id},#{customer.id},#{store.id})
+	</insert>
+	<delete id="delete" parameterType="long">
+		delete from t_proxyOrder where id = #{id}
+	</delete>
+	
+	<select id="get" resultType="ProxyOrder" parameterType="long">
+		select *
+		from t_proxyOrder  
+		where id=#{id}
+	</select>
+	
+	
+	<resultMap type="ProxyOrder" id="productOrderMap">
+		<id column="id" property="id"/>
+		<result column="buyTime" property="buyTime"/>
+		<result column="orderNum" property="orderNum"/>
+		<result column="proxyPrice" property="proxyPrice"/>
+		<result column="productOrderNum" property="productOrderNum"/>
+		<association property="user" javaType="User">
+			<id column="uid" property="id"/>
+		</association>
+		<association property="customer" javaType="Customer">
+			<id column="cid" property="id"/>
+		</association>
+		<association property="store" javaType="Store">
+			<id column="sid" property="id"/>
+		</association>
+	</resultMap>
+	<!-- 公共的高级查询条件 -->
+	<sql id="whereSql">
+		<where>
+			<if test="userName!=null and userName!=''">
+				(u.username = #{userName} or u.nickname = #{userName})
+			</if>
+			<if test="storeName!=null and storeName!=''">
+				and s.name = #{storeName})
+			</if>
+			<if test="customerName!=null and customerName!=''">
+				and c.name = #{customerName})
+			</if>
+			<if test="orderNum!=null and orderNum!=''">
+				and p.orderNum = #{orderNum}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="query" resultType="ProxyOrder" parameterType="ProxyOrderQuery">
+		select p.*
+		from t_proxyOrder p 
+		left join t_user u on p.user_id = u.id
+		left join t_store s on p.store_id = s.id
+		left join t_customer c on p.customer_id = c.id
+		<include refid="whereSql"/>
+		order by p.buyTime 
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<select id="queryTotal" resultType="long" parameterType="ProxyOrderQuery">
+		select count(p.id)
+		from t_proxyOrder p 
+		left join t_user u on p.user_id = u.id
+		left join t_store s on p.store_id = s.id
+		left join t_customer c on p.customer_id = c.id
+		<include refid="whereSql"/>
+	</select>
+</mapper>

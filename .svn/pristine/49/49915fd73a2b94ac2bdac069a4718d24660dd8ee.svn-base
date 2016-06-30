@@ -1,0 +1,34 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.City;
+import com.huashidai.weihuotong.mapper.CityMapper;
+import com.huashidai.weihuotong.redis.Cacheable;
+import com.huashidai.weihuotong.service.ICityService;
+
+@Service
+public class CityServiceImpl implements ICityService {
+	@Autowired
+	private CityMapper cityMapper;
+	@Cacheable
+	@Override
+	public City get(Long id) {
+		return cityMapper.get(id);
+	}
+	@Cacheable
+	@Override
+	public List<City> getByProvince(Long provinceId) {
+		return cityMapper.getByProvince(provinceId);
+	}
+	@Cacheable
+	@Override
+	public List<City> getAll() {
+		return cityMapper.getAll();
+	}
+
+
+}

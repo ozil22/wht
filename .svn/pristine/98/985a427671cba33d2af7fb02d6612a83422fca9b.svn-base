@@ -1,0 +1,37 @@
+package com.huashidai.weihuotong.domain;
+
+public class Type {
+	private Long id;
+	private String name;//分类名
+	private String image;//分类图片地址
+	private Type parent;//上级分类
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getImage() {
+		return image;
+	}
+	public void setImage(String image) {
+		this.image = image;
+	}
+	public Type getParent() {
+		return parent;
+	}
+	public void setParent(Type parent) {
+		this.parent = parent;
+	}
+	@Override
+	public String toString() {
+		return "Type [id=" + id + ", name=" + name + ", image=" + image
+				+ ", parent=" + parent + "]";
+	}
+}

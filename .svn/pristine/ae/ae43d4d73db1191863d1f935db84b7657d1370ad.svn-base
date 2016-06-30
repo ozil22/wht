@@ -1,0 +1,89 @@
+package com.huashidai.weihuotong.utils;
+
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
+import java.util.Properties;
+
+import org.junit.Test;
+
+
+/**
+ * 短信
+ * 
+ * @author ozil
+ *
+ */
+public class SMSUtil {
+	private static String url = null;// 请求地址
+	private static String sid = null;// 主账户id
+	private static String appId = null;// 应用id
+	private static String token = null;// 验证信息
+	static {
+		if (url == null) {
+			url = getValue("url");
+		}
+		if (sid == null) {
+			sid = getValue("sid");
+		}
+		if (appId == null) {
+			appId = getValue("appId");
+		}
+		if (token == null) {
+			token = getValue("token");
+		}
+	}
+
+	public static String getValue(String key) {
+		InputStream is = SMSUtil.class.getResourceAsStream("/sms.properties");
+		Properties dbproperties = new Properties();
+		try {
+			dbproperties.load(is);
+			return dbproperties.getProperty(key).toString();
+
+		} catch (Exception e) {
+			System.err.println("不能读取属性文件. "
+					+ "请确保sms.properties在CLASSPATH指定的路径中");
+		}
+		return null;
+	}
+
+	/**
+	 * 发送短信
+	 * 
+	 * @param templateId
+	 *            模板id
+	 * @param to
+	 *            短信接收端手机号码（国内短信不要加前缀，国际短信号码前须带相应的国家区号，如日本：0081）
+	 * @param param
+	 *            内容数据，用于替换模板中{数字}，若有多个替换内容，用英文逗号隔开即可
+	 * @return "resp": {
+	 * 				"respCode": 请求状态码，取值000000（成功）,
+	 * 			    "failure": 表示短信验证码发送失败的条数,
+	 * 				"templateSMS": {
+	 * 					"createDate": 短信的创建时间
+	 *					"smsId": 短信标识符。一个由32个字符组成的短信唯一标识符
+	 *				}
+	 *			}
+	 */
+	public static Map<String, Object> sendSMS(String templateId, String to,
+			String param) {
+		String time = new SimpleDateFormat("yyyyMMddHHmmssSSS")
+				.format(new Date());
+		String sign = MD5Util.md5(sid + time + token);
+		String params = "sid=" + sid + "&appId=" + appId + "&sign=" + sign
+				+ "&time=" + time + "&templateId=" + templateId
+				+ "&to=" + to + "&param=" + param;
+		HttpRequest.sendPost(url, params);
+		//String result = HttpRequest.sendPost(url, params);
+//		Map<String, Object> map = JsonUtil.toMap(result);
+		return null;
+	}
+	
+	@Test
+	public void testName() throws Exception {
+		Map<String, Object> sendSMS = SMSUtil.sendSMS("175264", "13980928652", "123,5");
+		System.out.println(sendSMS);
+	}
+}

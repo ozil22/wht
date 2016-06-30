@@ -1,0 +1,17 @@
+package com.huashidai.weihuotong.service;
+
+import java.util.Map;
+
+
+public interface ISecuredOrderService {
+	/**
+	 * 生成订单号
+	 */
+	Map<String,Object> createOrderNum(Long storeId);
+	/**
+	 * 完成订单后做的操作
+	 * @param promotionOrder
+	 */
+	void completeOrder(Integer amount, Long id,String orderNum);
+	
+}

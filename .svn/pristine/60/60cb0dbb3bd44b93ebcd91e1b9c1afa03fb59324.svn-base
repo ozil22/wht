@@ -1,0 +1,10 @@
+//添加一个吧form表单的参数转换为一个json对象的方法
+$.fn.serializeJson = function() {
+	var paramJson = {};
+	var params = this.serializeArray();
+	$.each(params, function(index, data) {
+		paramJson[data.name] = data.value;
+	});
+	return paramJson;
+}
+

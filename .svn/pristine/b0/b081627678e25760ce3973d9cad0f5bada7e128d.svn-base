@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.SecuredOrderMapper">
+
+	<insert id="save" parameterType="SecuredOrder" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_securedOrder(buyTime,orderNum,totalPrice,payPrice,
+					store_id,totalOrder_id) 
+					values(#{buyTime},#{orderNum},#{totalPrice},#{payPrice},
+					#{store.id},#{totalOrder.id})
+	</insert>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_securedOrder where id = #{id}
+	</delete>
+	
+	<select id="get" resultType="SecuredOrder" parameterType="long">
+		select *
+		from t_securedOrder  
+		where id=#{id}
+	</select>
+	
+	<resultMap type="SecuredOrder" id="securedOrderMap">
+		<id column="id" property="id"/>
+		<result column="buyTime" property="buyTime"/>
+		<result column="orderNum" property="orderNum"/>
+		<result column="totalPrice" property="totalPrice"/>
+		<result column="payPrice" property="payPrice"/>
+		<association property="store" javaType="Store">
+			<id column="uid" property="id"/>
+			<id column="uname" property="name"/>
+		</association>
+	</resultMap>
+	
+	<select id="getByTotalOrderNum" resultMap="securedOrderMap" parameterType="String">
+		select p.*,u.id uid,u..name uname
+		from t_securedOrder  p
+		left join t_totalorder t on p.totalOrder_id = t.id
+		left join t_store u on p.store_id = u.id 
+		where t.orderNum=#{totalOrderNum}
+	</select>
+</mapper>

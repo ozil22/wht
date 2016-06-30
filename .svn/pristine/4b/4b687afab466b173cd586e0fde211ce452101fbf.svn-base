@@ -1,0 +1,42 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.Webpage;
+import com.huashidai.weihuotong.mapper.WebpageMapper;
+import com.huashidai.weihuotong.service.IWebpageService;
+
+@Service
+public class WebpageServiceImpl implements IWebpageService {
+	@Autowired
+	private WebpageMapper webpageMapper;
+	
+	@Override
+	public void save(Webpage webpage) {
+		webpageMapper.save(webpage);
+	}
+
+	@Override
+	public void update(Webpage webpage) {
+		webpageMapper.update(webpage);
+	}
+
+	@Override
+	public void delete(Long id) {
+		webpageMapper.delete(id);
+	}
+
+	@Override
+	public Webpage get(Long id) {
+		return webpageMapper.get(id);
+	}
+
+	@Override
+	public List<Webpage> getAll() {
+		return webpageMapper.getAll();
+	}
+
+}

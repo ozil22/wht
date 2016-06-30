@@ -1,0 +1,156 @@
+$(function() {
+	$(".close").bind("click", function() {
+		$(".login").hide();
+	})
+
+	var appH = $(window).height();
+	var appW = $(window).width();
+
+	$(".chooseaddress").height(appH).width(appW).css("left", appW + "px");
+
+	$(".S_address").height(appH).width(appW).css("left", appW + "px");
+	$(".login-gint").bind("click", function() {
+		var customerId = $("#customerId").val();
+		console.debug(customerId);
+		if (customerId) {
+			console.debug($(".chooseaddress"));
+			$(".chooseaddress").show();
+			$(".chooseaddress").animate({
+				"left" : 0
+			}, "1500");
+		} else {
+			$(".login").show();
+		}
+
+	});
+	$(".headimgl").bind("click", function() {
+		$(".chooseaddress").show();
+		$(".chooseaddress").animate({
+			"left" : appW + "px"
+		}, "1500");
+
+	});
+	$(".btn-addressbtn").bind("click", function() {
+		$(".S_address").show();
+		$(".S_address").animate({
+			"left" : 0
+		}, "1500");
+
+	});
+	$(".headimgll").bind("click", function() {
+		$(".S_address").show();
+		$(".S_address").animate({
+			"left" : appW + "px"
+		}, "1500");
+	});
+
+	$(".z_resuleAddre:eq(0)").change(function() {
+		var thisC = $(".z_resuleAddre:eq(0) option:selected").val();
+		// $.pos("",{"company":thisC},function(data){
+		// if(data.status ==1){
+		var html = "";
+		// for(var i=0;i<data.list.length;i++){
+		// html += '<option
+		// value='+data.list[i].val+'>'++data.list[i].text'</option>';
+		html += '<option value=' + "成都" + '>成都</option>';
+		html += '<option value=' + "绵阳" + '>绵阳</option>';
+		html += '<option value=' + "美姑" + '>美姑</option>';
+		// }
+		$(".z_resuleAddre:eq(1)").html(html);
+		$(".z_resuleAddreHid").attr("value", thisC);
+		// }
+		// })
+	});
+
+	var prov, city, moreAddres;
+	$(".z_addressBoxS").bind(
+			"click",
+			function() {
+				var name = $(".z_resuleName").val();
+				var tel = $(".z_resuleTel").val();
+				var prov = $(".z_resuleAddre:eq(0) option:selected").val();
+				var city = $(".z_resuleAddre:eq(1) option:selected").val();
+				var moreAddres = $(".z_resuleMoreAddre").val();
+				var address = $(".z_resuleAddreHid").val();
+				var addressArr = [];
+				var title = [ "收货人", "手机号", "省", "市", "详细地址" ];
+				var data = {};
+				for ( var i in address.split("&")) {
+					var provSplit = address.split("&")[0];
+					var citySplit = address.split("&")[1];
+					addressArr.push(name, tel, prov, city, moreAddres);
+					for (var j = 0; j < 5; j++) {
+						data[title[j]] = addressArr[j];
+					}
+				}
+				var jasnArr = [];
+				for ( var l in data) {
+					var dataKey = l;
+					if (data[l] == "") {
+						jasnArr.push(l);
+					}
+				}
+				var emptyAddress = jasnArr.join(",");
+				if (emptyAddress) {
+					alert("请输入您的" + emptyAddress);
+				} else {
+					var isTel = /^1[34578]\d{9}$/;
+					if (!isTel.test(tel)) {
+						alert("请输入手机号");
+					} else {
+						$(".btn-address").html(
+								"<p class='address1 textOver_Ellip'>" + prov
+										+ "省" + city + "市" + moreAddres
+										+ "</p>");
+						$(".S_address").animate({
+							"left" : appW + "px"
+						}, "1500");
+					}
+				}
+			});
+
+	function sum() {
+		var lastPrice = Number($(".z_orderInfoBoxRightLastPrice").text()
+				.substring(1));
+		var trafficPay = Number($(".z_trafficPay").text().substring(1));
+		var couponPay = Number($(".z_couponPay").text().substring(1));
+		$(".z_allPay").text("合计:" + (lastPrice + trafficPay - couponPay));
+	}
+
+	// 登陆按钮
+	$("#submitCustomer").bind("click", function() {
+		var username = $(".phone").val();
+		var password = $(".password1").val();
+		if (username == '') {
+			alert('请填写手机号！');
+		} else if (password == '') {
+			alert('请填写密码！');
+		} else {
+			$.post("/proxy/customerLogin", {
+				username : username,
+				password : password
+			}, function(data) {
+				if (data.success) {
+					window.location.reload();
+				} else {
+					alert(data.message);
+				}
+			});
+
+		}
+	});
+	// 发送临时密码
+	$("#postRandomCode").bind("click", function() {
+		var phone = $(".phone").val();
+		if (phone == '') {
+			alert('请填写手机号！');
+		} else {
+			$.post("/proxy/customerRandomCode", {
+				phone : phone,
+			}, function(data) {
+				alert(data.message);
+			});
+			
+		}
+	});
+});

@@ -1,0 +1,134 @@
+package com.huashidai.weihuotong.app;
+
+/**
+ * 广告相关的接口
+ */
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.service.IAdPositionIdService;
+import com.huashidai.weihuotong.service.IGoodsService;
+import com.huashidai.weihuotong.service.IPromotionService;
+import com.huashidai.weihuotong.service.IStoreService;
+import com.huashidai.weihuotong.service.ITypeService;
+import com.huashidai.weihuotong.service.IWebpageService;
+import com.huashidai.weihuotong.utils.AppResult;
+
+@Controller
+@RequestMapping("/app")
+public class PromotionAPP {
+	@Autowired
+	private IPromotionService promotionService;
+	@Autowired
+	private IAdPositionIdService adPositionIdService;
+	@Autowired
+	private ITypeService typeService;
+	@Autowired
+	private IGoodsService goodsService;
+	@Autowired
+	private IStoreService storeService;
+	@Autowired
+	private IWebpageService webpageService;
+
+	/**
+	 * 首页广告
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/promotion")
+	@ResponseBody
+	public AppResult promotion(int page) {
+		AppResult appResult = null;
+		try {
+			Map<String, Object> data = new HashMap<String, Object>();
+			if (page == 1) {
+				// 首页banner图
+				List<Object> banners = promotionService.getBanner(null);
+				data.put("banner", banners);
+			}
+			// 首页广告
+			List<Map<String, Object>> typeAndAd = promotionService
+					.getTypeAndAd(3, page);
+			data.put("promotion", typeAndAd);
+
+			appResult = new AppResult(data);
+		} catch (Exception e) {
+			appResult = new AppResult();
+		}
+		return appResult;
+	}
+
+	/**
+	 * 进入商品分类的广告
+	 * 
+	 * @param goodsTypeId
+	 *            商品分类id
+	 * @return
+	 */
+	@RequestMapping("/promotionOfType")
+	@ResponseBody
+	public AppResult promotionOfType(Long goodsTypeId, int page) {
+		AppResult appResult = null;
+		try {
+			Map<String, Object> data = new HashMap<String, Object>();
+			if (page == 1) {
+				// banner图
+				List<Object> banners = promotionService.getBanner(goodsTypeId);
+				data.put("banner", banners);
+			}
+			// 广告
+			List<Map<String, Object>> typeAndAd = promotionService
+					.getByGoodsType(goodsTypeId, 9, page);
+			data.put("promotion", typeAndAd);
+
+			appResult = new AppResult(data);
+		} catch (Exception e) {
+			appResult = new AppResult();
+		}
+		return appResult;
+	}
+
+	/**
+	 * 点击进入广告
+	 * 
+	 * @param promotionId
+	 *            广告id
+	 * @return
+	 */
+	@RequestMapping("/enterPromotion")
+	@ResponseBody
+	public AppResult enterPromotion(Long promotionId) {
+		AppResult appResult = null;
+		try {
+			Map<String, Object> data = promotionService
+					.enterPromotion(promotionId);
+			appResult = new AppResult(data);
+		} catch (LogicException e) {
+			appResult = new AppResult(e.getMessage(), e.getErrorCode());
+		}
+		return appResult;
+	}
+
+	/**
+	 * 点击广告,返回网页
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/enterWebPage")
+	public ModelAndView enterWebPage(Long promotionId) {
+		String content = promotionService.getContent(promotionId);
+		ModelAndView modelAndView = new ModelAndView();
+		modelAndView.addObject("content", content);
+		modelAndView.setViewName("/app/webpage");
+		return modelAndView;
+	}
+
+}

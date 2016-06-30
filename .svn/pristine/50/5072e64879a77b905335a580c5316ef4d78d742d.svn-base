@@ -1,0 +1,67 @@
+package com.huashidai.weihuotong.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.huashidai.weihuotong.domain.Resource;
+import com.huashidai.weihuotong.service.IResourceService;
+import com.huashidai.weihuotong.utils.AjaxResult;
+
+@Controller
+@RequestMapping("resource")
+public class ResourceController {
+
+	//注入service接口
+	@Autowired
+	IResourceService resourceService;
+	
+	/*
+	 * 显示页面的方法
+	 */
+	@RequestMapping("/index")
+	public String roleList(){
+		
+		return "/resource/resource";
+	}
+	
+	/*
+	 * 显示页面完了以后.通过的jQuery请求到这里来获取数据
+	 */
+	@RequestMapping("/list")
+	@ResponseBody
+	public List<Resource> roleAll(){
+		List<Resource> list = resourceService.getAll();
+		return list;
+	}
+	
+	/*
+	 * 保存操作的持久化操作
+	 * 	有id的就更新
+	 * 	没有id的就添加
+	 */
+	@RequestMapping("/save")
+	@ResponseBody
+	public AjaxResult save(Resource resource){
+		if (resource.getId()==null) {
+			resourceService.save(resource);
+		}else {
+			resourceService.update(resource);
+		}
+		return new AjaxResult();
+	}
+	
+	/*
+	 * 删除用户传入后台的行
+	 */
+	@RequestMapping("/delete")
+	@ResponseBody
+	public AjaxResult delete(Long id){
+		resourceService.delete(id);
+		return new AjaxResult();
+	}
+	
+}

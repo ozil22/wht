@@ -1,0 +1,59 @@
+/*
+Navicat MySQL Data Transfer
+
+Source Server         : localhost
+Source Server Version : 50528
+Source Host           : localhost:3306
+Source Database       : wht
+
+Target Server Type    : MYSQL
+Target Server Version : 50528
+File Encoding         : 65001
+
+Date: 2016-05-05 17:41:26
+*/
+
+SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for t_bannerimage
+-- ----------------------------
+DROP TABLE IF EXISTS `t_bannerimage`;
+CREATE TABLE `t_bannerimage` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `src` varchar(100) NOT NULL,
+  `sort` int(11) DEFAULT NULL,
+  `goods_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of t_bannerimage
+-- ----------------------------
+INSERT INTO `t_bannerimage` VALUES ('1', '/images/bannerImage/20160413-175740.jpg', null, '1');
+INSERT INTO `t_bannerimage` VALUES ('2', '/images/bannerImage/20160413-175740.jpg', null, '2');
+INSERT INTO `t_bannerimage` VALUES ('3', '/images/bannerImage/20160413-175740.jpg', null, '3');
+INSERT INTO `t_bannerimage` VALUES ('4', '/images/bannerImage/20160413-175740.jpg', null, '4');
+INSERT INTO `t_bannerimage` VALUES ('5', '/images/bannerImage/20160413-175740.jpg', null, '5');
+INSERT INTO `t_bannerimage` VALUES ('6', '/images/bannerImage/20160413-175740.jpg', null, '6');
+INSERT INTO `t_bannerimage` VALUES ('7', '/images/bannerImage/20160413-175740.jpg', null, '7');
+INSERT INTO `t_bannerimage` VALUES ('8', '/images/bannerImage/20160413-175740.jpg', null, '8');
+
+-- ----------------------------
+-- Table structure for t_detailsimage
+-- ----------------------------
+DROP TABLE IF EXISTS `t_detailsimage`;
+CREATE TABLE `t_detailsimage` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `src` varchar(100) NOT NULL,
+  `sort` int(11) DEFAULT NULL,
+  `goods_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of t_detailsimage
+-- ----------------------------
+INSERT INTO `t_detailsimage` VALUES ('1', '/images/detailsImage/20160413-175740.jpg', null, '1');
+INSERT INTO `t_detailsimage` VALUES ('2', '/images/detailsImage/20160413-175740.jpg', null, '1');
+INSERT INTO `t_detailsimage` VALUES ('3', '/images/detailsImage/20160413-175740.jpg', null, '1');

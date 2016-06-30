@@ -1,0 +1,34 @@
+package com.huashidai.weihuotong.query;
+
+public class WithdrawQuery extends BaseQuery {
+	/**
+	 * 账户id
+	 */
+	private Long accountId = -1L;
+	/**
+	 * 账户名
+	 */
+	private String name;
+
+	public Long getAccountId() {
+		return accountId;
+	}
+
+	public void setAccountId(Long accountId) {
+		this.accountId = accountId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + accountId + "," + name;
+	}
+
+}

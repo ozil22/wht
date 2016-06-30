@@ -1,0 +1,165 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.huashidai.weihuotong.domain.Article;
+import com.huashidai.weihuotong.domain.ArticleComment;
+import com.huashidai.weihuotong.domain.ArticleImage;
+import com.huashidai.weihuotong.domain.Store;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.mapper.ArticleImageMapper;
+import com.huashidai.weihuotong.mapper.ArticleMapper;
+import com.huashidai.weihuotong.query.ArticleCommentQuery;
+import com.huashidai.weihuotong.query.ArticleQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.redis.CacheEvict;
+import com.huashidai.weihuotong.redis.Cacheable;
+import com.huashidai.weihuotong.service.IArticleCommentService;
+import com.huashidai.weihuotong.service.IArticleService;
+import com.huashidai.weihuotong.utils.FileUtil;
+import com.huashidai.weihuotong.utils.StateCode;
+
+@Service
+public class ArticleServiceImpl implements IArticleService {
+	@Autowired
+	private ArticleMapper articleMapper;
+	@Autowired
+	private IArticleCommentService articleCommentService;
+	@Autowired
+	private ArticleImageMapper articleImageMapper;
+
+	@Cacheable
+	@Override
+	public PageResult<Article> query(ArticleQuery qu) {
+		// 统计查询
+		Long total = articleMapper.queryTotal(qu);
+		// 分页查询
+		List<Article> rows = articleMapper.query(qu);
+		return new PageResult<Article>(rows, qu.getPageSize(),
+				qu.getCurrentPage(), total.intValue());
+	}
+
+	@Cacheable
+	@Override
+	public Map<String, Object> queryMap(ArticleQuery qu) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		PageResult<Article> pageResult = query(qu);
+		map.put("total", pageResult.getTotalPage());
+		ArrayList<Object> articles = new ArrayList<Object>();
+		List<Article> datas = pageResult.getRows();
+		for (Article a : datas) {
+			Map<String, Object> article = new HashMap<String, Object>();
+			article.put("id", a.getId());
+			article.put("name", a.getName());
+			article.put("time", a.getTime());
+			article.put("storeName", a.getStore().getName());
+			article.put("commentNum", a.getCommentNum());
+			articles.add(article);
+		}
+		map.put("articles", articles);
+		return map;
+	}
+
+	@CacheEvict
+	@Override
+	public void addArticle(MultipartFile[] file, Article article)
+			throws IOException {
+		article.setTime(new Date());
+		articleMapper.save(article);
+		for (MultipartFile multipartFile : file) {
+			String src = FileUtil.saveFile(multipartFile, "article");
+			ArticleImage articleImage = new ArticleImage();
+			articleImage.setArticle(article);
+			articleImage.setSrc(src);
+			articleImageMapper.save(articleImage);
+		}
+	}
+
+	@CacheEvict
+	@Override
+	public void removeArticle(Long articleId, Long storeId) {
+		Article article = articleMapper.get(articleId);
+		if (article.getStore().getId() != storeId) {
+			throw new LogicException("只能删除自己的文章！", StateCode.ARTICLE_NOTDELETE);
+		}
+		articleMapper.delete(articleId);
+	}
+
+	@Cacheable(expire=60*10)
+	@Override
+	public Map<String, Object> enterArticle(Long articleId) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		Article article = articleMapper.get(articleId);
+		map.put("id", articleId);
+		map.put("name", article.getName());
+		map.put("content", article.getContent());
+		map.put("commentNum", article.getCommentNum());
+		map.put("time", article.getTime());
+		List<ArticleImage> articleImages = article.getArticleImages();
+		ArrayList<Object> images = new ArrayList<Object>();
+		for (ArticleImage articleImage : articleImages) {
+			images.add(articleImage.getSrc());
+		}
+		map.put("image", images);
+		ArrayList<Object> acs = new ArrayList<Object>();
+		ArticleCommentQuery qu = new ArticleCommentQuery();
+		qu.setArticleId(articleId);
+		qu.setPageSize(2);
+		PageResult<ArticleComment> result = articleCommentService.query(qu);
+		List<ArticleComment> rows = result.getRows();
+		for (ArticleComment articleComment : rows) {
+			Map<String, Object> ac = new HashMap<String, Object>();
+			ac.put("content", articleComment.getContent());
+			ac.put("commentTime", articleComment.getCommentTime());
+			Store store = articleComment.getStore();
+			if (store != null) {
+				ac.put("nickname", articleComment.getStore().getName());
+				ac.put("headImage", articleComment.getStore().getHeadImage());
+			}
+			acs.add(ac);
+		}
+		map.put("articleComments", acs);
+		return map;
+	}
+
+	@CacheEvict
+	@Override
+	public void delete(Long id) {
+		// 删除评论
+		articleCommentService.deleteByArticle(id);
+		// 删除文章
+		articleMapper.delete(id);
+
+	}
+
+	@Cacheable
+	@Override
+	public Article get(Long id) {
+		Article article = articleMapper.get(id);
+		List<ArticleImage> images = articleImageMapper.getByArticle(id);
+		article.setArticleImages(images);
+		return articleMapper.get(id);
+	}
+
+	@CacheEvict
+	@Override
+	public void addCommentNum(int i, Long id) {
+		articleMapper.addCommentNum(i, id);
+	}
+
+	@Cacheable
+	@Override
+	public Long queryTotal(ArticleQuery qu) {
+		return articleMapper.queryTotal(qu);
+	}
+
+}

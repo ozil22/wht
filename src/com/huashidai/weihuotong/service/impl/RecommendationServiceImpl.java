@@ -1,0 +1,43 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.Recommendation;
+import com.huashidai.weihuotong.mapper.RecommendationMapper;
+import com.huashidai.weihuotong.query.BaseQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.redis.CacheEvict;
+import com.huashidai.weihuotong.redis.Cacheable;
+import com.huashidai.weihuotong.service.IRecommendationService;
+
+@Service
+public class RecommendationServiceImpl implements IRecommendationService {
+	@Autowired
+	private RecommendationMapper recommendationMapper;
+
+	@CacheEvict
+	@Override
+	public void save(Recommendation recommendation) {
+		recommendationMapper.save(recommendation);
+	}
+
+	@Cacheable
+	@Override
+	public Recommendation get(Long id) {
+		return recommendationMapper.get(id);
+	}
+
+	@Cacheable
+	@Override
+	public PageResult<Recommendation> query(BaseQuery qu) {
+		// 统计查询
+		Long total = recommendationMapper.queryTotal(qu);
+		// 分页查询
+		List<Recommendation> rows = recommendationMapper.query(qu);
+		return new PageResult<Recommendation>(rows, qu.getPageSize(),
+				qu.getCurrentPage(), total.intValue());
+	}
+}

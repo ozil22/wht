@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+			http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+			http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+			http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+			http://www.springframework.org/schema/task  
+			http://www.springframework.org/schema/task/spring-task-3.1.xsd  ">
+
+
+	<!-- 开启全注解扫描 -->
+	<context:component-scan base-package="com.huashidai.weihuotong"></context:component-scan>
+	<!-- 加载数据库资源文件 -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:db.properties</value>
+			</list>
+		</property>
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+	</bean>
+
+	<!-- 数据库配置数据 -->
+<!-- 	<context:property-placeholder location="classpath:db.properties" /> -->
+	<!-- 配置数据源.datasource -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${driver}" />
+		<property name="url" value="${url}" />
+		<property name="username" value="${user}" />
+		<property name="password" value="${password}" />
+	</bean>
+	<!-- Mybatis核心配置 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 数据库连接配置 -->
+		<property name="dataSource" ref="dataSource" />
+		<!-- 引入mybatis配置 -->
+		<!-- <property name="configLocation" value="classpath:mybatis-config.xml" 
+			/> -->
+		<!-- 类的别名设置 -->
+		<property name="typeAliasesPackage"
+			value="com.huashidai.weihuotong.domain,com.huashidai.weihuotong.query"></property>
+		<!-- -->
+		<property name="mapperLocations"
+			value="classpath:com/huashidai/weihuotong/mapper/*Mapper.xml"></property>
+	</bean>
+
+	<!-- 配置声明式事务 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<!-- 配置切入点 ..*该包下所有资源 .*类下面所有方法 -->
+	<aop:config>
+		<aop:pointcut expression="execution(* com.huashidai.weihuotong.service..*.*(..))"
+			id="pointcutId" />
+		<!-- 关联切入点与事务属性 -->
+		<aop:advisor advice-ref="adviceId" pointcut-ref="pointcutId" />
+	</aop:config>
+	<!-- 配置事物属性 -->
+	<!-- transaction-manager与事物管理器关联,如果是transactionManager可以默认不写 -->
+	<tx:advice id="adviceId" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!--切入点的查询方法不使用事务 -->
+			<tx:method name="get*" read-only="true" propagation="SUPPORTS" />
+			<tx:method name="list*" read-only="true" propagation="SUPPORTS" />
+			<tx:method name="query*" read-only="true" propagation="SUPPORTS" />
+			<tx:method name="find*" read-only="true" propagation="SUPPORTS" />
+			<!-- 切入点的其它所有方法使用事务 -->
+			<tx:method name="*" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- 引入其他配置文件 -->
+	<import resource="classpath:applicationContext-*.xml" />
+
+	<!-- 配置响应的方式 ,解决返回的json数据乱码问题 -->
+	<bean id="stringConverter"
+		class="org.springframework.http.converter.StringHttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>text/plain;charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- json输出的配置 -->
+	<bean id="jsonConverter"
+		class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"></bean>
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<ref bean="stringConverter" />
+				<ref bean="jsonConverter" />
+			</list>
+		</property>
+	</bean>
+	<!-- 配置文件上传下载 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 1024*1024*50 = 52428800 -->
+		<property name="maxUploadSize" value="52428800"></property>
+		<property name="resolveLazily" value="true" />
+	</bean>
+
+	<!-- 配置系统日志 -->
+	<aop:config>
+		<!--配置切入点 -->
+		<aop:pointcut expression="execution(* com.huashidai.weihuotong.service..*.*(..))"
+			id="systemLogPointcut" />
+		<!-- 通知 实际上是定义横切逻辑，就是在连接点上做什么 -->
+		<aop:aspect ref="systemLogUtil">
+			<!-- 配置在切入后执行的方法 -->
+			<aop:after method="writeLog" pointcut-ref="systemLogPointcut" />
+		</aop:aspect>
+	</aop:config>
+
+	<!-- quartz配置 -->
+	<!-- task注解扫描 -->
+	<task:annotation-driven />
+	<context:annotation-config />
+	<bean
+		class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor" />
+	<context:component-scan base-package="com.huashidai.weihuotong.quartz" />
+
+	<!-- redis -->
+	<!-- 启动@AspectJ支持-->
+	<aop:aspectj-autoproxy/>  
+	<!-- 加载redis资源文件 -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:redis.properties</value>
+			</list>
+		</property>
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+	</bean>
+	<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<!-- 最小空闲连接数,默认0 -->
+		<property name="minIdle" value="${redis.minIdle}" />
+		<!-- 最大空闲连接数,默认8 -->
+		<property name="maxIdle" value="${redis.maxIdle}" />
+		<!-- 最大连接数,默认8个 -->
+		<property name="maxTotal" value="${redis.maxTotal}" />
+		<!-- 获取连接时的最大等待毫秒数(如果设置为阻塞时BlockWhenExhausted),如果超时就抛异常, 小于零:阻塞不确定的时间, 
+			默认-1 -->
+		<property name="maxWaitMillis" value="${redis.maxWaitMillis}" />
+	</bean>
+
+	<bean id="jedisConnFactory"
+		class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+		<property name="hostName" value="${redis.host}" />
+		<property name="port" value="${redis.port}" />
+<!-- 		<property name="password" value="${redis.password}" /> -->
+		<property name="usePool" value="true" />
+		<property name="poolConfig" ref="poolConfig" />
+	</bean>
+
+	<!-- redis template definition -->
+	<bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+		<property name="connectionFactory" ref="jedisConnFactory" />
+		<property name="keySerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+		</property>
+		<property name="valueSerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />
+		</property>
+		<property name="hashKeySerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+		</property>
+		<property name="hashValueSerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />
+		</property>
+	</bean>
+</beans>

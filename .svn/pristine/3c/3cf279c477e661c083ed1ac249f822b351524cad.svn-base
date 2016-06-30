@@ -1,0 +1,23 @@
+package com.huashidai.weihuotong.domain;
+
+import java.math.BigDecimal;
+
+import com.huashidai.weihuotong.utils.ConstUtil;
+
+/**
+ * 平台系统账户 
+ * @author Administrator
+ */
+public class SystemAccount{
+	
+	/** 系统账户余额 */
+    private BigDecimal balance  = ConstUtil.ZERO;
+
+	public BigDecimal getBalance() {
+		return balance;
+	}
+
+	public void setBalance(BigDecimal balance) {
+		this.balance = balance;
+	}
+}

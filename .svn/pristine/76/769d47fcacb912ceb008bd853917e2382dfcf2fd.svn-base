@@ -1,0 +1,48 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.Product;
+import com.huashidai.weihuotong.mapper.ProductMapper;
+import com.huashidai.weihuotong.service.IProductService;
+
+@Service
+public class ProductServiceImpl implements IProductService {
+	@Autowired
+	private ProductMapper productMapper;
+
+	@Override
+	public void save(Product product) {
+		productMapper.save(product);
+	}
+
+	@Override
+	public void update(Product product) {
+		productMapper.update(product);
+	}
+
+
+	@Override
+	public void delete(Long id) {
+		productMapper.delete(id);
+	}
+
+	@Override
+	public Product get(Long id) {
+		return productMapper.get(id);
+	}
+
+	@Override
+	public List<Product> getAll() {
+		return productMapper.getAll();
+	}
+
+	@Override
+	public List<Product> getByGoods(Long goodsId) {
+		return productMapper.getByGoods(goodsId);
+	} 
+	
+}

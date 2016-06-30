@@ -1,0 +1,11 @@
+package com.huashidai.weihuotong.mapper;
+
+import com.huashidai.weihuotong.domain.SystemAccount;
+
+public interface SystemAccountMapper {
+
+	void update(SystemAccount systemAccount);
+
+	SystemAccount get();
+
+}

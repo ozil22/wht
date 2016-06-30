@@ -1,0 +1,78 @@
+package com.huashidai.weihuotong.query;
+
+
+public class PromotionQuery extends BaseQuery {
+	private Integer adType = -99;//广告类型
+	private Long goodsTypeId = -1L;//商品类型
+	private Long adPositionId = -1L;//广告位
+	private Long storeId= -1L;//拥有者
+	
+	private Integer state = -99;//状态  -2,未付款,-1未通过,0待审核,1正常
+	private Integer promotionDate = -99;//广告时间状态,ConstUtil
+	public Integer getAdType() {
+		return adType;
+	}
+	public void setAdType(Integer adType) {
+		this.adType = adType;
+	}
+	public Long getGoodsTypeId() {
+		return goodsTypeId;
+	}
+	public void setGoodsTypeId(Long goodsTypeId) {
+		this.goodsTypeId = goodsTypeId;
+	}
+	public Long getAdPositionId() {
+		return adPositionId;
+	}
+	public void setAdPositionId(Long adPositionId) {
+		this.adPositionId = adPositionId;
+	}
+	public Integer getState() {
+		return state;
+	}
+	public void setState(Integer state) {
+		this.state = state;
+	}
+	
+	
+	public Integer getPromotionDate() {
+		return promotionDate;
+	}
+	public void setPromotionDate(Integer promotionDate) {
+		this.promotionDate = promotionDate;
+	}
+	
+	
+	
+	public Long getStoreId() {
+		return storeId;
+	}
+	public void setStoreId(Long storeId) {
+		this.storeId = storeId;
+	}
+	/**
+	 * 
+	 * @param adType 广告类型
+	 * @param goodsTypeId 商品类型
+	 * @param adPositionId 广告位Id
+	 * @param state 广告状态
+	 * @param isCurrent 是否是当前时间
+	 */
+	public PromotionQuery(Integer adType,Long goodsTypeId,Long adPositionId,Integer state,
+			Integer promotionDate) {
+		this.adType = adType;
+		this.goodsTypeId = goodsTypeId;
+		this.adPositionId = adPositionId;
+		this.state = state;
+		this.promotionDate = promotionDate;
+	}
+	public PromotionQuery() {
+	}
+	@Override
+	public String toString() {
+		return super.toString()  + adType + "," + goodsTypeId + "," + adPositionId + ","
+				+ storeId + "," + state + "," + promotionDate;
+	}
+	
+	
+}

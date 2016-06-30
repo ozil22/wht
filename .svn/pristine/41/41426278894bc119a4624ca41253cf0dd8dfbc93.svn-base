@@ -1,0 +1,190 @@
+package com.huashidai.weihuotong.domain;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import com.huashidai.weihuotong.utils.ConstUtil;
+
+/**
+ * APP账户
+ * */
+public class User {
+
+	private Long id;
+	private String username;
+	private String password;
+	private String nickname;
+	private String email;
+	private String headImage;// 头像
+	private Integer state = ConstUtil.USER_NORMAL;// 状态,0异常,无法使用,1正常
+	private Integer userType = ConstUtil.USERTYPE_PROXY;// 账户类型,0代理,1店铺
+	private String myCode;// 我的邀请码
+	private String useCode;// 使用的邀请码
+	private String background;// 背景图
+	private String wechat;// 绑定的微信昵称
+	private String openid;// 微信的授权标识
+
+	private Integer turnover = 0;// 成交量
+	private BigDecimal amount = ConstUtil.ZERO;// 成交金额
+
+	// 展示图片
+	private List<UserImage> userImages;
+	// 关联店铺
+	private Store store;
+
+	public User(Long userId) {
+		this.id = userId;
+	}
+
+	public User() {
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getNickname() {
+		return nickname;
+	}
+
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
+	public String getHeadImage() {
+		return headImage;
+	}
+
+	public void setHeadImage(String headImage) {
+		this.headImage = headImage;
+	}
+
+	public List<UserImage> getUserImages() {
+		return userImages;
+	}
+
+	public void setUserImages(List<UserImage> userImages) {
+		this.userImages = userImages;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public Integer getState() {
+		return state;
+	}
+
+	public void setState(Integer state) {
+		this.state = state;
+	}
+
+	public Integer getUserType() {
+		return userType;
+	}
+
+	public void setUserType(Integer userType) {
+		this.userType = userType;
+	}
+
+	public String getMyCode() {
+		return myCode;
+	}
+
+	public void setMyCode(String myCode) {
+		this.myCode = myCode;
+	}
+
+	public String getUseCode() {
+		return useCode;
+	}
+
+	public void setUseCode(String useCode) {
+		this.useCode = useCode;
+	}
+
+	public String getBackground() {
+		return background;
+	}
+
+	public void setBackground(String background) {
+		this.background = background;
+	}
+
+	public Store getStore() {
+		return store;
+	}
+
+	public void setStore(Store store) {
+		this.store = store;
+	}
+
+	public Integer getTurnover() {
+		return turnover;
+	}
+
+	public void setTurnover(Integer turnover) {
+		this.turnover = turnover;
+	}
+
+	public BigDecimal getAmount() {
+		return amount;
+	}
+
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
+	}
+
+	public String getWechat() {
+		return wechat;
+	}
+
+	public void setWechat(String wechat) {
+		this.wechat = wechat;
+	}
+
+	public String getOpenid() {
+		return openid;
+	}
+
+	public void setOpenid(String openid) {
+		this.openid = openid;
+	}
+
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", username=" + username + ", password="
+				+ password + ", nickname=" + nickname + ", email=" + email
+				+ ", headImage=" + headImage + ", state=" + state
+				+ ", userType=" + userType + ", myCode=" + myCode
+				+ ", useCode=" + useCode + ", background=" + background
+				+ ", wechat=" + wechat + ", openid=" + openid + ", turnover="
+				+ turnover + ", amount=" + amount + ", userImages="
+				+ userImages + ", store=" + store + "]";
+	}
+
+}

@@ -1,0 +1,298 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.huashidai.weihuotong.domain.Account;
+import com.huashidai.weihuotong.domain.Store;
+import com.huashidai.weihuotong.domain.User;
+import com.huashidai.weihuotong.domain.UserImage;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.mapper.UserMapper;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.query.UserQuery;
+import com.huashidai.weihuotong.service.IAccountService;
+import com.huashidai.weihuotong.service.IUserImageService;
+import com.huashidai.weihuotong.service.IUserService;
+import com.huashidai.weihuotong.utils.ConstUtil;
+import com.huashidai.weihuotong.utils.FileUtil;
+import com.huashidai.weihuotong.utils.MD5Util;
+import com.huashidai.weihuotong.utils.RandomUtil;
+import com.huashidai.weihuotong.utils.ReadProperties;
+import com.huashidai.weihuotong.utils.StateCode;
+
+@Service
+public class UserServiceImpl implements IUserService {
+
+	@Autowired
+	private UserMapper userMapper;
+	@Autowired
+	private IUserImageService userImageService;
+	@Autowired
+	private IAccountService accountService;
+
+	@Override
+	public PageResult<User> query(UserQuery qu) {
+		// 统计查询
+		Long total = userMapper.queryTotal(qu);
+		// 分页查询
+		List<User> rows = userMapper.query(qu);
+		return new PageResult<User>(rows, qu.getPageSize(),
+				qu.getCurrentPage(), total.intValue());
+	}
+
+	@Override
+	public User findcheckLogin(String username, String password, String wechat,
+			String openid) {
+		// 加密密码
+		password = MD5Util.MD5(password);
+		User user = userMapper.checkLogin(username);
+		// 检查用户名
+		if (user == null) {
+			throw new LogicException("用户名错误！！", StateCode.USERNAME_ERROR);
+		}
+		// 检查密码
+		if (!user.getPassword().equals(password)) {
+			throw new LogicException("密码错误！！", StateCode.PASSWORD_ERROR);
+		}
+		// 检查状态
+		if (user.getState() != 1) {
+			throw new LogicException("账号状态异常,已停用！！", StateCode.STATE_ERROR);
+		}
+		if (openid != null) {
+			user.setWechat(wechat);
+			user.setOpenid(openid);
+			userMapper.updateWechat(user);
+		}
+		return user;
+	}
+
+	@Override
+	public User checkWechatLogin(String wechat, String openid) {
+		User user = userMapper.getByWechat(openid);
+		// 检查用户名
+		if (user == null) {
+			throw new LogicException("该微信号还未绑定任何账户！！", StateCode.USER_NOWECHAT);
+		}
+		// 检查状态
+		if (user.getState() != 1) {
+			throw new LogicException("账号状态异常,已停用！！", StateCode.STATE_ERROR);
+		}
+		// 判断微信昵称是否更新
+		if (!wechat.equals(user.getWechat())) {
+			user.setWechat(wechat);
+			userMapper.updateWechat(user);
+		}
+		return user;
+	}
+
+	@Override
+	public User register(String username, String password, String useCode,
+			String wechat, String openid) {
+		// 加密密码
+		password = MD5Util.MD5(password);
+		// 检查用户名
+		User user = userMapper.checkLogin(username);
+		if (user != null) {
+			throw new LogicException("用户名已存在！！", StateCode.USERNAME_EXISTING);
+		}
+		// 检查邀请码
+		// List<User> list2 = userMapper.getByCode(useCode);
+		// if (list2 == null || list2.size() == 0 || list2.get(0) == null) {
+		// throw new LogicException("邀请码错误！！", StateCode.CODE_NOTFOUND);
+		// }
+
+		user = new User();
+		user.setUsername(username);
+		user.setNickname(username);
+		user.setPassword(password);
+		user.setMyCode(RandomUtil.randomCode(6));
+		user.setUseCode(useCode);
+		if (openid != null) {
+			user.setWechat(wechat);
+			user.setOpenid(openid);
+		}
+		userMapper.save(user);
+		// 创建对应账户
+		Account account = new Account();
+		account.setUser(user);
+		account.setName(username);
+		accountService.save(account);
+		return user;
+	}
+
+	@Override
+	public User updatePassword(String username, String password,
+			String newPassword) {
+		// 加密密码
+		newPassword = MD5Util.MD5(newPassword);
+		User user = findcheckLogin(username, password, null, null);
+		if (user != null) {
+			user.setPassword(newPassword);
+		}
+		userMapper.update(user);
+		return user;
+	}
+
+	@Override
+	public User forgetPassword(String username, String password) {
+		// 加密密码
+		password = MD5Util.MD5(password);
+		// 检查用户名
+		User user = userMapper.checkLogin(username);
+		if (user == null) {
+			throw new LogicException("用户名不存在！！", StateCode.USERNAME_ERROR);
+		}
+		user.setPassword(password);
+		userMapper.update(user);
+		return user;
+	}
+
+	@Override
+	public void updateBackground(MultipartFile image, Long userId)
+			throws IOException {
+		String src = FileUtil.saveFile(image, "background");
+		User user = userMapper.get(userId);
+		String background = user.getBackground();
+		if (StringUtils.isNotBlank(background)) {
+			FileUtil.deleteFile(background);
+		}
+		user.setBackground(src);
+		userMapper.update(user);
+	}
+
+	@Override
+	public Map<String, Object> getUserInfo(Long userId) {
+		Map<String, Object> userInfo = new HashMap<String, Object>();
+		// 展示图片
+		List<UserImage> userImages = userImageService.getByUser(userId);
+		List<String> images = new ArrayList<String>();
+		for (UserImage userImage : userImages) {
+			images.add(userImage.getSrc());
+		}
+		userInfo.put("images", images);
+		// 用户信息
+		User user = userMapper.get(userId);
+		userInfo.put("background", user.getBackground());
+		userInfo.put("turnover", user.getTurnover());
+		userInfo.put("amount", user.getAmount());
+		userInfo.put("myCode", user.getMyCode());
+		userInfo.put("username", user.getUsername());
+		userInfo.put("wechat", user.getWechat());
+		Store store = user.getStore();
+		if (store == null) {
+			userInfo.put("storeId", -1L);
+		} else if (store.getState() == ConstUtil.STORE_PENDING) {
+			userInfo.put("storeId", 0L);
+		} else {
+			userInfo.put("storeId", store.getId());
+		}
+		userInfo.put("phone", ReadProperties.getPhone());
+		return userInfo;
+	}
+
+	// 停用账户
+	@Override
+	public void leave(Long id) {
+		User user = userMapper.get(id);
+		user.setState(0);
+		userMapper.update(user);
+
+	}
+
+	@Override
+	public void up(Long id) {
+		User user = userMapper.get(id);
+		user.setState(1);
+		userMapper.update(user);
+		;
+	}
+
+	@Override
+	public void delete(Long id) {
+		User user = userMapper.get(id);
+		if (user.getState() != 0) {
+			throw new LogicException("不能删除未停用的账户", StateCode.USER_NOTDELETE);
+		}
+		userMapper.delete(id);
+	}
+
+	@Override
+	public Map<String, Object> userTeam(Long userId,UserQuery qu) {
+		Map<String, Object> team = new HashMap<String, Object>();
+		User us = userMapper.get(userId);
+		Map<String, Object> account = accountService.getMapByUser(userId);
+		team.putAll(account);
+		List<Object> users = new ArrayList<Object>();
+		qu.setUseCode(us.getMyCode());
+		PageResult<User> result = query(qu );
+		team.put("num", result.getTotal());
+		team.put("total", result.getTotalPage());
+		List<User> rows = result.getRows();
+		for (User user : rows) {
+			Map<String, Object> u = new HashMap<String, Object>();
+			u.put("name", user.getNickname());
+			u.put("phone", user.getUsername());
+			u.put("headImage", user.getHeadImage());
+			users.add(u);
+		}
+		team.put("users", users);
+		return team;
+	}
+
+	@Override
+	public User getByStore(Long id) {
+		return userMapper.getByStore(id);
+	}
+
+	@Override
+	public User get(Long id) {
+		return userMapper.get(id);
+	}
+
+	@Override
+	public User getByCode(String useCode) {
+		return userMapper.getByCode(useCode);
+	}
+
+	@Override
+	public void update(User user) {
+		userMapper.update(user);
+	}
+	@Override
+	public void updateStore(Long userId,Long storeId, int userType) {
+		userMapper.updateStore(userId,storeId,userType);
+	}
+
+	@Override
+	public void removeWechat(String username, String password) {
+		// 加密密码
+		password = MD5Util.MD5(password);
+		User user = userMapper.checkLogin(username);
+		// 检查用户名
+		if (user == null) {
+			throw new LogicException("用户名错误！！", StateCode.USERNAME_ERROR);
+		}
+		// 检查密码
+		if (!user.getPassword().equals(password)) {
+			throw new LogicException("密码错误！！", StateCode.PASSWORD_ERROR);
+		}
+		user.setWechat(null);
+		user.setOpenid(null);
+		userMapper.updateWechat(user);
+	}
+
+	@Override
+	public void updateHeadImage(Long storeId, String src) {
+		userMapper.updateHeadImage(storeId,src);
+	}
+
+}

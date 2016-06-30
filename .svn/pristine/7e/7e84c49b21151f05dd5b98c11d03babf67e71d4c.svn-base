@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.huashidai.weihuotong.mapper.ArticleImageMapper"> 
+	
+	<insert id="save" parameterType="ArticleImage" useGeneratedKeys="true" keyProperty="id">
+	 	insert into t_articleImage(src,article_id)
+		values(#{src},#{article.id}) 
+	</insert>
+	
+	
+	<update id="update" parameterType="ArticleImage">
+		update t_articleImage set 
+			src=#{src},
+			article_id=#{article.id},
+ 			where id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_articleImage
+		where id=#{id}
+	</delete>
+	
+	<select id="get" resultType="ArticleImage" parameterType="long">
+		 select * from t_articleImage
+		where id=#{id}
+	</select>
+	
+	<select id="getByArticle" resultType="ArticleImage" parameterType="long">
+		 select * from t_articleImage
+		where article_id=#{articleId}
+	</select>
+	<select id="deleteByArticle" parameterType="long">
+		delete from t_articleImage
+		where article_id=#{articleId}
+	</select>
+	
+	
+</mapper> 

@@ -1,0 +1,42 @@
+package com.huashidai.weihuotong.query;
+
+
+
+public class UserQuery extends BaseQuery{
+	private String userName;
+	private Integer state = -99;
+	private Integer userType = -1;
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	
+	
+
+	public Integer getState() {
+		return state;
+	}
+
+	public void setState(Integer state) {
+		this.state = state;
+	}
+
+	public Integer getUserType() {
+		return userType;
+	}
+
+	public void setUserType(Integer userType) {
+		this.userType = userType;
+	}
+
+	@Override
+	public String toString() {
+		return "UserQuery [userName=" + userName + ", state=" + state
+				+ ", userType=" + userType + "]";
+	}
+
+}

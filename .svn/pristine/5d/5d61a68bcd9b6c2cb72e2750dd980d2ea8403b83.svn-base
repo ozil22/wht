@@ -1,0 +1,136 @@
+package com.huashidai.weihuotong.redis;
+
+import java.lang.annotation.Annotation;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ListOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.stereotype.Component;
+
+import com.huashidai.weihuotong.redis.CacheEvict.ExpressionMode;
+import com.huashidai.weihuotong.redis.Cacheable.KeyMode;
+
+/**
+ * AOP拦截器的处理类,用于拦截加了@Cacheable的方法
+ * 
+ * @author ozil
+ *
+ */
+@Aspect
+@Component
+public class CacheableAOP {
+	@Autowired
+	private RedisTemplate<String, Object> redisTemplate;
+
+	@Around("@annotation(cache)")
+	public Object cached(final ProceedingJoinPoint pjp, Cacheable cache)
+			throws Throwable {
+		System.out
+				.println("=====================================================================");
+		System.out.println("获取缓存");
+		System.out
+				.println("=====================================================================");
+		String key = getCacheKey(pjp, cache);
+		ValueOperations<String, Object> valueOper = redisTemplate.opsForValue();
+		Object value = valueOper.get(key); // 从缓存获取数据
+		if (value != null)
+			return value; // 如果有数据,则直接返回
+
+		value = pjp.proceed(); // 跳过缓存,到后端查询数据
+		if (cache.expire() <= 0) { // 如果没有设置过期时间,则无限期缓存
+			valueOper.set(key, value);
+		} else { // 否则设置缓存时间
+			valueOper.set(key, value, cache.expire(), TimeUnit.SECONDS);
+		}
+		return value;
+	}
+	@Around("@annotation(evict)")
+	public void evicted(final ProceedingJoinPoint pjp, CacheEvict evict)
+			throws Throwable {
+		System.out.println("======================================================");
+		System.out.println("清除缓存");
+		System.out.println("======================================================");
+		String evictExpression = getEvictExpression(pjp, evict);
+		System.out.println(evictExpression+"==================================");
+		 Set<String> keys = redisTemplate.keys(evictExpression);  
+		 System.out.println(keys.size());
+		 redisTemplate.delete("com.huashidai.weihuotong.service.IArticleTypeService.getAll");  
+	       if (!keys.isEmpty()) {  
+	    	   System.out.println("--------------------------------------------------");
+	    	   redisTemplate.delete(keys);  
+	    	   for (String string : keys) {
+				System.out.println(string+"++++++++++++++++++++++++++++++++");
+			}
+	       }  
+	}
+
+	/**
+	 * 获取缓存的key值
+	 * 
+	 * @param pjp
+	 * @param cache
+	 * @return
+	 */
+	private String getCacheKey(ProceedingJoinPoint pjp, Cacheable cache) {
+
+		StringBuilder buf = new StringBuilder();
+		buf.append(pjp.getSignature().getDeclaringTypeName()).append(".")
+				.append(pjp.getSignature().getName());
+		if (cache.key().length() > 0) {
+			buf.append(".").append(cache.key());
+		}
+
+		Object[] args = pjp.getArgs();
+		if (cache.keyMode() == KeyMode.DEFAULT) {
+			Annotation[][] pas = ((MethodSignature) pjp.getSignature())
+					.getMethod().getParameterAnnotations();
+			for (int i = 0; i < pas.length; i++) {
+				for (Annotation an : pas[i]) {
+					if (an instanceof CacheKey) {
+						buf.append(".").append(args[i].toString());
+						break;
+					}
+				}
+			}
+		} else if (cache.keyMode() == KeyMode.BASIC) {
+			for (Object arg : args) {
+				if (arg instanceof String) {
+					buf.append(".").append(arg);
+				} else if (arg instanceof Integer || arg instanceof Long
+						|| arg instanceof Short) {
+					buf.append(".").append(arg.toString());
+				} else if (arg instanceof Boolean) {
+					buf.append(".").append(arg.toString());
+				}
+			}
+		} else if (cache.keyMode() == KeyMode.ALL) {
+			for (Object arg : args) {
+				buf.append(".").append(arg.toString());
+			}
+		}
+
+		return buf.toString();
+	}
+	/**
+	 * 获取要清除缓存的表达式
+	 * 
+	 * @param pjp
+	 * @param cache
+	 * @return
+	 */
+	private String getEvictExpression(ProceedingJoinPoint pjp, CacheEvict evict) {
+		StringBuilder buf = new StringBuilder();
+		buf.append(pjp.getSignature().getDeclaringTypeName());
+		if (evict.expressionMode() == ExpressionMode.ALL) {
+			//不操作............
+		}
+		return buf.toString();
+	}
+}

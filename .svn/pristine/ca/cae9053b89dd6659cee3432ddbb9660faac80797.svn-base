@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.TypeMapper">
+
+	<insert id="save" parameterType="Type" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_type(name,image,pinYin,parent_id) 
+					values(#{name},#{image},#{pinYin},#{parent.id})
+	</insert>
+	
+	<update id="update" parameterType="Type">
+		update t_type set 
+		name=#{name},
+		image=#{image},
+		pinYin=#{pinYin}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_type where id = #{id}
+	</delete>
+	
+	<select id="get" resultType="Type">
+		select * from t_type
+		where id=#{id}
+	</select>
+	
+	<select id="getAll" resultType="Type">
+		select * from t_type
+		order by t.pinYin
+	</select>
+	<select id="getByParent" resultType="Type" parameterType="long">
+		select * from t_type
+		<if test="_parameter != null">
+			where parent_id=#{_parameter}
+		</if>
+		<if test="_parameter == null">
+			where parent_id is null
+		</if>
+		order by pinYin
+	</select>
+	
+	<sql id="whereSql">
+		<if test="parentId == null">
+			where t.parent_id is null
+		</if>
+		<if test="parentId != null">
+			where t.parent_id=#{parentId}
+		</if>
+	</sql>
+	
+	<select id="query" resultType="Type" parameterType="TypeQuery">
+		select * 
+		from t_type t
+		<include refid="whereSql"/>
+		order by t.pinYin
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+		<select id="queryTotal" resultType="long" parameterType="TypeQuery">
+		select count(t.id)
+		from t_type t
+		<include refid="whereSql"/>
+	</select>
+	
+</mapper>

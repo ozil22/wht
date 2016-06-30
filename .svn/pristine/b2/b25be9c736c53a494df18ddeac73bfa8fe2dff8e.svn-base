@@ -1,0 +1,214 @@
+package com.huashidai.weihuotong.pay;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.huashidai.weihuotong.domain.Account;
+import com.huashidai.weihuotong.domain.ProductOrder;
+import com.huashidai.weihuotong.domain.PromotionOrder;
+import com.huashidai.weihuotong.domain.Store;
+import com.huashidai.weihuotong.domain.SystemAccount;
+import com.huashidai.weihuotong.domain.User;
+import com.huashidai.weihuotong.domain.paramList.ProductOrderItemList;
+import com.huashidai.weihuotong.service.IAccountService;
+import com.huashidai.weihuotong.service.IMarginOrderService;
+import com.huashidai.weihuotong.service.IProductOrderService;
+import com.huashidai.weihuotong.service.IPromotionOrderService;
+import com.huashidai.weihuotong.service.ISystemAccountFlowService;
+import com.huashidai.weihuotong.service.ISystemAccountService;
+import com.huashidai.weihuotong.utils.AppResult;
+import com.huashidai.weihuotong.utils.ConstUtil;
+import com.huashidai.weihuotong.utils.OrderNumUtil;
+import com.huashidai.weihuotong.utils.UserContext;
+import com.pingplusplus.Pingpp;
+import com.pingplusplus.model.Charge;
+
+@Controller
+@RequestMapping("/pay")
+public class PayController {
+	private String apiKey = "sk_live_mDunr1z9yffHGOOCuLmHaj9K";
+	private String appId = "app_m5OuvHGmT4uLOKqD";
+
+	@Autowired
+	private IProductOrderService productOrderService;
+	@Autowired
+	private IPromotionOrderService promotionOrderService;
+	@Autowired
+	private IMarginOrderService marginOrderService;
+	@Autowired
+	private ISystemAccountService systemAccountService;
+	@Autowired
+	private ISystemAccountFlowService systemAccountFlowService;
+	@Autowired
+	private IAccountService accountService;
+
+	/**
+	 * 创建charge对象(app端)
+	 * 
+	 * @param chargeParam
+	 * @param appId
+	 * @param apiKey
+	 * @param items
+	 * @param userId
+	 * @return
+	 */
+	@RequestMapping("/appPay")
+	@ResponseBody
+	public AppResult appPay(ChargeParam chargeParam) {
+		AppResult appResult = null;
+		try {
+			Pingpp.apiKey = apiKey;
+			Map<String, Object> chargeParams = new HashMap<String, Object>();
+			Map<String, String> app = new HashMap<String, String>();
+			app.put("id", appId);
+			chargeParams.put("app", app);
+			chargeParams.put("order_no", chargeParam.getOrder_no());
+			chargeParams.put("amount", chargeParam.getAmount());
+			chargeParams.put("channel", chargeParam.getChannel());
+			chargeParams.put("currency", chargeParam.getCurrency());
+			chargeParams.put("client_ip", UserContext.getIP());
+			chargeParams.put("subject", chargeParam.getSubject());
+			chargeParams.put("body", chargeParam.getBody());
+
+			Charge charge = Charge.create(chargeParams);
+			appResult = new AppResult(charge);
+		} catch (Exception e) {
+			e.printStackTrace();
+			appResult = new AppResult();
+		}
+		return appResult;
+	}
+
+	/**
+	 * 创建charge对象(手机网页端)
+	 * 
+	 * @param chargeParam
+	 * @param appId
+	 * @param apiKey
+	 * @param items
+	 * @param userId
+	 * @param customerId
+	 * @param proxyGoodsId
+	 * @param addressId
+	 * @return
+	 */
+	@RequestMapping("/webPay")
+	@ResponseBody
+	public AppResult webPay(ChargeParam chargeParam,
+			ProductOrderItemList items, Long customerId, Long proxyGoodsId,
+			Long addressId) {
+		AppResult appResult = null;
+		try {
+			Map<String, Object> order = productOrderService.submitOrder(items,
+					null, addressId, customerId, proxyGoodsId);
+			Pingpp.apiKey = apiKey;
+			Map<String, Object> chargeParams = new HashMap<String, Object>();
+			Map<String, String> app = new HashMap<String, String>();
+			app.put("id", appId);
+			chargeParams.put("app", app);
+			chargeParams.put("order_no", order.get("orderNum"));
+//			chargeParams.put("amount", order.get("payPrice"));
+			chargeParams.put("amount", 1);
+			chargeParams.put("currency", chargeParam.getCurrency());
+			chargeParams.put("client_ip", chargeParam.getClient_ip());
+			chargeParams.put("subject", chargeParam.getSubject());
+			chargeParams.put("body", chargeParam.getBody());
+			String channel = chargeParam.getChannel();
+			chargeParams.put("channel", chargeParam.getChannel());
+			Map<String, String> extra = new HashMap<String, String>();
+			if ("alipay_wap".equals(channel)) {
+				extra.put("success_url", chargeParam.getSuccess_url());
+				extra.put("cancel_url", chargeParam.getCancel_url());
+				chargeParams.put("extra", extra);
+			}else if ("wx_pub".equals(channel)) {
+				extra.put("open_id", "app_m5OuvHGmT4uLOKqD");
+				chargeParams.put("extra", extra);
+			}
+			
+			Charge charge = Charge.create(chargeParams);
+			appResult = new AppResult(charge);
+		} catch (Exception e) {
+			e.printStackTrace();
+			appResult = new AppResult();
+		}
+		return appResult;
+	}
+
+	/**
+	 * 支付成功回调方法
+	 * 
+	 * @param charge
+	 * @throws IOException
+	 */
+	@RequestMapping("/callBack")
+	@ResponseBody
+	public void callBack() throws IOException {
+		// 获取头部所有信息
+		HttpServletRequest request = UserContext.getRequest();
+		request.setCharacterEncoding("UTF8");
+		// 获得 http body 内容
+		BufferedReader reader = request.getReader();
+		StringBuffer buffer = new StringBuffer();
+		String string;
+		while ((string = reader.readLine()) != null) {
+			buffer.append(string);
+		}
+		JsonUtil p = new JsonUtil();
+		HashMap<String, Object> map = p.toMap(buffer.toString());
+		HashMap<String, Object> data = p.toMap(map.get("data").toString());
+		HashMap<String, Object> charge = p.toMap(data.get("object").toString());
+		String orderNo = charge.get("order_no").toString();//订单号
+		String amount = charge.get("amount").toString();//金额
+		BigDecimal price = new BigDecimal(amount);
+		//商品订单
+		if (OrderNumUtil.getOrderType(orderNo).equals(OrderNumUtil.TOTAL_PRE)) {
+			List<ProductOrder> orders = productOrderService
+					.getByTotalOrderNum(orderNo);
+			for (ProductOrder productOrder : orders) {
+				productOrderService.updateState(productOrder.getId(),
+						ConstUtil.ORDER_WAIT_POST);
+				User user = productOrder.getUser();
+				Account account = accountService.getByUser(user.getId());
+				SystemAccount systemAccount = systemAccountService.update(price);
+				systemAccountFlowService.createSystemAccountFlow(ConstUtil.SYSTEMACCOUNT_ACTIONTYPE_SALE, price, systemAccount, "商品销售", account);
+			}
+		} else if (OrderNumUtil.getOrderType(orderNo).equals(
+				OrderNumUtil.PRODUCT_PRE)) {
+			ProductOrder order = productOrderService.getByOrderNum(orderNo);
+			if (order != null) {
+				productOrderService.updateState(order.getId(),
+						ConstUtil.ORDER_WAIT_POST);
+				User user = order.getUser();
+				Account account = accountService.getByUser(user.getId());
+				SystemAccount systemAccount = systemAccountService.update(price);
+				systemAccountFlowService.createSystemAccountFlow(ConstUtil.SYSTEMACCOUNT_ACTIONTYPE_SALE, price, systemAccount, "", account);
+			}
+			//广告订单
+		} else if (OrderNumUtil.getOrderType(orderNo).equals(
+				OrderNumUtil.PROMOTION_PRE)) {
+			PromotionOrder order = promotionOrderService.getByOrderNum(orderNo);
+			if (order != null) {
+				promotionOrderService.completeOrder(order);
+				Store store = order.getStore();
+				Account account = accountService.getByStore(store.getId());
+				SystemAccount systemAccount = systemAccountService.update(price);
+				systemAccountFlowService.createSystemAccountFlow(ConstUtil.SYSTEMACCOUNT_ACTIONTYPE_PROMOTION, price, systemAccount, "", account);
+			}
+		} else if (OrderNumUtil.getOrderType(orderNo).equals(
+				OrderNumUtil.MARGIN_PRE)) {
+			marginOrderService.completeOrder(price,
+					OrderNumUtil.getId(orderNo), orderNo);
+		}
+	}
+}

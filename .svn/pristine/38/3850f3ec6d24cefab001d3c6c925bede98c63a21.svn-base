@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.PromotionOrderMapper">
+
+	<insert id="save" parameterType="PromotionOrder" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_promotionOrder(buyTime,orderNum,state,totalPrice,payPrice,
+					user_id,promotion_id) 
+					values(#{buyTime},#{orderNum},#{state},#{totalPrice},#{payPrice},
+					#{user.id},#{promotion.id})
+	</insert>
+	<!-- 修改状态 -->
+	<update id="updateState" parameterType="PromotionOrder">
+		update t_promotionOrder set 
+		state=#{state}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_promotionOrder where id = #{id}
+	</delete>
+	
+	<select id="get" resultType="PromotionOrder" parameterType="long">
+		select *
+		from t_promotionOrder  
+		where id=#{id}
+	</select>
+	<select id="getByOrderNum" resultType="PromotionOrder" parameterType="string">
+		select *
+		from t_promotionOrder  
+		where orderNum=#{orderNum}
+	</select>
+	
+	<resultMap type="PromotionOrder" id="promotionOrderMap">
+		<id column="id" property="id"/>
+		<result column="buyTime" property="buyTime"/>
+		<result column="orderNum" property="orderNum"/>
+		<result column="state" property="state"/>
+		<result column="totalPrice" property="totalPrice"/>
+		<result column="payPrice" property="payPrice"/>
+		<association property="user" javaType="User">
+			<id column="uid" property="id"/>
+			<id column="uusername" property="username"/>
+		</association>
+		<association property="promotion" javaType="Promotion">
+			<id column="ptid" property="id"/>
+		</association>
+	</resultMap>
+	
+</mapper>

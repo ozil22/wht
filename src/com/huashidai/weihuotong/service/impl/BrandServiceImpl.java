@@ -1,0 +1,101 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.huashidai.weihuotong.domain.Brand;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.mapper.BrandMapper;
+import com.huashidai.weihuotong.query.BaseQuery;
+import com.huashidai.weihuotong.query.GoodsQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.redis.CacheEvict;
+import com.huashidai.weihuotong.redis.Cacheable;
+import com.huashidai.weihuotong.service.IBrandService;
+import com.huashidai.weihuotong.service.IGoodsService;
+import com.huashidai.weihuotong.utils.FileUtil;
+import com.huashidai.weihuotong.utils.PinYinUtil;
+import com.huashidai.weihuotong.utils.StateCode;
+
+@Service
+public class BrandServiceImpl implements IBrandService {
+	@Autowired
+	private BrandMapper brandMapper;
+	@Autowired
+	private IGoodsService goodsService;
+
+	@CacheEvict
+	@Override
+	public void save(MultipartFile image, Brand brand) throws IOException {
+		if (image != null && !image.isEmpty()) {
+			String src = FileUtil.saveFile(image, "brandImage");
+			brand.setImage(src);
+		}
+		brand.setPinYin(PinYinUtil.getPinYinHeadChar(brand.getName()));
+		brandMapper.save(brand);
+	}
+
+	@CacheEvict
+	@Override
+	public void update(MultipartFile image, Brand brand) throws IOException {
+		if (image != null && !image.isEmpty()) {
+			String src = FileUtil.saveFile(image, "brandImage");
+			FileUtil.deleteFile(brand.getImage());
+			brand.setImage(src);
+		}
+		brand.setPinYin(PinYinUtil.getPinYinHeadChar(brand.getName()));
+		brandMapper.update(brand);
+	}
+
+	@CacheEvict
+	@Override
+	public void delete(Long id) {
+		GoodsQuery qu = new GoodsQuery();
+		qu.setBrandId(id);
+		Long total = goodsService.queryTotal(qu);
+		if (total != null && total > 0) {
+			throw new LogicException("删除失败,还有该品牌的商品未删除!",
+					StateCode.BRAND_NOTDELETE);
+		}
+		// 删除图片
+		Brand brand = brandMapper.get(id);
+		FileUtil.deleteFile(brand.getImage());
+		brandMapper.delete(id);
+	}
+
+	@Cacheable
+	@Override
+	public PageResult<Brand> query(BaseQuery qu) {
+		// 统计查询
+		Long total = brandMapper.queryTotal(qu);
+		// 分页查询
+		List<Brand> rows = brandMapper.query(qu);
+		return new PageResult<Brand>(rows, qu.getPageSize(),
+				qu.getCurrentPage(), total.intValue());
+	}
+
+	@Cacheable
+	@Override
+	public List<Object> getAll() {
+		ArrayList<Object> list = new ArrayList<Object>();
+		BaseQuery qu = new BaseQuery();
+		qu.setPageSize(-1);// 设置不分页
+		List<Brand> rows = brandMapper.query(qu);
+		for (Brand brand : rows) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("id", brand.getId());
+			map.put("name", brand.getName());
+			map.put("pinYin", brand.getPinYin());
+			list.add(map);
+		}
+		return list;
+	}
+
+}

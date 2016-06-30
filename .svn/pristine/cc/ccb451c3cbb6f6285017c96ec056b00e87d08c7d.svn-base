@@ -1,0 +1,152 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.huashidai.weihuotong.domain.Store;
+import com.huashidai.weihuotong.domain.User;
+import com.huashidai.weihuotong.domain.UserImage;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.mapper.StoreMapper;
+import com.huashidai.weihuotong.mapper.UserImageMapper;
+import com.huashidai.weihuotong.mapper.UserMapper;
+import com.huashidai.weihuotong.query.GoodsQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.query.StoreQuery;
+import com.huashidai.weihuotong.service.IGoodsService;
+import com.huashidai.weihuotong.service.IStoreService;
+import com.huashidai.weihuotong.utils.FileUtil;
+import com.huashidai.weihuotong.utils.StateCode;
+
+@Service
+public class StoreServiceImpl implements IStoreService {
+	@Autowired
+	private StoreMapper storeMapper;
+	@Autowired
+	private UserMapper userMapper;
+	@Autowired
+	private UserImageMapper userImageMapper;
+	@Autowired
+	private IGoodsService goodsService;
+
+
+	@Override
+	public List<Store> getAll() {
+		return storeMapper.getAll();
+	}
+	
+	@Override
+	public PageResult<Store> query(StoreQuery qu) {
+		PageResult<Store> pr = new PageResult<Store>();
+		// 统计查询
+		Long total = storeMapper.queryTotal(qu);
+		pr.setTotal(total.intValue());
+		// 分页查询
+		List<Store> rows = storeMapper.query(qu);
+		pr.setRows(rows);
+		// 页数
+		pr.setPage(qu.getCurrentPage());
+		pr.setSize(qu.getPageSize());
+		return pr;
+	}
+
+	@Override
+	public Map<String, Object> enterStore(GoodsQuery goodsQuery) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		Long storeId = goodsQuery.getStoreId();
+		Store store = storeMapper.get(storeId);
+		if (store == null) {
+			throw new LogicException("店铺不存在！！", StateCode.STRORE_NOTFOUND);
+		}
+		User user = userMapper.getByStore(storeId);
+		// 店铺用户图片
+		ArrayList<Object> images = new ArrayList<Object>();
+		List<UserImage> userImages = userImageMapper.getByUser(user.getId());
+		for (UserImage userImage : userImages) {
+			Map<String, Object> image = new HashMap<String, Object>();
+			image.put("src", userImage.getSrc());
+			image.put("id", userImage.getId());
+			images.add(image);
+		}
+		map.put("userImages", images);
+		//背景图
+		String background = user.getBackground();
+		map.put("background", background);
+		// 店铺所有商品
+		map.putAll(goodsService.queryMap(goodsQuery));
+		return map;
+	}
+	
+	@Override
+	public void updateHeadImage(MultipartFile image, Long storeId)
+			throws IOException {
+		String src = FileUtil.saveFile(image, "headImage");
+		Store store = storeMapper.get(storeId);
+		String headImage = store.getHeadImage();
+		if (StringUtils.isNotBlank(headImage)) {
+			FileUtil.deleteFile(headImage);
+		}
+		store.setHeadImage(src);
+		storeMapper.update(store);
+	}
+
+	@Override
+	public Map<String, Object> searchStore(StoreQuery qu) {
+		Map<String, Object> map = new HashMap<String, Object>(); 
+		List<Object> stores = new ArrayList<Object>() ;
+		PageResult<Store> result = query(qu);
+		map.put("total", result.getTotal());
+		for (Store store : result.getRows()) {
+			Map<String, Object> s = new HashMap<String, Object>(); 
+			s.put("id", store.getId());
+			s.put("name", store.getName());
+			s.put("state", store.getState());
+			s.put("headImage", store.getHeadImage());
+			s.put("secured", store.getSecured());
+			s.put("margin", store.getMargin());
+			stores.add(s);
+		}
+		map.put("stores", stores);
+		return map;
+	}
+
+	@Override
+	public void updateState(Long id, Integer state) {
+		Store store = storeMapper.get(id);
+		if (store == null) {
+			throw new LogicException("店铺不存在！！", StateCode.STRORE_NOTFOUND);
+		}
+		if (store.getState() != 0 && state != -2) {
+			throw new LogicException("该店铺不是待审核状态", StateCode.STRORE_NOTAUTH);
+		}
+		store.setState(state);
+		storeMapper.updateState(store);
+		
+	}
+
+	@Override
+	public Map<String, Object> save(Store store) {
+		storeMapper.save(store);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("storeId", store.getId());
+		return map;
+	}
+
+	@Override
+	public void update(MultipartFile image, Store store) throws IOException {
+		if (image != null && !image.isEmpty()) {
+			String src = FileUtil.saveFile(image, "storeImage");
+			FileUtil.deleteFile(store.getHeadImage());
+			store.setHeadImage(src);
+		}
+		storeMapper.update(store);
+	}
+}

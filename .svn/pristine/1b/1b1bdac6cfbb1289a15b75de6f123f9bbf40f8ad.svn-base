@@ -1,0 +1,42 @@
+package com.huashidai.weihuotong.service;
+
+import java.util.List;
+import java.util.Map;
+
+public interface IPromotionService {
+	/**
+	 * 获取banner图广告
+	 * @return
+	 */
+	List<Object> getBanner(Long goodsTypeId);
+	
+	/**
+	 * 获取对应商品类型的广告(非banner图)
+	 * @param type 商品类型
+	 * @param size 每页数量
+	 * @param page 第几页
+	 * @return
+	 */
+	List<Map<String, Object>> getByGoodsType(Long goodsTypeId,int size,int page);
+	/**
+	 * 获取商品类型和对应的广告
+	 * @param size 每页数量
+	 * @param page 第几页的商品类型
+	 * @return
+	 */
+	List<Map<String, Object>> getTypeAndAd(int size,int page);
+	
+	
+	/**
+	 * 点击进入广告
+	 * @param promotionId 广告id
+	 * @return
+	 */
+	Map<String, Object> enterPromotion(Long promotionId);
+	/**
+	 * 获取广告内容
+	 * @param promotionId 广告id
+	 * @return
+	 */
+	String getContent(Long promotionId);
+}

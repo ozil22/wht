@@ -1,0 +1,50 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.MarginOrder;
+import com.huashidai.weihuotong.domain.Store;
+import com.huashidai.weihuotong.mapper.MarginOrderMapper;
+import com.huashidai.weihuotong.service.IMarginOrderService;
+import com.huashidai.weihuotong.service.IStoreService;
+import com.huashidai.weihuotong.utils.OrderNumUtil;
+
+@Service
+public class MarginOrderServiceImpl implements IMarginOrderService {
+
+	@Autowired
+	private MarginOrderMapper marginOrderMapper;
+	@Autowired
+	private IStoreService storeService;
+
+	@Override
+	public Map<String, Object> createOrderNum(Long storeId) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		String orderNum = OrderNumUtil.SECURED_PRE + OrderNumUtil.getOrderNum(storeId);
+		map.put("orderNum", orderNum);
+		return map;
+	}
+
+	@Override
+	public void completeOrder(String amount, Long id,String orderNum) {
+		Store store = storeService.get(id);
+		BigDecimal price = new BigDecimal(amount).divide(new BigDecimal(100));
+		//保存订单信息
+		MarginOrder marginOrder = new MarginOrder(new Date(), orderNum, price, price, store);
+		marginOrderMapper.save(marginOrder);
+		//修改店铺信息
+		storeService.updateMargin(price.intValue(), id);
+	}
+	
+	@Override
+	public MarginOrder getByOrderNum(String orderNum) {
+		return marginOrderMapper.getByOrderNum(orderNum);
+	}
+
+}

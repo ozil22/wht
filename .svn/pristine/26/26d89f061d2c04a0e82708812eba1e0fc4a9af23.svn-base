@@ -1,0 +1,29 @@
+body{background: #F6F6F6;;}
+.btn1{width: 100%;border: 0px;height: 50px;background: #FF5F28;color: #fff;text-align: center;line-height: 50px;
+       font-size: 1.8rem;float: right;padding: 0 1rem;margin-top: 1.5rem;position: fixed;bottom: 0px;}
+.spxbox1{width: 100%;background: #fff;}
+.spxp1{display:block; padding: 1rem 0;width: 94%;margin: 0 auto;
+		margin-top: 1rem;font-size: 2.0rem;
+       color: #ff5f28;text-align: center;border-bottom: 1px solid #E5E5E5;}
+.spxp2{color: #4b4b4b;font-size: 1.3rem;
+		white-space: nowrap;padding: 1.5rem 0;width: 94%;
+		margin: 0 auto;overflow: hidden;
+		text-overflow: ellipsis;}
+/*.ssp1{text-align: left;font-size: 1.6rem;width: 94%;margin: 0 auto;}*/
+.spsp1{text-align: left;font-size: 1.6rem;color: #4b4b4b}
+.detail-content {width: 94%;margin: 0 auto;}
+.TB21{width: 100%;}
+.btn-scroll-top{height: 50px;
+width: 50px;
+line-height: 50px;
+text-align: center;
+color: #ff5f28;
+background: rgba(255,255,255,0.75);
+border: 1px solid #ff5f28;
+-webkit-border-radius: 50px;
+-moz-border-radius: 50px;
+-ms-border-radius: 50px;
+-o-border-radius: 50px;
+border-radius: 50px;}
+.iconfont a{font-size: 2.4rem;color: #ff5f28;text-decoration: none;}
+.hidden{display: none;}

@@ -1,0 +1,101 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.Address;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.mapper.AddressMapper;
+import com.huashidai.weihuotong.service.IAddressService;
+import com.huashidai.weihuotong.utils.StateCode;
+
+@Service
+public class AddressServiceImpl implements IAddressService {
+	@Autowired
+	private AddressMapper addressMapper; 
+	@Override
+	public void save(Address address) {
+		addressMapper.save(address);
+	}
+
+	@Override
+	public void update(Address address) {
+		addressMapper.update(address);
+	}
+
+	@Override
+	public void delete(Address address) {
+		List<Address> byUser = addressMapper.getByUser(address.getUser().getId());
+		boolean flag = true; 
+		for (Address add : byUser) {
+			if (add.getId() == address.getId()) {
+				addressMapper.delete(address.getId());
+				flag = false;
+				return;
+			}
+		}
+		if (flag) {
+			throw new LogicException("要删除地址不存在!!", StateCode.ADDRESS_NOTFOUND);
+		}
+	}
+
+	@Override
+	public void updateDefault(Address address) {
+		//修改原来的默认地址
+		Address def = addressMapper.getDefault(address.getUser().getId());
+		if (def != null) {
+			def.setDefaultAddress(0);
+			addressMapper.update(def);
+		}
+		//设置新的默认地址
+		address.setDefaultAddress(1);
+		addressMapper.updateDefault(address);
+	}
+
+	@Override
+	public Map<String, Object> getDefault(Long userId) {
+		Address address = addressMapper.getDefault(userId);
+		if (address != null) {
+			return bulidMap(address);
+		} 
+		return null;
+	}
+
+	@Override
+	public List<Object> getByUser(Long userId) {
+		List<Object> adds = new ArrayList<Object>();
+		List<Address> ads = addressMapper.getByUser(userId);
+		//默认放在第一个
+		for (Address address : ads) {
+			if (address.getDefaultAddress() == 1) {
+				Map<String, Object> bulidMap = bulidMap(address);
+				adds.add(bulidMap);
+				break;
+			}
+		}
+		for (Address address : ads) {
+			if (address.getDefaultAddress() != 1) {
+				Map<String, Object> bulidMap = bulidMap(address);
+				adds.add(bulidMap);
+			}
+		}
+		return adds;
+	}
+	
+	private Map<String,Object> bulidMap(Address address){
+		Map<String,Object> map = new HashMap<String,Object>();
+		map.put("id", address.getId());
+		map.put("address", address.getAddress());
+		map.put("cityId", address.getCity().getId());
+		map.put("cityName", address.getCity().getName());
+		map.put("defaultAddress", address.getDefaultAddress());
+		map.put("name", address.getName());
+		map.put("phone", address.getPhone());
+		return map;
+	}
+}

@@ -1,0 +1,281 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+<script type="text/javascript">
+$(function(){
+	//缓存要用到的组件
+	var promotionDataGrid = $("#promotionDataGrid");//数据表格
+	var goodsTypeIdCombobox = $("#goodsTypeIdCombobox");//商品类型
+	var promotion_searchForm = $("#promotion_searchForm");//搜索表单
+	var promotionDialog = $("#promotionDialog");//编辑窗口
+	var goodsTypeCombobox = $("#goodsTypeCombobox");//商品类型
+	var promotionForm = $("#promotionForm");//参数表单
+
+   //数据表格
+    promotionDataGrid.datagrid({
+    	fit:true,
+		border:false,
+		url:'promotion/query',
+		singleSelect:true,
+		fitColumns:true,
+		striped:true,
+		pagination:true,
+		pageSize:20,
+		pageList:[5,10,20,50],
+		toolbar:'#promotion_toolbar',
+		view: detailview,    
+	    detailFormatter:function(index,row){    
+	        return '<div id="pro-' + index + '" style="padding:5px"></div>';    
+	    },    
+	  	onExpandRow: function(index,row){
+	        $('#pro-'+index).datagrid({    
+	        	url:'promotion/query?promotion='+row.id+'&promotionDate=3',  
+	        	fitColumns:true,
+	            loadMsg:'数据加载中,请稍后...',
+	            height:'auto',  
+     			columns:[[  
+                     {field:'id',title:'ID',width:20,align:"center"},  
+                     {field:'image',title:'广告图片',formatter:formatBigImg,width:60,align:"center"},  
+                     {field:'beginTime',title:'开始时间',formatter:formatTime,width:40,align:"center"},  
+                     {field:'endTime',title:'结束时间',formatter:formatTime,width:40,align:"center"},  
+                     {field:'price',title:'价格',width:30,align:"center"},  
+                     {field:'contentType',title:'跳转类型',formatter:formatTime,width:50,align:"center"},  
+                     {field:'contentId',title:'广告网页',formatter:formatTime,width:50,align:"center"},  
+                     {field:'state',title:'状态',formatter:formatTime,width:30,align:"center"},  
+                 ]],
+               onResize:function(){
+            	   promotionDataGrid.datagrid('fixDetailRowHeight',index);
+					},
+					onLoadSuccess:function(){
+						setTimeout(function(){
+							promotionDataGrid.datagrid('fixDetailRowHeight',index);
+						},0);
+				}
+	        }); 
+	        promotionDataGrid.datagrid('fixDetailRowHeight',index);
+	    }   
+	});
+	
+	$.ajax({ 
+		url: 'type/list',
+		dataType: 'json', 
+		success: function(typeData){ 
+			typeData.push({'id':'0','name':'首页'});
+			//搜索
+			goodsTypeIdCombobox.combobox({
+		        prompt:'商品类型',
+		        valueField:'id',
+		        textField:'name',
+		        data:typeData
+		    });
+			//编辑
+			goodsTypeCombobox.combobox({
+		        prompt:'商品类型',
+		        valueField:'id',
+		        textField:'name',
+		        data:typeData
+		    });
+        }
+	});
+    
+	//创建cmdType管理所有操作函数
+	var cmdAdPositionId={
+		//高级查询
+	    promotion_search:function(){
+	    	var params = {};
+			var paramArr = promotion_searchForm.serializeArray();
+		    $.each(paramArr,function(i,data){
+		    	params[data.name] = data.value;
+		 	}); 
+	 		promotionDataGrid.datagrid("load",params);
+		},
+			
+		//新增
+		promotion_create:function(){
+			// 1.清空对话框数据
+			promotionForm.form("clear");
+			// 2.打开添加对话框
+			promotionDialog.dialog("open");
+		},
+
+
+		//编辑
+		promotion_edit:function(){
+			// 1.获取选中行信息
+			var rowData = promotionDataGrid.datagrid("getSelected");
+			// 2.判断
+			if(!rowData){
+				$.messager.alert("温馨提示","你没有选中任何数据","info");
+				return;
+			}
+			// 3.清空对话框数据
+			promotionForm.form("clear");
+			// 4.打开添加对话框
+			promotionDialog.dialog("open");
+			//5.设置下拉框不可用
+			firstCombobox.combobox('disable');
+			secondCombobox.combobox('disable');
+			// 6.把数据加载到对话框中,回显数据
+			promotionForm.form("load",rowData);
+		},
+		//保存
+		promotion_save:function(){
+			var i = 0;
+			var a = 0;
+			// 把表单的参数，通过AJAX方式提交到后台
+			promotionForm.form("submit",{
+				url:"/promotion/save",
+				onSubmit:function(params){
+					// 1、 获得选择的上级分类
+					var secondId = secondCombobox.combobox("getValues");
+					// 2、判断并拼接需要的参数
+					if (secondId == false) {
+						var firstId = firstCombobox.combobox("getValues");
+						params['parent.id'] = firstId;
+					}else{
+						params['parent.id'] = secondId;
+					}
+				},
+				success:function(data){ 
+					data = $.parseJSON(data);//转为json
+					if(data.success){
+						promotionDialog.dialog("close");
+						$.messager.alert("温馨提示",data.message,"info",function(){
+							// 刷新表格
+							promotionDataGrid.datagrid("reload");
+						});
+					}else{
+						$.messager.alert("温馨提示",data.message,"info");
+					}
+				}
+			});
+		},
+		//取消
+		promotion_cancel:function(){
+			promotionDialog.dialog("close");
+		},
+
+		//删除
+		promotion_del:function(){
+			// 1.获取选中行信息
+			var rowData = promotionDataGrid.datagrid("getSelected");
+			console.debug(rowData);
+			// 2.判断
+			if(!rowData){
+				$.messager.alert("温馨提示","你没有选中任何数据","info");
+				return;
+			}
+			//提示用户是否删除
+			$.messager.confirm("温馨提示","是否确认删除该广告位?",function(yes){
+				if(yes){
+					// 获取数据的唯一标示
+					var id = rowData.id;
+					// 发送AJAX请求，修改ID对应数据状态
+					$.get("/promotion/delete",{id:id},function(data){
+						if(data.success){
+							$.messager.alert("温馨提示",data.message,"info",function(){
+								promotionDataGrid.datagrid("reload");
+							});
+						}else{
+							$.messager.alert("温馨提示",data.message,"warning");
+						}
+					},"json");
+				}
+			});
+			
+		},
+		
+		//刷新
+		promotion_refresh:function(){
+			promotionDataGrid.datagrid("reload");
+		},	
+		//当前广告
+		promotion_promotion:function(){
+			promotionDataGrid.datagrid("reload");
+		}
+	}
+	
+	//对页面上所有按钮做一次统一的监听
+	$("a[data-cmd]").on("click",function(){
+		//获取data-cmd属性的值
+		var cmd = $(this).data("cmd");//data-key="value"其实就是一个{key:value}类型的数据
+		if (cmd) {
+			cmdAdPositionId[cmd]();//执行对应的方法
+		}
+	});
+});
+//查看当前广告
+function showPromotion(id){
+	alert(id);
+}
+</script>
+	<table id="promotionDataGrid" style="width: 600px;height: 300px;">
+		<!--
+			定义表格的表头 
+		 -->
+		<thead>
+			<tr>
+				<!-- field：指定需要显示列对应JSON数据属性 -->
+				<th field="id"  width="10" >ID</th>
+				<th field="type"   width="10" data-options="formatter:formatAdType">类型</th>
+				<th field="goodsType"   width="10" data-options="formatter:formatAdCoodsType">商品分类</th>
+				<th field="dayPrice"      width="10">价格(元/天)</th>
+			</tr>
+		</thead>
+	</table>
+	
+	 <div id="promotion_toolbar">
+	 	<div>
+		 	<form method="post" id="promotion_searchForm">
+			<a class="easyui-linkbutton" iconCls="icon-add"  data-cmd="promotion_create">添加</a>
+			<a class="easyui-linkbutton" iconCls="icon-remove" data-cmd="promotion_del">删除</a>
+			<a class="easyui-linkbutton" iconCls="icon-edit"  data-cmd="promotion_edit">编辑</a>
+			<a class="easyui-linkbutton" iconCls="icon-reload"  data-cmd="promotion_refresh">刷新</a>
+		 
+				<select class="easyui-combobox" name="type" data-options="prompt:'广告类型'" style="width: 100px">
+					<option value="-99">广告类型</option>
+					<option value="1">banner广告位</option>
+					<option value="0">非banner广告位</option>
+					<option value="2">宽广告位</option>
+					<option value="3">窄广告位</option>
+				</select> 
+				<input id="goodsTypeIdCombobox" name="goodsTypeId" style="width: 100px"/>
+				<a class="easyui-linkbutton" iconCls="icon-search" data-cmd="promotion_search">搜索</a>
+		 	</form>
+		 </div> 
+	</div>
+	
+	<!-- 新增或编辑表格 -->
+	<div id="promotionDialog" class="easyui-dialog" style="width: 250px;height: 210px;padding: 20px;"
+		data-options="modal:true,title:'广告位编辑',iconCls:'icon-edit',buttons:'#promotion_bs',closed:true" >
+		<form id="promotionForm"  method="post">
+			<input type="hidden" name="id">
+			 <div style="margin-top: 10px;">
+			 	商品分类：<input id="goodsTypeCombobox" name="goodsType.id" data-options="required:true" style="width: 130px"/>
+			 </div>
+			 <div style="margin-top: 10px;">
+			 	广告类型：<select class="easyui-combobox" name="type" data-options="required:true,prompt:'广告类型'" style="width: 130px">
+					<option value="0">banner广告位</option>
+					<option value="1">宽广告位</option>
+					<option value="2">窄广告位</option>
+					<option value="3">非banner广告位</option>
+				</select> 
+			 </div>
+			 <div style="margin-top: 10px;">
+			 	广告价格：<input type="text" name="price"  class="easyui-numberbox" data-options="required:true" style="width: 130px">
+			 </div>
+		</form>
+	</div>
+	<div id="promotion_bs">
+		<a class="easyui-linkbutton" iconCls="icon-save" data-cmd="promotion_save">保存</a>
+		<a class="easyui-linkbutton" iconCls="icon-cancel"  data-cmd="promotion_cancel">取消</a>
+	</div>
+	
+</body>
+</html>

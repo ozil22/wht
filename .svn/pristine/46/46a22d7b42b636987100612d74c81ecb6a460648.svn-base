@@ -1,0 +1,85 @@
+package com.huashidai.weihuotong.domain;
+
+import java.math.BigDecimal;
+import java.util.Date;
+/**
+ * 商品订单
+ * @author ozil
+ *
+ */
+public class ProxyOrder {
+	private Long id;
+	private Date buyTime;//购买时间
+	private String orderNum;//订单号
+	private BigDecimal proxyPrice;//代理费用
+	private User user;//代理人
+	private Customer customer;//购买代理商品的客户
+	private Store store;//出售商品的店铺
+	private String productOrderNum;//购买商品订单号
+	
+	
+	
+	
+	public ProxyOrder() {
+	}
+	public ProxyOrder(Date buyTime, String orderNum, BigDecimal proxyPrice,
+			User user, Customer customer, Store store, String productOrderNum) {
+		this.buyTime = buyTime;
+		this.orderNum = orderNum;
+		this.proxyPrice = proxyPrice;
+		this.user = user;
+		this.customer = customer;
+		this.store = store;
+		this.productOrderNum = productOrderNum;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public Date getBuyTime() {
+		return buyTime;
+	}
+	public void setBuyTime(Date buyTime) {
+		this.buyTime = buyTime;
+	}
+	public String getOrderNum() {
+		return orderNum;
+	}
+	public void setOrderNum(String orderNum) {
+		this.orderNum = orderNum;
+	}
+	public BigDecimal getProxyPrice() {
+		return proxyPrice;
+	}
+	public void setProxyPrice(BigDecimal proxyPrice) {
+		this.proxyPrice = proxyPrice;
+	}
+	public User getUser() {
+		return user;
+	}
+	public void setUser(User user) {
+		this.user = user;
+	}
+	public Customer getCustomer() {
+		return customer;
+	}
+	public void setCustomer(Customer customer) {
+		this.customer = customer;
+	}
+	public Store getStore() {
+		return store;
+	}
+	public void setStore(Store store) {
+		this.store = store;
+	}
+	public String getProductOrderNum() {
+		return productOrderNum;
+	}
+	public void setProductOrderNum(String productOrderNum) {
+		this.productOrderNum = productOrderNum;
+	}
+	
+	
+}

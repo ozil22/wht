@@ -1,0 +1,54 @@
+package com.huashidai.weihuotong.mapper;
+
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.huashidai.weihuotong.domain.Goods;
+import com.huashidai.weihuotong.query.GoodsQuery;
+
+public interface GoodsMapper {
+	/**
+	 * 保存
+	 */
+	void save(Goods goods);
+	/**
+	 * 更新
+	 */
+	void update(Goods goods);
+	/**
+	 * 修改状态
+	 */
+	void updateState(Goods goods);
+	/**
+	 * 删除
+	 */
+	void delete(Long id);
+	/**
+	 * 获取单个
+	 */
+	Goods get(Long id);
+	/**
+	 * 查询所有
+	 */
+	List<Goods> getAll();
+	/**
+	 * 高级查询
+	 */
+	List<Goods> query(GoodsQuery qu);
+	/**
+	 * 查询总数
+	 */
+	Long queryTotal(GoodsQuery gqu);
+	/**
+	 * 增加销量
+	 * @param saleNum
+	 */
+	void addSaleNum(@Param("saleNum")Integer saleNum);
+	/**
+	 * 增加代理量
+	 * @param saleNum
+	 */
+	void addProxyNum(@Param("proxyNum")Integer proxyNum);
+}

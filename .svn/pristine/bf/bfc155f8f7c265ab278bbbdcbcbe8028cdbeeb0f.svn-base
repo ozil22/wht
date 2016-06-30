@@ -1,0 +1,99 @@
+package com.huashidai.weihuotong.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.huashidai.weihuotong.domain.ArticleType;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.query.BaseQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.service.IArticleTypeService;
+import com.huashidai.weihuotong.utils.AjaxResult;
+import com.huashidai.weihuotong.utils.MethodAnnotation;
+import com.huashidai.weihuotong.utils.MethodAnnotation.ResourceType;
+
+@Controller
+@RequestMapping("/articleType")
+public class ArticleTypeCotroller {
+
+	@Autowired
+	IArticleTypeService articleTypeService;
+
+	/**
+	 * 主页
+	 * @return
+	 */
+	@MethodAnnotation(name = "主页", type = ResourceType.文章分类)
+	@RequestMapping("/index")
+	public String articleType() {
+		return "article/articleType";
+	}
+	/**
+	 * 分类列表
+	 * @return
+	 */
+	@MethodAnnotation(name = "列表", type = ResourceType.文章分类)
+	@RequestMapping("/list")
+	@ResponseBody
+	public List<ArticleType> showArticleType(Long id) {
+		List<ArticleType> list = articleTypeService.getAllArticleType();
+		return list;
+	}
+
+	/**
+	 * 高级查询+分页
+	 * 
+	 * @param req
+	 * @return
+	 */
+	@MethodAnnotation(name = "查询", type = ResourceType.文章)
+	@RequestMapping("/query")
+	@ResponseBody
+	public PageResult<ArticleType> query(BaseQuery qu) {
+		PageResult<ArticleType> list = articleTypeService.query(qu);
+		return list;
+	}
+
+	/**
+	 * 删除
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@MethodAnnotation(name = "添加", type = ResourceType.文章分类)
+	@RequestMapping("/save")
+	@ResponseBody
+	public AjaxResult save(ArticleType articleType) {
+		AjaxResult ar;
+		try {
+			articleTypeService.save(articleType);
+			ar = new AjaxResult();
+		} catch (LogicException e) {
+			ar = new AjaxResult(e.getMessage(), e.getErrorCode());
+		}
+		return ar;
+	}
+	/**
+	 * 删除
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@MethodAnnotation(name = "删除", type = ResourceType.文章分类)
+	@RequestMapping("/delete")
+	@ResponseBody
+	public AjaxResult delete(Long id) {
+		AjaxResult ar;
+		try {
+			articleTypeService.delete(id);
+			ar = new AjaxResult();
+		} catch (LogicException e) {
+			ar = new AjaxResult(e.getMessage(), e.getErrorCode());
+		}
+		return ar;
+	}
+}

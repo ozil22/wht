@@ -1,0 +1,112 @@
+package com.huashidai.weihuotong.domain;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+/**
+ * 代理记录
+ * @author ozil
+ *
+ */
+public class ProxyLog implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7140039853907916577L;
+	private Long id;
+	private Date time;//代理时间
+	private Integer proxyType;//代理方式
+	private BigDecimal price;//价格
+	private String image;//商品图片
+	private String storeName;//店铺名字
+	private String details;//商品介绍
+	private Long goodsId;//商品id
+	private Long userId;//代理人id
+	
+	
+	public ProxyLog() {
+	}
+	
+	
+	public ProxyLog(Date time, Integer proxyType, BigDecimal price,
+			String image, String storeName, String details, Long goodsId,
+			Long userId) {
+		this.time = time;
+		this.proxyType = proxyType;
+		this.price = price;
+		this.image = image;
+		this.storeName = storeName;
+		this.details = details;
+		this.goodsId = goodsId;
+		this.userId = userId;
+	}
+
+
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public Date getTime() {
+		return time;
+	}
+	public void setTime(Date time) {
+		this.time = time;
+	}
+	public Integer getProxyType() {
+		return proxyType;
+	}
+	public void setProxyType(Integer proxyType) {
+		this.proxyType = proxyType;
+	}
+	public BigDecimal getPrice() {
+		return price;
+	}
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+	public String getImage() {
+		return image;
+	}
+	public void setImage(String image) {
+		this.image = image;
+	}
+	public String getDetails() {
+		return details;
+	}
+	public void setDetails(String details) {
+		this.details = details;
+	}
+	public Long getGoodsId() {
+		return goodsId;
+	}
+	public void setGoodsId(Long goodsId) {
+		this.goodsId = goodsId;
+	}
+	public Long getUserId() {
+		return userId;
+	}
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+	
+	public String getStoreName() {
+		return storeName;
+	}
+
+
+	public void setStoreName(String storeName) {
+		this.storeName = storeName;
+	}
+
+
+	@Override
+	public String toString() {
+		return "ProxyLog [id=" + id + ", time=" + time + ", proxyType="
+				+ proxyType + ", price=" + price + ", image=" + image
+				+ ", storeName=" + storeName + ", details=" + details
+				+ ", goodsId=" + goodsId + ", userId=" + userId + "]";
+	}
+	
+}

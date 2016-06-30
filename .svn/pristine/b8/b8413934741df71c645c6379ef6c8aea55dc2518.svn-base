@@ -1,0 +1,21 @@
+package com.huashidai.weihuotong.mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.huashidai.weihuotong.domain.Account;
+
+public interface AccountMapper {
+
+    void save(Account account);
+    
+    void update(Account account);
+    
+    void delete(Long id);
+
+    Account get(Long id);
+    
+    List<Account> getByUser(@Param("userId")Long userId);
+    
+}

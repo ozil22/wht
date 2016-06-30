@@ -1,0 +1,58 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.Account;
+import com.huashidai.weihuotong.mapper.AccountMapper;
+import com.huashidai.weihuotong.mapper.UserMapper;
+import com.huashidai.weihuotong.service.IAccountService;
+import com.huashidai.weihuotong.utils.ConstUtil;
+
+@Service
+public class AccountServiceImpl implements IAccountService {
+	@Autowired
+	private AccountMapper accountMapper;
+	@Autowired
+	private UserMapper userMapper;
+
+	@Override
+	public Map<String, Object> getByUser(Long userId) {
+		Account account = accountMapper.getByUser(userId);
+		if (account != null) {
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put("id", account.getId());
+			map.put("freezedAmount", account.getFreezedAmount());
+			map.put("balance", account.getBalance());
+			map.put("proxyIncome", account.getProxyIncome());
+			map.put("saleIncome", account.getSaleIncome());
+			return map;
+		}
+		return null;
+	}
+
+	@Override
+	public Account updateByUser(Long userId, BigDecimal amount,Integer accountFlowType) {
+		Account account = accountMapper.getByUser(userId);
+		if (amount != null) {
+			if (accountFlowType == ConstUtil.ACCOUNT_ACTIONTYPE_PROXYINCOME) {
+				account.setProxyIncome(account.getProxyIncome().add(amount));
+			}
+			if (accountFlowType == ConstUtil.ACCOUNT_ACTIONTYPE_SALEINCOME) {
+				account.setBalance(account.getBalance().add(amount));
+				account.setSaleIncome(account.getSaleIncome().add(amount));
+				
+			}
+			if (accountFlowType == ConstUtil.ACCOUNT_ACTIONTYPE_WITHDRAW) {
+				account.setBalance(account.getBalance().subtract(amount));
+				account.setFreezedAmount(account.getFreezedAmount().add(amount));
+			}
+		}
+		return account;
+	}
+	
+}

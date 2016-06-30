@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.GoodsMapper">
+
+	<insert id="save" parameterType="Goods" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_goods(name,goodsNum,details,price,salePrice,postage,state,image,
+					proxyNum,saleNum,time,inventoryNum,version,brand_id,type_id,store_id) 
+					values(#{name},#{goodsNum},#{details},#{price},#{salePrice},#{postage},#{state},#{image},
+					#{proxyNum},#{saleNum},#{time},#{inventoryNum},#{version},#{brand.id},#{type.id},#{store.id})
+	</insert>
+	<!-- 修改-->
+	<update id="update" parameterType="Goods">
+		update t_goods set 
+		name=#{name},
+		goodsNum=#{goodsNum},
+		details=#{details},
+		price=#{price},
+		salePrice=#{salePrice},
+		postage=#{postage},
+		image=#{image},
+		inventoryNum=#{inventoryNum},
+		brand_id=#{brand.id},
+		type_id=#{type.id}
+		where id = #{id}
+	</update>
+	<!-- 修改状态 -->
+	<update id="updateState" parameterType="Goods">
+		update t_goods set 
+		state=#{state}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_goods where id = #{id}
+	</delete>
+	
+	<resultMap type="Goods" id="goodsMap">
+		<id property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="goodsNum" column="goodsNum"/>
+		<result property="details" column="details"/>
+		<result property="price" column="price"/>
+		<result property="salePrice" column="salePrice"/>
+		<result property="postage" column="postage"/>
+		<result property="proxyNum" column="proxyNum"/>
+		<result property="saleNum" column="saleNum"/>
+		<result property="state" column="state"/>
+		<result property="image" column="image"/>
+		<result property="inventoryNum" column="inventoryNum"/>
+		<association property="store" javaType="Store">
+			<id property="id" column="sid"/>
+			<result property="name" column="sname"/>
+			<result property="headImage" column="sheadImage"/>
+			<result property="phone" column="sphone"/>
+			<result property="secured" column="ssecured"/>
+			<result property="margin" column="smargin"/>
+		</association>
+		<association property="brand" javaType="Brand">
+			<id property="id" column="bid"/>
+			<result property="name" column="bname"/>
+		</association>
+		<association property="type" javaType="Type">
+			<id property="id" column="tid"/>
+			<result property="name" column="tname"/>
+		</association>
+		<collection property="bannerImages" ofType="BannerImage">
+			<result property="src" column="bisrc"/>
+			<result property="sort" column="bisort"/>
+		</collection>
+		<collection property="detailsImages" ofType="DetailsImage">
+			<result property="src" column="dsrc"/>
+			<result property="sort" column="dsort"/>
+		</collection>
+	</resultMap>
+	
+	<!-- 公共的查询语句 -->
+	<sql id="selectSql">
+		select g.*,
+			bi.src bisrc,bi.sort bisort,
+			d.src dsrc,d.sort dsort,
+			s.id sid,s.name sname,s.headImage sheadImage,s.phone sphone,s.secured ssecured,s.margin smargin,
+			b.id bid,b.name bname,
+			t.id tid,t.name tname
+		from t_goods g 
+		left join t_bannerimage bi on g.id = bi.goods_id
+		left join t_detailsimage d on g.id = d.goods_id
+		left join t_store s on g.store_id = s.id 
+		left join t_brand b on g.brand_id = b.id 
+		left join t_type t on g.type_id = t.id 
+	</sql>
+	<!-- 公共的高级查询条件 -->
+	<sql id="whereSql">
+		<where>
+			<if test="goodsName!=null and goodsName!=''">
+				g.name like concat('%',#{goodsName},'%')
+			</if>
+			<if test="state!=-99">
+				and g.state = #{state}
+			</if>
+			<if test="storeId != null and storeId != -1">
+				and g.store_id = #{storeId}
+			</if>
+			<if test="typeId != null and typeId != -1">
+				and g.type_id = #{typeId}
+			</if>
+			<if test="brandId != null and brandId != -1">
+				and g.brand_id = #{brandId}
+			</if>
+			<if test="uptime != null">
+				and g.time > #{uptime}
+			</if>
+			<if test="saleNum != null and saleNum != 0">
+				and g.saleNum > #{saleNum}
+			</if>
+			<if test="parentId != null and parentId != -1">
+				and g.type_id in (select id from t_type where parent_id in (select id from t_type where parent_id = #{parentId}))
+			</if>
+		</where>
+	</sql>
+	<!-- 包含关联对象 -->
+	<select id="getMap" resultMap="goodsMap" parameterType="long">
+		<include refid="selectSql"/>
+		where g.id=#{id}
+	</select>
+	<select id="get" resultType="Goods" parameterType="long">
+		select * from t_goods
+		where id=#{id}
+	</select>
+	
+	<select id="getAll" resultMap="goodsMap">
+		<include refid="selectSql"/>
+	</select>
+	
+	
+	<select id="query" resultMap="goodsMap" parameterType="GoodsQuery">
+		<include refid="selectSql"/>
+		<include refid="whereSql"/>
+		<if test="sort==-1">
+			order by g.time 
+		</if> 
+		<if test="sort==1">
+			order by g.time desc
+		</if> 
+		<if test="sort==2">
+			order by g.saleNum desc
+		</if> 
+		<if test="sort==-3">
+			order by g.salePrice
+		</if> 
+		<if test="sort==3">
+			order by g.salePrice desc
+		</if> 
+		<if test="sort==4">
+			order by g.proxyNum desc
+		</if> 
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 获取总记录数 -->
+	<select id="queryTotal" resultType="long" parameterType="GoodsQuery">
+		select count(g.id)
+		from t_goods g 
+		<include refid="whereSql"/>
+	</select>
+	<!-- 增加销量 -->
+	<select id="addSaleNum" resultType="int">
+		update t_goods set 
+		saleNum= saleNum + #{saleNum}
+		where id = #{id}
+	</select>
+	<!-- 增加代理量 -->
+	<select id="addProxyNum" resultType="int">
+		update t_goods set 
+		proxyNum= proxyNum + #{proxyNum}
+		where id = #{id}
+	</select>
+	
+		<!-- 更新库存-->
+	<update id="updateNum" parameterType="Goods">
+		update t_goods set 
+		inventoryNum=#{inventoryNum},
+		version=version+1
+		where id = #{id}
+		and version=#{vsersion}
+	</update>
+</mapper>

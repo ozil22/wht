@@ -1,0 +1,58 @@
+package com.huashidai.weihuotong.service;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.huashidai.weihuotong.domain.Store;
+import com.huashidai.weihuotong.query.GoodsQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.query.StoreQuery;
+
+public interface IStoreService {
+	/**
+	 * 进入店铺
+	 * @param goodsQuery 商品查询条件
+	 * @return
+	 */
+	Map<String,Object> enterStore(GoodsQuery goodsQuery);
+	
+	/**
+	 * 保存
+	 */
+	Map<String,Object> save(Store store);
+	/**
+	 * 查询所有
+	 */
+	List<Store> getAll();
+	
+	/**
+	 * 高级查询
+	 * @param qu
+	 * @return
+	 */
+	PageResult<Store> query(StoreQuery qu);
+	/**
+	 * 
+	 * @param image
+	 * @param storeId
+	 */
+	void updateHeadImage(MultipartFile image, Long storeId) throws IOException;
+	/**
+	 * 搜索店铺
+	 * @param storeQuery
+	 */
+	Map<String, Object> searchStore(StoreQuery storeQuery);
+	/**
+	 * 修改状态
+	 */
+	void updateState(Long id,Integer state);
+	/**
+	 * 更新
+	 * @param storeImage
+	 * @param store
+	 */
+	void update(MultipartFile storeImage, Store store) throws IOException;
+}

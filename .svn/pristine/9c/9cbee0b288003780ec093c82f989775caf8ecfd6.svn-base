@@ -1,0 +1,33 @@
+package com.huashidai.weihuotong.mapper;
+
+
+import java.util.List;
+
+import com.huashidai.weihuotong.domain.ProductOrder;
+
+public interface ProductOrderMapper {
+	/**
+	 * 保存
+	 */
+	void save(ProductOrder productOrder);
+	/**
+	 * 更新
+	 */
+	void update(ProductOrder productOrder);
+	/**
+	 * 修改状态
+	 */
+	void updateState(ProductOrder productOrder);
+	/**
+	 * 删除
+	 */
+	void delete(Long id);
+	/**
+	 * 获取单个
+	 */
+	ProductOrder get(Long id);
+	/**
+	 * 查询所有
+	 */
+	List<ProductOrder> getAll();
+}

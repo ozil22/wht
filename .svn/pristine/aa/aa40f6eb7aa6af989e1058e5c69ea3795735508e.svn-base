@@ -1,0 +1,9 @@
+#driver=com.mysql.jdbc.Driver
+#url=jdbc:mysql://211.149.241.17:3306/weihuotong123?createDatabaseIfNotExist=true&characterEncoding=utf-8
+#user=weihuotong123
+#password=123456
+
+driver=com.mysql.jdbc.Driver
+url=jdbc:mysql://localhost:3306/wht?createDatabaseIfNotExist=true&characterEncoding=utf-8
+user=root
+password=admin

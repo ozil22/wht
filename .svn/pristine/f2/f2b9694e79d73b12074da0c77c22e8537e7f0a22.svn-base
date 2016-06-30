@@ -1,0 +1,270 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%--     <%@taglib uri="http://www.springframework.org/tags/form"  prefix="c"%> --%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+
+<!-- easyui主题/皮肤,并且使用的是默认 -->
+<link rel="stylesheet" type="text/css" href="/easyui/themes/default/easyui.css">
+<!-- easyui图标样式 -->
+<link rel="stylesheet" type="text/css" href="/easyui/themes/icon.css">
+<link rel="stylesheet" type="text/css" media="screen" href="/jquery-validate/css/screen.css" />
+
+<!-- easyui依赖jquery库 -->
+<script type="text/javascript" src="/easyui/jquery.min.js"></script>
+<!-- easyui核心文件 -->
+<script type="text/javascript" src="/easyui/jquery.easyui.min.js"></script>
+<!-- easyui汉化文件 -->
+<script type="text/javascript" src="/easyui/locale/easyui-lang-zh_CN.js"></script>
+<body>
+</head>
+<body>
+<script type="text/javascript">
+$(function(){
+	//在页面加载完毕以后,首先声明组件
+	var rightRow,leftRow,dialog,datagrids,myForm,rightTable,leftTable;
+	//放入缓存中
+	rightTable = $("#permissionAll");
+	leftTable = $("#permissionSave");
+	dialog = $("#myDialog");
+	datagrids = $("#roleDatagrid");
+	roleForm = $("#roleForm");
+	//定义事件对象
+	myBtn = {
+		addRole:function(){
+			roleForm.form("clear");
+			dialog.dialog("setTitle",'添加对话框');
+			dialog.dialog("open");
+			leftTable.datagrid('loadData',{total:0,rows:[]});
+			rightTable.datagrid("load");
+		},
+		editRole:function(){
+			roleForm.form("clear");
+			dialog.dialog("setTitle",'修改对话框');
+			
+			//加载右边的所有的权限列表
+			rightTable.datagrid("load");
+			//获取选中行
+			var row = datagrids.datagrid("getSelected");
+			console.debug(row);
+			//判断是否有选中某一行
+			if(!row){
+				$.messager.alert("提示","您未选中要编辑的信息","info");
+				return;
+			}
+			//删除左边的所有的权限列表
+			leftTable.datagrid('loadData',{total:0,rows:[]});
+			//选中
+			//打开用户录入对话框
+			dialog.dialog("open");
+			//load data 读取记录填充到表单中。数据参数可以是一个字符串或一个对象类型，如果是字符串则作为远程URL，否则作为本地记录。  
+			//回显
+			$.get("/role/echo?id="+row.id,function(data){
+				console.debug(data);
+				$.each(data,function(index,value){
+					console.debug(value);
+					leftTable.datagrid("appendRow",value);
+				});
+	 		});
+			roleForm.form("load",row);
+		},
+		removeRole:function(){
+			//获取选中行
+			var row = datagrids.datagrid("getSelected");
+			//未选中
+			if(!row){
+				$.messager.alert("提示","您未选中要删除的信息","info");
+				return;
+			}
+			
+			//选中
+			//fn(b): 当用户点击“确定”按钮的时侯将传递一个true值给回调函数，否则传递一个false值。 
+			$.messager.confirm("确认框","是否确定删除  [<font color='red'>"+row.name +"</font>] 信息吗?",function(b){
+				if(b){
+					//通过ajex传入需要删除的id
+					var id = row.id;
+					$.post("/role/delete",{id:id},function(data){
+						if("success" == data){
+							$.messager.alert("提示","删除成功","info");
+							//表格重新加载数据
+							//刷新表格数据方法：reload，load
+							//reload : 页码不变条件参数不变，直接重新加载一次数据;重载行。等同于'load'方法，但是它将保持在当前页。
+							//load   : 重新加载数据，页码变成第一页，条件参数没有了；
+							datagrids.datagrid("reload");
+						}else{
+							$.messager.alert("提示","删除失败","error");
+						}
+					});
+				}
+			});
+		},
+		saveRsource:function(){
+			//获得所选择的权限数组
+			var pers = leftTable.datagrid("getRows");
+			//定义需要向后台传递的数组对象
+			roleForm.form('submit', {    
+			    url:'/role/save',    
+			    onSubmit: function(param){    
+					$.each( pers, function(i,val){
+						param["permissions["+i+"].id"] = val.id;
+					});
+			    },
+			    success:function(data){    
+			    	//把获得的json形式的字符串转换为json对象
+					data = $.parseJSON(data);
+					//保存成功关闭对话框
+					dialog.dialog("close");
+					//显示提示信息
+					$.messager.alert('温馨提示',"操作状态：" +data.message,'info',function(){
+						//在关闭弹窗后的一个回调函数
+						//刷新数据
+						datagrids.datagrid("reload");
+					});
+			    } 
+			});  
+		},
+		backRsource:function(){
+			//关闭对话框
+			dialog.dialog("close");
+		}
+	};
+	
+	rightTable.datagrid({
+		onDblClickRow:function(rowIndex,rowData){
+			// 1、 获取行数据，rowData
+			console.debug(rowData);
+			// 2、 检查选中数据是否存在
+			var selectedPermissionArr = leftTable.datagrid("getRows");
+			// 是否重复标志
+			var repect = false;
+			$.each(selectedPermissionArr,function(i,p){
+				if(p.id==rowData.id){
+					repect = true;
+				}
+			});
+			
+			// 3、获取已选权限表格，向表格中添加数据
+			if(!repect){
+				leftTable.datagrid("appendRow",rowData);
+			}else{
+				 $.messager.show({
+						 title:'温馨提示',
+						 msg:'这个权限已被选中！！',
+						 showType:'fade',
+						 timeout:1200,
+						 style:{
+							 right:'',
+							 bottom:''
+						 }
+				 });
+			}
+		}
+	});
+	
+	leftTable.datagrid({
+		onDblClickRow:function(rowIndex,rowData){
+			// 1、 获取行数据，rowData
+			leftTable.datagrid("deleteRow",rowIndex);
+		}
+	});
+
+	
+	//当我们的按钮被点击的时候出发事件
+	$("a[data-btn]").on("click",function(){
+		//确定点击的按钮需要访问的是什么方法
+		var currentBtn = $(this).data("btn");
+		//如果访问的这个方法不存在的情况...
+		if (currentBtn) {
+			myBtn[currentBtn]();
+		}
+	});
+});
+</script>
+	<table class="easyui-datagrid" style="width:500px;height:300px" id="roleDatagrid"
+	  data-options="singleSelect:true,
+		url:'/role/list',
+		fit:true,
+		fitColumns:true,
+		pagination:true,
+		rownumbers:true,
+		toolbar:'#role_tool'" 
+		>
+		<thead>
+			<tr>
+				<th field="sn"    width="100">角色编号</th>
+				<th field="name"    width="100">角色名称</th>
+			</tr>
+		</thead>
+	</table>
+	
+	<div id="role_tool">
+		<a data-btn="addRole" class="easyui-linkbutton" iconCls="icon-add" plain="true">新建角色</a>
+		<a data-btn="editRole" class="easyui-linkbutton" iconCls="icon-edit" plain="true">编辑角色</a>
+		<a data-btn="removeRole" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除角色</a>
+	</div>
+	
+	<div id="myDialog" class="easyui-dialog" style="width: 1000px;height:350px;"
+	data-options="
+		modal:true,
+		title:'客户录入',
+		closed:true,
+		buttons:'#btu'
+	">
+		<div class="easyui-layout" 
+		style="width:983px;height:270px;">
+			<form action="#" id="roleForm" method="post">
+				 <div data-options="region:'north',split:true" 
+				 style="height:50px;" align="center">
+					<p> </p>
+					<input id="resourceId" type="hidden" name="id" />
+				 	角色编号:<input id="resourceSn" name="sn" style="width: 280px;height:20px;" />&nbsp;&nbsp;&nbsp;
+				 	角色名称:<input id="resourceName" name="name" style="width: 280px;height:20px;" />
+				 </div> 
+				 <div data-options="region:'west',title:'已选权限',split:true" 
+				 style="width:480px;">
+				 	<table class="easyui-datagrid" style="width:500px;height:200px" id="permissionSave"
+						  data-options="singleSelect:true,
+							fit:true,
+							fitColumns:true"
+							>
+							<thead>
+								<tr>
+									<th field="id"    width="100">权限名称</th>
+									<th field="name"    width="100">权限资源</th>
+								</tr>
+							</thead>
+						</table>
+				 </div>   
+	    		 <div data-options="region:'center',title:'所有权限 '"
+	    		 style="padding:5px;background:#eee;">
+	    		 	<table class="easyui-datagrid" style="width:500px;height:200px" id="permissionAll"
+						  data-options="singleSelect:true,
+							url:'/permission/permission_list',
+							fit:true,
+							fitColumns:true,
+							pagination:true,
+							rownumbers:true"
+							>
+							<thead>
+								<tr>
+									<th field="id"    width="100">权限名称</th>
+									<th field="name"    width="100">权限资源</th>
+								</tr>
+							</thead>
+						</table>
+	    		 </div>
+	    	</form>
+		</div>
+	</div>
+	
+<!-- 	data-options="iconCls:'icon-cancel'" -->
+	<div id="btu">
+		<a class="easyui-linkbutton"  data-btn="saveRsource" data-options="iconCls:'icon-add'">保存</a>
+		<a class="easyui-linkbutton" data-btn="backRsource" data-options="iconCls:'icon-cancel'" onclick="$('#myDialog').dialog('close')">取消</a>
+	</div>
+</body>
+</html>

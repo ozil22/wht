@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.ProductOrderMapper">
+
+	<insert id="save" parameterType="ProductOrder" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_productOrder(buyTime,orderNum,postage,state,totalPrice,message,address_id,
+					user_id,store_id,payPrice,totalOrder_id) 
+					values(#{buyTime},#{orderNum},#{postage},#{state},#{totalPrice},#{message},#{address.id},
+					#{user.id},#{store.id},#{payPrice},#{totalOrder.id})
+	</insert>
+	<!-- 修改-->
+	<update id="update" parameterType="ProductOrder">
+		update t_productOrder set 
+		postage=#{postage},
+		totalPrice=#{totalPrice},
+		message=#{message},
+		address_id=#{address.id},
+		payPrice=#{payPrice}
+		where id = #{id}
+	</update>
+	<!-- 修改状态 -->
+	<update id="updateState" parameterType="ProductOrder">
+		update t_productOrder set 
+		state=#{state}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_productOrder where id = #{id}
+	</delete>
+	
+	<select id="get" resultType="ProductOrder" parameterType="long">
+		select *
+		from t_productOrder  
+		where id=#{id}
+	</select>
+	
+	<select id="getAll" resultType="ProductOrder">
+		select * from t_productOrder
+	</select>
+	
+		<!-- 公共的高级查询条件 -->
+	<!-- <sql id="whereSql">
+		<where>
+			<if test="ProductOrderName!=null">
+				g.name like concat('%',#{ProductOrderName},'%')
+			</if>
+			<if test="state!=-99">
+				and g.state = #{state}
+			</if>
+			<if test="storeId != null and storeId != -1">
+				and g.store_id = #{storeId}
+			</if>
+			<if test="typeId != null and typeId != -1">
+				and g.type_id = #{typeId}
+			</if>
+			<if test="uptime != null">
+				and g.time > #{uptime}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="query" resultMap="ProductOrderMap" parameterType="ProductOrderQuery">
+		select g.*,b.src bsrc,b.sort bsort
+		from t_productOrder g 
+		join t_bannerimage b
+		on g.id = b.ProductOrder_id
+		<include refid="whereSql"/>
+		<if test="sort==-1">
+			order by g.time 
+		</if> 
+		<if test="sort==1">
+			order by g.time desc
+		</if> 
+		<if test="sort==2">
+			order by g.saleNum desc
+		</if> 
+		<if test="sort==-3">
+			order by g.salePrice
+		</if> 
+		<if test="sort==3">
+			order by g.salePrice desc
+		</if> 
+		<if test="sort==4">
+			order by g.proxyNum desc
+		</if> 
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	获取总记录数
+	<select id="queryTotal" resultType="long" parameterType="ProductOrderQuery">
+		select count(g.id)
+		from t_productOrder g 
+		join t_bannerimage b
+		on g.id = b.ProductOrder_id
+		<include refid="whereSql"/>
+	</select> -->
+</mapper>

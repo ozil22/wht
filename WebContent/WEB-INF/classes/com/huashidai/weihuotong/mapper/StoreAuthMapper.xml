@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.StoreAuthMapper">
+	<!-- 保存审核信息 -->
+	<insert id="save" parameterType="StoreAuth" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_storeAuth(linkman,applyTime,state,idCard1,idCard2,otherCard1,
+							otherCard2,otherCard3,otherCard4,store_id) 
+					values(#{linkman},#{applyTime},#{state},#{idCard1},#{idCard2},
+					#{otherCard1},#{otherCard2},#{otherCard3},#{otherCard4},#{store.id})
+	</insert>
+	<!-- 修改审核信息-->
+	<update id="updateAuthInfo" parameterType="StoreAuth">
+		update t_storeAuth set 
+		linkman=#{linkman},
+		applyTime=#{applyTime},
+		idCard1=#{idCard1},
+		idCard2=#{idCard2},
+		otherCard1=#{otherCard1},
+		otherCard2=#{otherCard2},
+		otherCard3=#{otherCard3},
+		otherCard4=#{otherCard4},
+		state=0
+		where id = #{id}
+	</update>
+	<!-- 修改状态 -->
+	<update id="updateState" parameterType="StoreAuth">
+		update t_storeAuth set 
+		state=#{state}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_storeAuth where id = #{id}
+	</delete>
+	
+	
+	<select id="get" resultType="StoreAuth">
+		select * from t_storeAuth  
+		where id=#{id}
+	</select>
+	<select id="getByStore" resultType="StoreAuth">
+		select * from t_storeAuth  
+		where store_id=#{storeId}
+	</select>
+	
+	<select id="getAll" resultType="StoreAuth">
+		select * from t_storeAuth
+	</select>
+</mapper>

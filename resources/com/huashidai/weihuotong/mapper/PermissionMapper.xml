@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.PermissionMapper">
+	
+	<resultMap id="permissionMap" type="Permission">
+		<id property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="type" column="type"/>
+		<result property="resource" column="resource"/>
+	</resultMap>
+	<!-- 查询出所有的权限信息 -->
+ 	<select id="getAll" resultMap="permissionMap">
+		select p.*
+		from t_permission p left join t_resource r on p.resource=r.name
+	</select>
+	
+	<!-- 返回权限列表 -->
+	<select id="getAllPermission" resultType="Permission">
+		select * from t_permission 
+	</select>
+		
+	<!-- 根据传入的id的值,来查询出对应的权限 -->
+	<select id="get" parameterType="long" resultMap="permissionMap">
+		select p.*
+		from t_permission p left join t_resource r on p.resource=r.name
+		where p.id=#{id}
+	</select>
+	
+	<!-- 添加一个权限信息  -->
+	<select id="getPermissionByResources" parameterType="string" resultType="Permission">
+		select * from t_permission where resource=#{resource}
+	</select>
+	<select id="getUserPermission" parameterType="long" resultType="Permission">
+		select  DISTINCT emp.username,p.name,p.id,p.resource 
+			from t_permission  p
+			left join t_role_permission rp on(rp.permission_id=p.id)
+			left join t_role r on(r.id=rp.role_id)
+			left join t_employee_role er on(er.role_id=r.id)
+			left join t_employee emp on(emp.id=er.employee_id)
+			where emp.id=#{id}
+	</select>
+	
+	<!-- 添加一个角色信息  -->
+	<insert id="save" parameterType="Permission">
+		insert into t_permission (name,type,resource)
+		values (#{name},#{type},#{resource})
+	</insert>
+	<!-- 修改一个权限信息 -->
+	<update id="update" parameterType="Permission">
+		update t_permission set name=#{name},
+		type=#{type},
+		resource=#{resource}
+		where id=#{id}
+	</update>
+	<!-- 删除一个权限信息 -->
+	<update id="delete" parameterType="long">
+		delete from t_permission
+		where id=#{id}
+	</update>
+	<!-- 添加全部权限 -->
+	<!-- IGNORE，这个关键字判断每条记录是否存在，是否违反饿了表中的唯一索引，如果存在就不插入，而不存在的记录就会插入。 -->
+	<insert id="saveAll" parameterType="arraylist">
+		insert ignore into t_permission (name,type,resource)
+		values
+	    <foreach collection="list" item="item" index="index" separator=",">  
+	        (#{item.name},#{item.type},#{item.resource}) 
+	    </foreach>  
+	</insert>
+	
+	<select id="query" resultType="Permission" parameterType="BaseQuery">
+		select *
+		from t_permission 
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 获取总记录数 -->
+	<select id="queryTotal" resultType="long" parameterType="BaseQuery">
+		select count(id)
+		from t_permission  
+	</select>
+</mapper>

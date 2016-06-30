@@ -1,0 +1,63 @@
+package com.huashidai.weihuotong.app;
+/**
+ * 代理商品相关网页接口
+ */
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.huashidai.weihuotong.domain.Goods;
+import com.huashidai.weihuotong.domain.Product;
+import com.huashidai.weihuotong.domain.ProxyGoods;
+import com.huashidai.weihuotong.domain.User;
+import com.huashidai.weihuotong.mapper.GoodsMapper;
+import com.huashidai.weihuotong.mapper.ProductMapper;
+import com.huashidai.weihuotong.mapper.ProxyGoodsMapper;
+
+@Controller
+@RequestMapping("/proxy")
+public class ProxyController {
+	@Autowired
+	private ProxyGoodsMapper proxyGoodsMapper;
+	@Autowired
+	private GoodsMapper goodsMapper;
+	@Autowired
+	private ProductMapper productMapper;
+	
+	/**
+	 * 代理商品页面
+	 * @return
+	 */
+	@RequestMapping("/enterProxyGoods")
+	public ModelAndView enterProxyGoods(Long proxyGoodsId){
+		ModelAndView modelAndView = new ModelAndView("proxy/proxyGoods");
+		ProxyGoods proxyGoods = proxyGoodsMapper.get(proxyGoodsId);
+		modelAndView.addObject("proxyGoods", proxyGoods);
+		User user = proxyGoods.getUser();
+		modelAndView.addObject("proxyUser", user);
+		Goods goods = proxyGoods.getGoods();
+		goods = goodsMapper.getMap(goods.getId());
+		modelAndView.addObject("goods", goods);
+		List<Product> products = productMapper.getByGoods(goods.getId());
+		System.out.println("==============================================================");
+		System.out.println("==============================================================");
+		System.out.println(products.size());
+		System.out.println("==============================================================");
+		System.out.println("==============================================================");
+		modelAndView.addObject("products", products);
+		return modelAndView;
+	}
+	/**
+	 * 订单页面
+	 * @return
+	 */
+	@RequestMapping("/proxyOrder")
+	public ModelAndView proxyOrder(){
+		ModelAndView modelAndView = new ModelAndView("proxy/proxyOrder");
+		return modelAndView;
+	}
+
+}

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashidai.weihuotong.mapper.ArticleCommentMapper" >
+  <insert id="save" parameterType="ArticleComment" >
+    insert into t_articleComment (content,commentTime,
+    	user_id,article_id)
+	    values (#{content}, #{commentTime},
+	    #{user.id},#{article.id})
+  </insert>
+  
+  
+  <delete id="delete" parameterType="long" >
+    delete from t_articleComment
+    where id = #{id}
+  </delete>
+  <delete id="deleteByArticle" parameterType="long" >
+    delete from t_articleComment
+    where article_id = #{articleId}
+  </delete>
+  
+  <resultMap type="ArticleComment" id="ArticleCommentMap">
+  	<id column="id" property="id"/>
+  	<result column="name" property="name"/>
+  	<result column="content" property="content"/>
+  	<result column="commentTime" property="commentTime"/>
+  	<association property="user" javaType="User">
+  		<id column="uid" property="id"/>
+	  	<result column="unickname" property="nickname"/>
+	  	<result column="uheadImage" property="headImage"/>
+  	</association>
+  </resultMap>
+  <sql id="selectSql"> 
+  	 select a.*,u.id uid,u.nickname unickname,u.headImage uheadImage
+    	from t_articleComment a
+    	left join t_user u on a.user_id = u.id
+  </sql>
+  
+  <sql id="whereSql">
+	  <where>
+	  	<if test="articleId != null and articleId != -1">
+			a.article_id = #{articleId}
+		</if>
+	  </where>
+  </sql>
+  <select id="query" resultMap="ArticleCommentMap" parameterType="ArticleCommentQuery">
+		<include refid="selectSql"/>
+		<include refid="whereSql"/>
+			order by a.commentTime desc
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 获取总记录数 -->
+	<select id="queryTotal" resultType="long" parameterType="ArticleCommentQuery">
+		select count(a.id)
+		from t_articleComment a 
+		<include refid="whereSql"/>
+	</select>
+  
+</mapper>

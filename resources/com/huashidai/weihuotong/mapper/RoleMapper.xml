@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.RoleMapper">
+	
+	<!-- 查询出所有的角色信息 -->
+	<select id="getAll" resultType="Role">
+		select * from t_role
+	</select>
+		
+	<resultMap id="roleResultMap" type="Role">
+		<id property="id" column="id"/>
+		<result property="name" column="name"/>
+	</resultMap>
+	<!-- 根据传入的id的值,来查询出对应的角色 -->
+	<select id="get" parameterType="long"  resultMap="roleResultMap">
+		select * from t_role
+		where id=#{id}
+	</select>
+	<resultMap id="menuResultMap" extends="roleResultMap" type="Role">
+		<collection property="menus" ofType="Menu">
+			<id property="id" column="mid"/>
+			<result property="text" column="mtext"/>
+			<result property="url" column="murl"/>
+		</collection>
+	</resultMap>
+	<!-- 根据传入的id的值.查询出角色可以访问的菜单信息 -->
+	<select id="finMenus" parameterType="long" resultMap="menuResultMap">
+		select r.id,r.name,m.id mid,m.text mtext,m.url murl
+		from t_role r left join t_role_menu rm on r.id=rm.role_id
+		left join t_menu m on rm.menu_id=m.id
+		where r.id=#{id}
+	</select>	
+	
+	<!-- 保存角色和菜单之间的关系 -->
+	<select id="saveRelativity" parameterType="Role_Menu">
+		insert into t_role_menu (role_id,menu_id)
+		values(#{role.id},#{menu.id})
+	</select>
+	
+	<!-- 删除角色与角色对应的菜单之间的关系 -->
+	<select id="deleteRelativity" parameterType="Role_Menu" >
+		delete t_role_menu
+		<where>
+			<if test="role_id!=0">
+				role_id=#{role.id}
+			</if>
+			<if test="menu_id!=0">
+				and menu_id=#{menu.id}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 添加一个角色信息  -->					 
+	<insert id="save" parameterType="Role" useGeneratedKeys="true" keyProperty="id">
+		insert into t_role(id,name,sn)
+		values (null,#{name},#{sn})
+	</insert>
+	<!-- 修改一个角色信息 -->
+	<update id="update" parameterType="Role">
+		update t_role set name=#{name}
+		where id=#{id}
+	</update>
+	<!-- 删除一个角色信息 -->
+	<update id="delete" parameterType="long">
+		delete from t_role
+		where id=#{id}
+	</update>
+	
+	<!-- 书写与权限有关的查询sql -->
+	<resultMap id="permissionResultMap" type="Role" extends="roleResultMap" >
+		<collection property="permissions" ofType="Permission">
+			<id property="id" column="pid"/>
+			<result property="name" column="pname"/>
+			<result property="type" column="ptype"/>
+		</collection>
+	</resultMap>
+	<select id="findPermissions" resultMap="permissionResultMap" parameterType="long">
+		select r.id,r.name,p.id pid,p.name pname,p.type ptype
+		from t_role r left join t_role_permission rp on r.id=rp.role_id
+		left join t_permission p on rp.permission_id=p.id
+		where r.id=#{id}
+		order by p.type
+	</select>
+	<!-- 保存角色和权限之间的关系 -->
+	<select id="saveRelativityForPermission" parameterType="list">
+		insert into t_role_permission (role_id,permission_id)
+		values
+		<foreach item="item" index="index" collection="list"
+			separator=",">
+			(#{item.role.id},#{item.permission.id})
+		</foreach>
+
+	</select>
+	
+	<!-- 删除角色与权限对应的菜单之间的关系 -->
+	<select id="deleteRelativityForPermission" parameterType="long" >
+		delete from t_role_permission
+		where role_id=#{id}
+	</select>
+	
+</mapper>

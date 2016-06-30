@@ -1,0 +1,27 @@
+package com.huashidai.weihuotong.mapper;
+
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.huashidai.weihuotong.domain.SecuredOrder;
+
+public interface SecuredOrderMapper {
+	/**
+	 * 保存
+	 */
+	void save(SecuredOrder securedOrder);
+	/**
+	 * 删除
+	 */
+	void delete(Long id);
+	/**
+	 * 获取单个
+	 */
+	SecuredOrder get(Long id);
+	/**
+	 * 根据总订单号获取
+	 */
+	List<SecuredOrder> getByTotalOrderNum(@Param("totalOrderNum")String totalOrderNum);
+}

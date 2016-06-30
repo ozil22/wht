@@ -1,0 +1,55 @@
+/*
+Navicat MySQL Data Transfer
+
+Source Server         : weihuotong
+Source Server Version : 50171
+Source Host           : 211.149.241.17:3306
+Source Database       : weihuotong123
+
+Target Server Type    : MYSQL
+Target Server Version : 50171
+File Encoding         : 65001
+
+Date: 2016-05-03 11:16:37
+*/
+
+SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for t_promotion
+-- ----------------------------
+DROP TABLE IF EXISTS `t_promotion`;
+CREATE TABLE `t_promotion` (
+  `state` bigint(20) NOT NULL,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `image` varchar(255) NOT NULL,
+  `contentType` int(11) NOT NULL,
+  `contentId` int(11) NOT NULL,
+  `beginTime` datetime NOT NULL,
+  `endTime` datetime NOT NULL,
+  `price` decimal(10,0) NOT NULL,
+  `adPositionId_id` bigint(20) NOT NULL,
+  `store_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of t_promotion
+-- ----------------------------
+INSERT INTO `t_promotion` VALUES ('1', '1', '/images/promotion/123.jpg', '1', '1', '2016-02-01 14:27:55', '2016-06-01 14:27:59', '123', '1', '0');
+INSERT INTO `t_promotion` VALUES ('1', '2', '/images/promotion/123.jpg', '1', '1', '2016-02-01 14:27:55', '2016-06-01 14:27:59', '123', '2', '0');
+INSERT INTO `t_promotion` VALUES ('0', '3', '/images/promotion/123.jpg', '1', '1', '2016-02-01 14:27:55', '2016-06-01 14:27:59', '123', '3', '0');
+INSERT INTO `t_promotion` VALUES ('1', '4', '/images/promotion/123.jpg', '1', '1', '2016-02-01 14:27:55', '2016-06-01 14:27:59', '123', '4', '0');
+INSERT INTO `t_promotion` VALUES ('1', '5', '/images/promotion/123.jpg', '1', '1', '2016-02-01 14:27:55', '2016-02-18 14:27:59', '123', '5', '0');
+INSERT INTO `t_promotion` VALUES ('0', '6', '/images/promotion/123.jpg', '1', '1', '2016-02-01 14:27:55', '2016-02-18 14:27:59', '123', '6', '0');
+INSERT INTO `t_promotion` VALUES ('0', '7', '/images/promotion/123.jpg', '1', '1', '2016-02-01 14:27:55', '2016-02-18 14:27:59', '123', '7', '0');
+INSERT INTO `t_promotion` VALUES ('0', '8', '/images/promotion/123.jpg', '1', '1', '2016-02-01 14:27:55', '2016-02-18 14:27:59', '123', '8', '0');
+INSERT INTO `t_promotion` VALUES ('0', '9', '/images/promotion/123.jpg', '1', '1', '2016-02-01 14:27:55', '2016-02-18 14:27:59', '123', '9', '0');
+INSERT INTO `t_promotion` VALUES ('0', '10', '/images/promotion/123.jpg', '1', '1', '2016-02-01 14:27:55', '2016-02-18 14:27:59', '123', '10', '0');
+INSERT INTO `t_promotion` VALUES ('0', '11', '/images/promotion/123.jpg', '1', '1', '2016-02-01 14:27:55', '2016-02-18 14:27:59', '123', '11', '0');
+INSERT INTO `t_promotion` VALUES ('0', '12', '/images/promotion/123.jpg', '1', '1', '2016-02-01 14:27:55', '2016-02-18 14:27:59', '123', '12', '0');
+INSERT INTO `t_promotion` VALUES ('0', '13', '/images/promotion/123.jpg', '1', '1', '2016-01-15 16:32:40', '2016-02-24 16:32:47', '123', '13', '0');
+INSERT INTO `t_promotion` VALUES ('0', '14', '/images/promotion/123.jpg', '1', '1', '2016-02-29 16:33:15', '2016-02-29 16:33:18', '123', '14', '0');
+INSERT INTO `t_promotion` VALUES ('0', '15', '/images/promotion/123.jpg', '1', '1', '2016-02-29 16:33:30', '2016-02-29 16:33:33', '123', '15', '0');
+INSERT INTO `t_promotion` VALUES ('0', '16', '/images/promotion/123.jpg', '1', '1', '2016-02-29 16:34:16', '2016-02-29 16:34:18', '123', '16', '0');
+INSERT INTO `t_promotion` VALUES ('0', '18', '/images/promotion/123.jpg', '3', '1', '2016-02-24 16:34:56', '2016-02-12 16:35:00', '123', '18', '0');

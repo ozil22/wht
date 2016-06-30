@@ -1,0 +1,17 @@
+package com.huashidai.weihuotong.mapper;
+
+import java.util.List;
+
+import com.huashidai.weihuotong.domain.AccountFlow;
+
+public interface AccountFlowMapper {
+
+	void save(AccountFlow accountFlow);
+
+	AccountFlow get(Long id);
+
+	List<AccountFlow> getByAccount(Long accountId);
+
+	void delete(Long id);
+
+}

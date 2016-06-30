@@ -1,0 +1,19 @@
+package com.huashidai.weihuotong.query;
+
+
+public class TypeQuery extends BaseQuery {
+	private Long parentId;// 上级类型
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
+	@Override
+	public String toString() {
+		return "TypeQuery [parentId=" + parentId + "]";
+	}
+}

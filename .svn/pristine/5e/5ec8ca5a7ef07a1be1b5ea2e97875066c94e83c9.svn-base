@@ -1,0 +1,97 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.Account;
+import com.huashidai.weihuotong.domain.SystemAccount;
+import com.huashidai.weihuotong.domain.Withdraw;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.mapper.WithdrawMapper;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.query.WithdrawQuery;
+import com.huashidai.weihuotong.service.IAccountFlowService;
+import com.huashidai.weihuotong.service.IAccountService;
+import com.huashidai.weihuotong.service.ISystemAccountFlowService;
+import com.huashidai.weihuotong.service.ISystemAccountService;
+import com.huashidai.weihuotong.service.IWithdrawService;
+import com.huashidai.weihuotong.utils.ConstUtil;
+import com.huashidai.weihuotong.utils.StateCode;
+
+@Service
+public class WithdrawServiceImpl implements IWithdrawService {
+	@Autowired
+	private WithdrawMapper withdrawMapper;
+	@Autowired
+	private IAccountService accountService;
+	@Autowired
+	private IAccountFlowService accountFlowService;
+	@Autowired
+	private ISystemAccountFlowService systemAccountFlowService;
+	@Autowired
+	private ISystemAccountService systemAccountService;
+
+	@Override
+	public PageResult<Withdraw> query(WithdrawQuery qu) {
+		// 统计查询
+		Long total = withdrawMapper.queryTotal(qu);
+		// 分页查询
+		List<Withdraw> rows = withdrawMapper.query(qu);
+		return new PageResult<Withdraw>(rows, qu.getPageSize(),
+				qu.getCurrentPage(), total.intValue());
+	}
+
+	@Override
+	public void withdrawApply(Withdraw withdraw) {
+		BigDecimal amount = withdraw.getAmount();
+		Account account = accountService.get(withdraw.getAccount().getId());
+		if (account.getBalance().compareTo(amount) == -1) {
+			throw new LogicException("余额不足！", StateCode.ACCOUNT_NO_BALANCE);
+		}
+		withdraw.setTime(new Date());
+		withdrawMapper.save(withdraw);
+		account.setBalance(account.getBalance().subtract(amount));
+		account.setFreezedAmount(account.getFreezedAmount().add(amount));
+		accountService.update(account.getId(),
+				amount.multiply(ConstUtil.NEGATIVE), amount, ConstUtil.ZERO,
+				ConstUtil.ZERO);
+	}
+
+	@Override
+	public void agreeApply(Long id) {
+		Withdraw withdraw = withdrawMapper.get(id);
+		BigDecimal amount = withdraw.getAmount();
+		SystemAccount systemAccount = systemAccountService.get();
+		BigDecimal sysBalance = systemAccount.getBalance();
+		if (sysBalance.compareTo(amount) == -1) {
+			throw new LogicException("系统账户余额不足！", StateCode.ACCOUNT_NO_BALANCE);
+		}
+		// 更新账户信息
+		Account account = withdraw.getAccount();
+		account = accountService.update(account.getId(), ConstUtil.ZERO,
+				amount.multiply(ConstUtil.NEGATIVE), ConstUtil.ZERO,
+				ConstUtil.ZERO);
+		systemAccount = systemAccountService.update(amount);
+
+		// 创建账户流水
+		accountFlowService.createAccountFlow(
+				ConstUtil.ACCOUNT_ACTIONTYPE_WITHDRAW, amount, account, "");
+		systemAccountFlowService.createSystemAccountFlow(
+				ConstUtil.ACCOUNT_ACTIONTYPE_WITHDRAW, amount, systemAccount,
+				account.getName() + "", account);
+		withdraw.setState(ConstUtil.MONEY_WITHDRAW_TRANSFERED);
+		withdrawMapper.update(withdraw);
+	}
+
+	@Override
+	public void refuseApply(Long id, String remark) {
+		Withdraw withdraw = withdrawMapper.get(id);
+		withdraw.setRemark(remark);
+		withdraw.setState(ConstUtil.MONEY_WITHDRAW_REJECTED);
+		withdrawMapper.update(withdraw);
+	}
+}

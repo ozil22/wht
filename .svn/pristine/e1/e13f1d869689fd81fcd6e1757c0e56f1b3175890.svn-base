@@ -1,0 +1,76 @@
+//格式化函数，返回值就是要显示的内容
+//时间格式化
+var format = function(time, format) {
+	var t = new Date(time);
+	var tf = function(i) {
+		return (i < 10 ? '0' : '') + i;
+	};
+	return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function(a) {
+		switch (a) {
+		case 'yyyy':
+			return tf(t.getFullYear());
+			break;
+		case 'MM':
+			return tf(t.getMonth() + 1);
+			break;
+		case 'dd':
+			return tf(t.getDate());
+			break;
+		case 'HH':
+			return tf(t.getHours());
+			break;
+		case 'mm':
+			return tf(t.getMinutes());
+			break;
+		case 'ss':
+			return tf(t.getSeconds());
+			break;
+		}
+		;
+	});
+};
+// 时间
+function formatTime(val, row) {
+	return format(val, 'yyyy-MM-dd');
+
+}
+// 准确时间
+function formatDateTime(val, row) {
+	return format(val, 'yyyy-MM-dd HH:mm:ss');
+
+}
+// 账户真实姓名
+function formatEmployee(val, row) {
+	return val ? val.realName : "<font color='red'>未知</font>";
+};
+
+// 性别
+function formatGender(val, row) {
+	return val ? "<font color='green'>男</font>" : "<font color='red'>女</font>";
+}
+//任意对象的name属性
+function formatObjectName(val,row,index){
+	return  val ? val.name : "<font color='red'>未知</font>";
+}
+//账户状态
+function formatEmployeeState(v,r,i){
+	return v ? "<font color='green'>正常</font>" : "<font color='red'>停用</font>";
+}
+//商品状态
+function formatGoodsState(v,r,i){
+	return v ? "<font color='green'>销售中</font>" : "<font color='red'>已下架</font>";
+}
+//显示对象中src字段的图片
+function formatImg(v,r,i){
+	return '<img src="'+v[0].src+'" width="60px" height="40px"/>';
+}
+//
+function formatFiledImg(v,r,i){
+	console.debug(v);
+	return '<img src="'+v+'" width="60px" height="40px"/>';
+}
+//商品详情
+function formatGoodsDetails(v,r,i){
+	return '<a href="#" onclick=showImg('+v+')>查看详情</a>';
+}
+

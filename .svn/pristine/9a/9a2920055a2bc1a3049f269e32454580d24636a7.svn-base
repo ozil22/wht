@@ -1,0 +1,351 @@
+package com.huashidai.weihuotong.app;
+/**
+ * 用户相关的接口
+ */
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.huashidai.weihuotong.domain.Address;
+import com.huashidai.weihuotong.domain.User;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.query.AccountFlowQuery;
+import com.huashidai.weihuotong.query.ProxyLogQuery;
+import com.huashidai.weihuotong.query.UserQuery;
+import com.huashidai.weihuotong.service.IAccountFlowService;
+import com.huashidai.weihuotong.service.IAccountService;
+import com.huashidai.weihuotong.service.IAddressService;
+import com.huashidai.weihuotong.service.IProxyLogService;
+import com.huashidai.weihuotong.service.IUserImageService;
+import com.huashidai.weihuotong.service.IUserService;
+import com.huashidai.weihuotong.utils.AppResult;
+
+@Controller
+@RequestMapping("/app")
+public class UserAPP {
+	@Autowired
+	private IUserService userService;
+	@Autowired
+	private IUserImageService userImageService;
+	@Autowired
+	private IAddressService addressService; 
+	@Autowired
+	private IAccountService accountService;
+	@Autowired
+	private IAccountFlowService accountFlowService;
+	@Autowired
+	private IProxyLogService proxyLogService;
+	
+	/**
+	 * 登录
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+	@RequestMapping("/checkLogin")
+	@ResponseBody
+	public AppResult checkLogin(String username,String password){
+		AppResult appResult = null;
+		try{
+			// 检查登陆
+			User user = userService.findcheckLogin(username, password);
+			// 封装响应信息
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put("userId", user.getId());
+			appResult = new AppResult(map);
+		}catch(LogicException e){
+			// 封装响应信息
+			appResult =new AppResult(e.getMessage(), e.getErrorCode());
+		}
+		return appResult;
+	}
+	/**
+	 * 注册
+	 * @param username
+	 * @param password
+	 * @param userCode
+	 * @return
+	 */
+	@RequestMapping("/register")
+	@ResponseBody
+	public AppResult register(String username,String password,String useCode){
+		AppResult appResult = null;
+		try{
+			User user = userService.register(username, password,useCode);
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("userId", user.getId());
+			appResult = new AppResult(map);
+		}catch(LogicException e){
+			appResult = new AppResult(e.getMessage(), e.getErrorCode());
+		}
+		return appResult;
+	}
+	/**
+	 * 修改密码
+	 * @param username
+	 * @param password
+	 * @param invitationCode
+	 * @return
+	 */
+	@RequestMapping("/updatePassword")
+	@ResponseBody
+	public AppResult updatePassword(String username,String password,String newPassword){
+		AppResult appResult = null;
+		try{
+			User user = userService.updatePassword(username, password,newPassword);
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("userId", user.getId());
+			appResult = new AppResult(map);
+		}catch(LogicException e){
+			appResult =new AppResult(e.getMessage(), e.getErrorCode());
+		}
+		return appResult;
+	}
+	/**
+	 * 忘记密码
+	 * @param username
+	 * @param password
+	 * @param invitationCode
+	 * @return
+	 */
+	@RequestMapping("/forgetPassword")
+	@ResponseBody
+	public AppResult forgetPassword(String username,String password){
+		AppResult appResult = null;
+		try{
+			User user = userService.forgetPassword(username, password);
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("userId", user.getId());
+			appResult = new AppResult(map);
+		}catch(LogicException e){
+			appResult =new AppResult(e.getMessage(), e.getErrorCode());
+		}
+		return appResult;
+	}
+	/**
+	 * 用户信息
+	 * @param userId
+	 * @return
+	 */
+	@RequestMapping("/userInfo")
+	@ResponseBody
+	public AppResult userInfo(Long userId){
+		AppResult appResult = null;
+		try{
+			Map<String,Object> userInfo = userService.getUserInfo(userId);
+			appResult = new AppResult(userInfo);
+		}catch(LogicException e){
+			appResult =new AppResult();
+		}
+		return appResult;
+	}
+	/**
+	 * 修改用户展示图片
+	 * @param userId
+	 * @param image
+	 * @param mode 更新方式 0 添加 ,1 覆盖
+	 * @return
+	 */
+	@RequestMapping("/updateUserImages")
+	@ResponseBody
+	public AppResult updateUserImages(@RequestParam("image") MultipartFile[] image,Long userId,int mode){
+		AppResult appResult = null;
+		try{
+			userImageService.updateByUser(image,userId,mode);
+			appResult = new AppResult(null);
+		}catch(IOException e){
+			appResult =new AppResult();
+		}
+		return appResult;
+	}
+	/**
+	 * 修改用户背景图片
+	 * @param userId
+	 * @param image
+	 * @return
+	 */
+	@RequestMapping("/updateBackground")
+	@ResponseBody
+	public AppResult updateBackground(@RequestParam("image") MultipartFile image,Long userId){
+		AppResult appResult = null;
+		try{
+			userService.updateBackground(image,userId);
+			appResult = new AppResult(null);
+		}catch(IOException e){
+			appResult =new AppResult();
+		}
+		return appResult;
+	}
+	
+	/**
+	 * 新增收货地址
+	 * @param userId
+	 * @param image
+	 * @return
+	 */
+	@RequestMapping("/saveAddress")
+	@ResponseBody
+	public AppResult saveAddress(Address address){
+		AppResult appResult = null;
+		try{
+			addressService.save(address);
+			appResult = new AppResult(null);
+		}catch(Exception e){
+			e.printStackTrace();
+			appResult =new AppResult();
+		}
+		return appResult;
+	}
+	/**
+	 * 修改收货地址
+	 * @param userId
+	 * @param image
+	 * @return
+	 */
+	@RequestMapping("/updateAddress")
+	@ResponseBody
+	public AppResult updateAddress(Address address){
+		AppResult appResult = null;
+		try{
+			addressService.update(address);
+			appResult = new AppResult(null);
+		}catch(Exception e){
+			e.printStackTrace();
+			appResult =new AppResult();
+		}
+		return appResult;
+	}
+	/**
+	 * 设置为默认地址
+	 * @param userId
+	 * @param image
+	 * @return
+	 */
+	@RequestMapping("/updateDefault")
+	@ResponseBody
+	public AppResult updateDefault(Address address){
+		AppResult appResult = null;
+		try{
+			addressService.updateDefault(address);
+			appResult = new AppResult(null);
+		}catch(Exception e){
+			e.printStackTrace();
+			appResult =new AppResult();
+		}
+		return appResult;
+	}
+	/**
+	 * 删除地址
+	 * @param userId
+	 * @param image
+	 * @return
+	 */
+	@RequestMapping("/deleteAddress")
+	@ResponseBody
+	public AppResult deleteAddress(Address address){
+		AppResult appResult = null;
+		try{
+			addressService.delete(address);
+			appResult = new AppResult(null);
+		}catch(LogicException e){
+			appResult =new AppResult(e.getMessage(), e.getErrorCode());
+		}
+		return appResult;
+	}
+	/**
+	 * 获取用户所有地址
+	 * @param userId
+	 * @param image
+	 * @return
+	 */
+	@RequestMapping("/getAddress")
+	@ResponseBody
+	public AppResult getAddress(Long userId){
+		AppResult appResult = null;
+		try{
+			List<Object> adds = addressService.getByUser(userId);
+			appResult = new AppResult(adds);
+		}catch(Exception e){
+			e.printStackTrace();
+			appResult =new AppResult();
+		}
+		return appResult;
+	}
+	/**
+	 * 查看我的收入
+	 * @param userId
+	 * @return
+	 */
+	@RequestMapping("/userAccount")
+	@ResponseBody
+	public AppResult userAccount(Long userId){
+		AppResult appResult = null;
+		try{
+			Map<String, Object> account = accountService.getByUser(userId);
+			appResult = new AppResult(account);
+		}catch(Exception e){
+			appResult =new AppResult();
+		}
+		return appResult;
+	}
+	/**
+	 * 查看我的资金明细(账户流水)
+	 * @param qu
+	 * @return
+	 */
+	@RequestMapping("/userAccountFlow")
+	@ResponseBody
+	public AppResult userAccountFlow(AccountFlowQuery qu){
+		AppResult appResult = null;
+		try{
+			Map<String, Object> accountFlows = accountFlowService.queryMap(qu);
+			appResult = new AppResult(accountFlows);
+		}catch(Exception e){
+			appResult =new AppResult();
+		}
+		return appResult;
+	}
+	/**
+	 * 我的团队
+	 * @param qu
+	 * @return
+	 */
+	@RequestMapping("/userTeam")
+	@ResponseBody
+	public AppResult userTeam(UserQuery qu){
+		AppResult appResult = null;
+		try{
+			Map<String,Object> map = userService.userTeam(qu);
+			appResult = new AppResult(map);
+		}catch(Exception e){
+			appResult =new AppResult();
+		}
+		return appResult;
+	}
+	/**
+	 * 我的转发
+	 * @param qu
+	 * @return
+	 */
+	@RequestMapping("/userProxy")
+	@ResponseBody
+	public AppResult userProxy(ProxyLogQuery qu){
+		AppResult appResult = null;
+		try{
+			Map<String, Object> map = proxyLogService.queryMap(qu);
+			appResult = new AppResult(map);
+		}catch(Exception e){
+			appResult =new AppResult();
+		}
+		return appResult;
+	}
+	
+}

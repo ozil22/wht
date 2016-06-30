@@ -1,0 +1,40 @@
+package com.huashidai.weihuotong.utils;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+/**
+ * 定义一个在方法上的自定义注解
+ * @author ozil
+ *
+ */
+/**
+ * 定义一个在方法上的自定义注解
+ * @author ozil
+ *
+ */
+/**
+ * 定义一个在方法上的自定义注解
+ * @author ozil
+ *
+ */
+/**
+ * 定义一个在方法上的自定义注解
+ * @author ozil
+ *
+ */
+@Target(ElementType.METHOD)//加在方法上的注解
+@Retention(RetentionPolicy.RUNTIME)//在运行时保存注解
+public @interface MethodAnnotation{
+	/**
+	 * 资源类别枚举
+	 */
+	public enum ResourceType {
+		账户权限, 账户, 客户店铺,客户账户, 商品,商品品牌,商品类型,商品订单,
+		广告位,广告,广告订单,文章,文章分类,文章评论,意见反馈,保证金订单,提现申请
+	};
+	
+    String name();//资源名字
+    ResourceType type();//资源类型
+}

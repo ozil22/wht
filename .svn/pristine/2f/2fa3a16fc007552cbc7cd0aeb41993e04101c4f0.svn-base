@@ -1,0 +1,71 @@
+package com.huashidai.weihuotong.query;
+
+/**
+ * 封装查询对象
+ */
+public class DepartmentQuery {
+	private String searchKey;
+	private Long managerId;
+	private Integer state=-99;
+	
+	public String getSearchKey() {
+		return searchKey;
+	}
+	public void setSearchKey(String searchKey) {
+		this.searchKey = searchKey;
+	}
+	public Long getManagerId() {
+		return managerId;
+	}
+	public void setManagerId(Long managerId) {
+		this.managerId = managerId;
+	}
+	public Integer getState() {
+		return state;
+	}
+	public void setState(Integer state) {
+		this.state = state;
+	}
+	@Override
+	public String toString() {
+		return "DepartmentQuery [searchKey=" + searchKey + ", managerId="
+				+ managerId + ", state=" + state + "]";
+	}
+	
+	//========================================***分页***=====================================
+	
+	private Integer pageSize=5;// 如果每页长度设置为-1，那么就不分页
+	private Integer currentPage=1;
+	
+	//算出每页第一条是总数据中的第几条数据
+	public Integer getStart(){
+		return (currentPage-1)*pageSize;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+	public Integer getCurrentPage() {
+		return currentPage;
+	}
+	public void setCurrentPage(Integer currentPage) {
+		this.currentPage = currentPage;
+	}
+	
+	// EasyUI分页组件兼容
+	public void setPage(Integer page) {
+		System.out.println("setPage.........");
+		this.currentPage = page;
+	}
+	public void setRows(Integer rows) {
+		System.out.println("setRows.........");
+		this.pageSize = rows;
+	}
+	
+	
+	
+	
+}

@@ -1,0 +1,24 @@
+package com.huashidai.weihuotong.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.huashidai.weihuotong.utils.MethodAnnotation;
+import com.huashidai.weihuotong.utils.MethodAnnotation.ResourceType;
+
+@Controller
+@RequestMapping("/test")
+public class _TestCotroller {
+
+	/**
+	 * 主页
+	 * @return
+	 */
+	@MethodAnnotation(name = "主页", type = ResourceType.广告位)
+	@RequestMapping("/index")
+	public String adPositionId() {
+		System.out.println(111111);
+		return "forward:/WEB-INF/test/upload.jsp";
+	}
+
+}

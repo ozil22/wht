@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.DetailsImageMapper">
+
+	<insert id="save" parameterType="DetailsImage" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_detailsImage(src,sort,goods_id) 
+					values(#{src},#{sort},#{goods.id})
+	</insert>
+	<!-- 修改-->
+	<update id="update" parameterType="DetailsImage">
+		update t_detailsImage set 
+		src=#{src},
+		sort=#{sort},
+		goods_id=#{goods.id},
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_detailsImage where id = #{id}
+	</delete>
+	
+	<select id="get" resultType="DetailsImage">
+		select *
+		from t_detailsImage
+		where id=#{id}
+	</select>
+	
+	<select id="getAll" resultType="DetailsImage">
+		select * from t_detailsImage
+	</select>
+	<select id="getByGoods" resultType="DetailsImage" parameterType="long">
+		select * from t_detailsImage
+		where goods_id = #{goodsId}
+	</select>
+	<select id="deleteByGoods" parameterType="long">
+		delete from t_detailsImage
+		where goods_id=#{goodsId}
+	</select>
+</mapper>

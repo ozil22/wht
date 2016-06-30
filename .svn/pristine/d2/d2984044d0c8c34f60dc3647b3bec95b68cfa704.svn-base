@@ -1,0 +1,41 @@
+package com.huashidai.weihuotong.query;
+
+
+public class AdPositionIdQuery extends BaseQuery {
+	/**
+	 * 广告类型
+	 * 0就是非banner图
+	 * 查询所有类型就不传
+	 */
+	private Integer type;
+	/**
+	 * 商品类型id
+	 * -1就是不按商品类型
+	 * 查询banner就是null
+	 */
+	private Long goodsTypeId = -1l;
+	public Integer getType() {
+		return type;
+	}
+	public void setType(Integer type) {
+		this.type = type;
+	}
+	public Long getGoodsTypeId() {
+		return goodsTypeId;
+	}
+	public void setGoodsTypeId(Long goodsTypeId) {
+		this.goodsTypeId = goodsTypeId;
+	}
+	@Override
+	public String toString() {
+		return "AdPositionIdQuery [type=" + type + ", goodsTypeId="
+				+ goodsTypeId + "]";
+	}
+	public AdPositionIdQuery(Integer type, Long goodsTypeId, Integer pageSize, Integer currentPage) {
+		super(pageSize, currentPage);
+		this.type = type;
+		this.goodsTypeId = goodsTypeId;
+	}
+	public AdPositionIdQuery() {
+	}
+}

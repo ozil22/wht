@@ -1,0 +1,28 @@
+package test;
+
+import java.util.Date;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.huashidai.weihuotong.domain.SystemLog;
+import com.huashidai.weihuotong.mapper.SystemLogMapper;
+
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:applicationContext.xml")
+public class SystemLogTset {
+	@Autowired
+	private SystemLogMapper mapper;
+	
+	@Test
+	public void test() throws Exception {
+		SystemLog s= new SystemLog();
+		s.setOpIP("1234");
+		s.setOpTime(new Date());
+		mapper.save(s);
+	}
+}

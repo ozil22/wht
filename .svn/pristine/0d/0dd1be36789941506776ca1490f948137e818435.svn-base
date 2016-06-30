@@ -1,0 +1,54 @@
+package com.huashidai.weihuotong.service;
+
+import java.io.IOException;
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.huashidai.weihuotong.domain.StoreAuth;
+
+public interface IStoreAuthService {
+
+	/**
+	 * 保存
+	 */
+	void save(StoreAuth storeAuth);
+
+	/**
+	 * 更新
+	 */
+	void update(StoreAuth storeAuth);
+
+	/**
+	 * 修改状态
+	 */
+	void updateState(StoreAuth storeAuth);
+
+	/**
+	 * 删除
+	 */
+	void delete(Long id);
+
+	/**
+	 * 获取单个
+	 */
+	StoreAuth get(Long id);
+
+	/**
+	 * 查询所有
+	 */
+	List<StoreAuth> getAll();
+
+	/**
+	 * 添加认证信息
+	 * 
+	 * @param file
+	 *            认证图片集合
+	 * @param linkman
+	 *            经营者
+	 * @param storeId
+	 *            店铺id
+	 */
+	void save(MultipartFile[] file, String linkman, Long storeId)
+			throws IOException;
+}

@@ -1,0 +1,96 @@
+//格式化函数，返回值就是要显示的内容
+//时间格式化
+var format = function(time, format) {
+	var t = new Date(time);
+	var tf = function(i) {
+		return (i < 10 ? '0' : '') + i;
+	};
+	return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function(a) {
+		switch (a) {
+		case 'yyyy':
+			return tf(t.getFullYear());
+			break;
+		case 'MM':
+			return tf(t.getMonth() + 1);
+			break;
+		case 'dd':
+			return tf(t.getDate());
+			break;
+		case 'HH':
+			return tf(t.getHours());
+			break;
+		case 'mm':
+			return tf(t.getMinutes());
+			break;
+		case 'ss':
+			return tf(t.getSeconds());
+			break;
+		}
+		;
+	});
+};
+// 时间
+function formatTime(val, row) {
+	return format(val, 'yyyy-MM-dd');
+
+}
+// 准确时间
+function formatDateTime(val, row) {
+	return format(val, 'yyyy-MM-dd HH:mm:ss');
+
+}
+// APP用户姓名
+function formatUser(val, row) {
+	return val ? val.name : "";
+}
+// 账户真实姓名
+function formatEmployee(val, row) {
+	return val ? val.realName : "";
+};
+
+// 性别
+function formatGender(val, row) {
+	return val ? "男" : "女";
+}
+//角色
+function formatRole(val,row){
+	return  val ? val.name : "<font color='red'>未知</font>";
+}
+//账户状态
+function formatEmployeeState(v,r,i){
+	switch (v) {
+		case 0:
+			return "<font color='red'>停用</font>";
+			break;
+
+		default:
+			return "<font color='green'>正常</font>";
+			break;
+	}
+	
+}
+//商品状态
+function formatGoodsState(v,r,i){
+	switch (v) {
+	case 0:
+		return "<font color='red'>已下架</font>";
+		break;
+		
+	default:
+		return "<font color='green'>销售中</font>";
+	break;
+	}
+	
+}
+//商品图片
+function formatGoodsImg(v,r,i){
+	return '<img src="'+v[0].src+'" width="60px" height="40px"/>';
+}
+//商品详情
+function formatGoodsDetails(v,r,i){
+	return '<a href="#" onclick=showImg('+v+')>查看详情</a>';
+}
+//内嵌对象的name
+function formatFiledName(v,r,i){
+	return v.name;
+}

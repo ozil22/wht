@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.huashidai.weihuotong.mapper.UserMapper"> 
+	
+	
+	<insert id="save" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+	 	insert into t_user(username,password,nickname,headImage,background,turnover,amount,
+	 	state,userTpye,myCode,useCode,wechat,openid,store_id)
+		values(#{username},#{password},#{nickname},#{headImage},#{background},#{turnover},#{amount},
+		#{state},#{userTpye},#{myCode},#{useCode},#{wechat},#{openid},#{store.id}) 
+	</insert>
+	
+	
+	<update id="update" parameterType="User">
+		update t_user set 
+			password=#{password},
+			nickname=#{nickname},
+			headImage=#{headImage},
+			background=#{background},
+			state=#{state},
+			userTpye=#{userTpye},
+			turnover=#{turnover},
+			amount=#{amount},
+			store_id=#{store.id}
+ 			where id=#{id} 
+	</update>
+	<update id="updateWechat" parameterType="User">
+		update t_user set 
+			wechat=#{wechat},
+			openid=#{openid},
+ 			where id=#{id} 
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_user 
+		where id=#{id}
+	</delete>
+	
+	<resultMap type="User" id="userMap">
+		<id property="id" column="id"/>
+		<result property="username" column="username"/>
+		<result property="password" column="password"/>
+		<result property="nickname" column="nickname"/>
+		<result property="email" column="email"/>
+		<result property="headImage" column="headImage"/>
+		<result property="background" column="background"/>
+		<result property="state" column="state"/>
+		<result property="userTpye" column="userTpye"/>
+		<result property="state" column="state"/>
+		<result property="myCode" column="myCode"/>
+		<result property="useCode" column="useCode"/>
+		<result property="turnover" column="turnover"/>
+		<result property="amount" column="amount"/>
+		<result property="wechat" column="wechat"/>
+		<result property="openid" column="openid"/>
+		<association property="store" javaType="Store">
+			<id property="id" column="sid"/>
+			<id property="name" column="sname"/>
+			<id property="state" column="sstate"/>
+		</association>
+	</resultMap>
+	
+	<select id="get" resultMap="userMap" parameterType="long">
+		 select u.*,s.id sid ,s.name sname,s.state sstate
+		 from t_user u
+		 left join t_store s on u.store_id = s.id
+		 where u.id=#{id}
+	</select>
+	<select id="getByStore" resultType="User" parameterType="long">
+		 select * from t_user 
+		where store_id=#{storeId}
+	</select>
+	<select id="getByCode" resultType="User" parameterType="string">
+		 select * from t_user 
+		where myCode=#{myCode}
+	</select>
+	
+	<select id="getAll" resultType="User">
+		 select * from t_user 
+	</select>
+	
+	<select id="checkLogin" resultMap="userMap">
+		 select u.*,s.id sid ,s.name sname,s.state sstate
+		 from t_user u
+		 left join t_store s on u.store_id = s.id
+		 where u.username=#{username}
+	</select>
+	<select id="getByWechat" resultMap="userMap">
+		 select u.*,s.id sid ,s.name sname,s.state sstate
+		 from t_user u
+		 left join t_store s on u.store_id = s.id
+		 where u.wechat=#{wechat} and u.openid=#{openid}
+	</select>
+	
+	
+		<!-- 公共的高级查询条件 -->
+	<sql id="whereSql">
+		<where>
+			<if test="userName!=null and userName!=''">
+				(u.username like concat('%',#{userName},'%') or u.nickname like concat('%',#{userName},'%'))
+			</if>
+			<if test="state!=-99">
+				and u.state=#{state}
+			</if>
+			<if test="userType!=-1">
+				and u.userType=#{userType}
+			</if>
+			<if test="useCode!=null and useCode !=''">
+				and u.useCode=#{useCode}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="query" resultMap="userMap" parameterType="EmployeeQuery">
+		 select u.*,s.id sid ,s.name sname,s.state sstate
+		 from t_user u
+		 left join t_store s on u.store_id = s.id
+		<include refid="whereSql"/>
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 获取总记录数 -->
+	<select id="queryTotal" resultType="long" parameterType="EmployeeQuery">
+		select count(u.id)
+		from t_user u
+		left join t_store s on u.store_id = s.id
+		<include refid="whereSql"/>
+	</select>
+</mapper> 

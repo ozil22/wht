@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.PromotionMapper">
+
+	<insert id="save" parameterType="Promotion" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_promotion(image,contentType,contentId,beginTime,endTime,price,state,adPositionId_id) 
+					values(#{image},#{contentType},#{contentId},#{beginTime},#{endTime},#{price},#{state
+					},#{adPositionId.id})
+	</insert>
+	<!-- 修改后状态变为待审 -->
+	<update id="update" parameterType="Promotion">
+		update t_promotion set 
+		image=#{image},
+		contentType=#{contentType},
+		contentId=#{contentId},
+		beginTime=#{beginTime},
+		endTime=#{endTime},
+		price=#{price},
+		state=0
+		where id = #{id}
+	</update>
+	<!-- 修改状态 -->
+	<update id="updateState" parameterType="Promotion">
+		update t_promotion set 
+		state=#{state}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_promotion where id = #{id}
+	</delete>
+	
+	<select id="get" resultType="Promotion">
+		select * from t_promotion
+		where id=#{id}
+	</select>
+	
+	<select id="getByAd" resultType="Promotion" parameterType="long">
+		select * from t_promotion
+		where adPositionId_id=#{_parameter}
+	</select>
+	<!-- 根据广告类型和商品类型获取 -->
+	<select id="getByAdAndGoods" resultType="Promotion" >
+		select p.* from t_promotion p 
+		left join t_adpositionid a
+		on(p.adPositionId_id = a.id)
+		where a.type = #{adTypeId}
+		<if test="goodsTypeId != null">
+			and a.goodsType_id = #{goodsTypeId}
+		</if>
+		<if test="goodsTypeId == null">
+			and a.goodsType_id is null
+		</if>
+	</select>
+	<!-- 获取banner图以外的 -->
+	<select id="getByGoodsType" resultType="Promotion" parameterType="long">
+		select p.* from t_promotion p
+		left join t_adpositionid a
+		on(p.adPositionId_id = a.id)
+		where a.goodsType_id = #{goodsTypeId}
+		and a.type != 1
+	</select>
+	
+	<select id="getAll" resultType="Promotion">
+		select * from t_promotion
+	</select>
+</mapper>

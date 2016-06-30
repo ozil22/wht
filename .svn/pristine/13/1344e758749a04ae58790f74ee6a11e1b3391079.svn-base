@@ -1,0 +1,85 @@
+package com.huashidai.weihuotong.utils;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+/**
+ * 生成唯一订单号
+ * 
+ * @author ozil
+ *
+ */
+public class OrderNumUtil {
+	/**
+	 * 总订单前缀
+	 */
+	public static final String TOTAL_PRE = "0";
+	/**
+	 * 普通订单前缀
+	 */
+	public static final String ORDER_PRE = "1";
+	/**
+	 * 分销订单前缀
+	 */
+	public static final String PROXY_PRE = "2";
+
+	private OrderNumUtil() {
+	}
+
+	/**
+	 * System.currentTimeMillis() 1970到当前时间的毫秒数
+	 */
+	// public static String getOrderNum() {
+	// return (System.currentTimeMillis() + "").substring(1)
+	// + (System.nanoTime() + "").substring(7, 10)+(new
+	// Random().nextInt(90000)+10000);
+	// }
+	/**
+	 * 根据订单类型获取订单号
+	 * System.nanoTime() 当前纳秒数,同一毫秒内后三位不同 orderType 订单类型
+	 * @return
+	 */
+	public static String getOrderNum(String orderType) {
+		// 到毫秒
+		String date = new SimpleDateFormat("yyMMddHHmmssSSS")
+				.format(new Date());
+		// 纳秒
+		String time = (System.nanoTime() + "").substring(7, 10);
+		return orderType + date + time;
+	}
+
+	/**
+	 * 根据商家id和订单类型生成订单号
+	 * 
+	 * @param id
+	 *            商家id (最多6位)
+	 * @param orderType
+	 *            (订单前缀)
+	 * @return
+	 */
+	public static String getOrderNum(Long id, String orderType) {
+		// 时间
+		String date = new SimpleDateFormat("MMddHHmmssSSS").format(new Date());
+		// 商家id
+		String garageId = "00000" + id;
+		int length = garageId.length();
+		garageId = garageId.substring(length - 6, length);
+		return orderType + garageId + date;
+	}
+
+	/**
+	 * 根据订单号获取商家id
+	 * 
+	 * @param orderNum
+	 * @return
+	 */
+	public static Long getGarageId(String orderNum) {
+		String garageId = orderNum.substring(1, 7);
+		return new Long(garageId);
+	}
+
+	public static String getOrderType(String orderNum) {
+		String type = orderNum.substring(0, 1);
+		return type;
+	}
+}

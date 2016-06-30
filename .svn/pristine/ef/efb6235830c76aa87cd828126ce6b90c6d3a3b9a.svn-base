@@ -1,0 +1,56 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.AccountFlow;
+import com.huashidai.weihuotong.mapper.AccountFlowMapper;
+import com.huashidai.weihuotong.query.AccountFlowQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.service.IAccountFlowService;
+
+@Service
+public class AccountFlowServiceImpl implements IAccountFlowService {
+	@Autowired
+	private AccountFlowMapper accountFlowMapper;
+
+	@Override
+	public PageResult<AccountFlow> query(AccountFlowQuery qu) {
+		PageResult<AccountFlow> pr = new PageResult<AccountFlow>();
+		// 统计查询
+		Long total = accountFlowMapper.queryTotal(qu);
+		pr.setTotal(total.intValue());
+		// 分页查询
+		List<AccountFlow> rows = accountFlowMapper.query(qu);
+		pr.setRows(rows);
+		// 页数
+		pr.setPage(qu.getCurrentPage());
+		pr.setSize(qu.getPageSize());
+		return pr;
+	}
+
+	@Override
+	public Map<String, Object> queryMap(AccountFlowQuery qu) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		PageResult<AccountFlow> pageResult = query(qu);
+		map.put("page", pageResult.getPage());
+		map.put("total", pageResult.getTotal());
+		ArrayList<Object> accountFlows = new ArrayList<Object>();
+		List<AccountFlow> datas = pageResult.getRows();
+		for (AccountFlow a : datas) {
+			Map<String, Object> accountFlow = new HashMap<String, Object>();
+			accountFlow.put("operateTime", a.getOperateTime());
+			accountFlow.put("accountActionType", a.getAccountActionType());
+			accountFlow.put("amount", a.getAmount());
+			accountFlows.add(accountFlow);
+		}
+		map.put("accountFlows", accountFlows);
+		return map;
+	}
+
+}

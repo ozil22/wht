@@ -1,0 +1,116 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.Type;
+import com.huashidai.weihuotong.mapper.TypeMapper;
+import com.huashidai.weihuotong.query.GoodsQuery;
+import com.huashidai.weihuotong.service.IGoodsService;
+import com.huashidai.weihuotong.service.ITypeService;
+
+@Service
+public class TypeServiceImpl implements ITypeService {
+	@Autowired
+	private TypeMapper typeMapper;
+	@Autowired
+	private IGoodsService goodsService;
+
+	@Override
+	public void save(Type type) {
+		typeMapper.save(type);
+	}
+
+	@Override
+	public void update(Type type) {
+		typeMapper.update(type);
+	}
+
+	@Override
+	public void delete(Long id) {
+		typeMapper.delete(id);
+	}
+
+	@Override
+	public Type get(Long id) {
+		return typeMapper.get(id);
+	}
+
+	@Override
+	public List<Type> getAll() {
+		return typeMapper.getAll();
+	}
+
+	@Override
+	public List<Type> getByParent(Long parentId) {
+		return typeMapper.getByParent(parentId);
+	}
+
+	@Override
+	public List<Object> getParentType() {
+		ArrayList<Object> types = new ArrayList<Object>();
+		List<Type> parents = getByParent(null);
+		for (Type parent : parents) {
+			Map<String, Object> type = new HashMap<String, Object>();
+			type.put("id", parent.getId());
+			type.put("name", parent.getName());
+			type.put("image", parent.getImage());
+			types.add(type);
+		}
+		return types;
+	}
+
+	@Override
+	public List<Object> getItemByParent(Long parentId) {
+		// 二级分类
+		ArrayList<Object> seconds = new ArrayList<Object>();
+		List<Type> types2 = getByParent(parentId);
+		for (Type type : types2) {
+			Map<String, Object> second = new HashMap<String, Object>();
+			Long secondId = type.getId();
+			second.put("secondId", secondId);
+			second.put("secondName", type.getName());
+			second.put("secondImage", type.getImage());
+			// 三级分类
+			ArrayList<Object> thirds = new ArrayList<Object>();
+			List<Type> types3 = getByParent(secondId);
+			for (Type t : types3) {
+				Map<String, Object> third = new HashMap<String, Object>();
+				Long thirdId = type.getId();
+				third.put("thirdId", thirdId);
+				third.put("thirdName", t.getName());
+				third.put("thirdImage", t.getImage());
+				thirds.add(third);
+			}
+			second.put("thirds", thirds);
+
+			seconds.add(second);
+		}
+		return seconds;
+	}
+
+	@Override
+	public Map<String, Object> enterType(GoodsQuery goodsQuery) {
+		return goodsService.queryMap(goodsQuery);
+	}
+
+	@Override
+	public List<Object> typesByParent(Long parentId) {
+		ArrayList<Object> ts = new ArrayList<Object>();
+		List<Type> types = getByParent(parentId);
+		for (Type type : types) {
+			Map<String, Object> t = new HashMap<String, Object>();
+			t.put("id", type.getId());
+			t.put("name", type.getName());
+			t.put("image", type.getImage());
+			ts.add(type);
+		}
+		return ts;
+	}
+
+}

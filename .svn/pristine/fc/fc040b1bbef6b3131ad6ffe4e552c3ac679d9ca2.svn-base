@@ -1,0 +1,58 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.AdPositionId;
+import com.huashidai.weihuotong.mapper.AdPositionIdMapper;
+import com.huashidai.weihuotong.query.AdPositionIdQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.service.IAdPositionIdService;
+
+@Service
+public class AdPositionIdServiceImpl implements IAdPositionIdService {
+	@Autowired
+	private AdPositionIdMapper adPositionIdMapper;
+	
+	@Override
+	public void save(AdPositionId ad) {
+		adPositionIdMapper.save(ad);
+	}
+
+	@Override
+	public void update(AdPositionId ad) {
+		adPositionIdMapper.update(ad);
+	}
+
+	@Override
+	public void delete(Long id) {
+		adPositionIdMapper.delete(id);
+	}
+
+	@Override
+	public AdPositionId get(Long id) {
+		return adPositionIdMapper.get(id);
+	}
+
+	@Override
+	public List<AdPositionId> getAll() {
+		return adPositionIdMapper.getAll();
+	}
+
+	@Override
+	public PageResult<AdPositionId> query(AdPositionIdQuery qu) {
+		PageResult<AdPositionId> pr = new PageResult<AdPositionId>();
+		// 统计查询
+		Long total = adPositionIdMapper.queryTotal(qu);
+		pr.setTotal(total.intValue());
+		// 分页查询
+		List<AdPositionId> rows = adPositionIdMapper.query(qu);
+		pr.setRows(rows);
+		// 页数
+		pr.setPage(qu.getCurrentPage());
+		pr.setSize(qu.getPageSize());
+		return pr;
+	}
+}

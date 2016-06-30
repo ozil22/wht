@@ -1,0 +1,82 @@
+package com.huashidai.weihuotong.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.huashidai.weihuotong.domain.SystemDictionary;
+import com.huashidai.weihuotong.service.ISystemDictionaryService;
+import com.huashidai.weihuotong.utils.MethodAnnotation;
+import com.huashidai.weihuotong.utils.MethodAnnotation.ResourceType;
+
+@Controller
+@RequestMapping("/systemDictionary")
+public class SystemDictionaryCotroller {
+	@Autowired
+	ISystemDictionaryService systemDictionaryService;
+
+	@MethodAnnotation(name="数据字典主页",type=ResourceType.数据字典)
+	@RequestMapping("/index")
+	private String index() {
+		return "systemDictionary/systemDictionaryMain";
+	}
+
+	// 返回列表数据
+	@MethodAnnotation(name="数据字典列表",type=ResourceType.数据字典)
+	@ResponseBody
+	@RequestMapping("/list")
+	private List<SystemDictionary> systemDictionaryList() {
+		return systemDictionaryService.getAll();
+	}
+	
+	//删除
+	@MethodAnnotation(name="数据字典删除",type=ResourceType.数据字典)
+	@ResponseBody
+	@RequestMapping("/delete")
+	private Map<String, Object> delete(Long id) {
+		Map<String,Object> map = new HashMap<>();//创建一个map来装返回的信息
+		try {
+			if (id != null) {
+				systemDictionaryService.delete(id);
+				map.put("success",true);//添加返回的信息
+				map.put("msg","恭喜您,删除成功!");//添加返回的信息
+			}
+			return map;
+		} catch (Exception e) {
+			e.printStackTrace();
+			map.put("success",false);
+			map.put("msg","删除失败!");
+			return map;
+		}
+	}
+	//保存和更新
+	@MethodAnnotation(name="数据字典编辑",type=ResourceType.数据字典)
+	@ResponseBody
+	@RequestMapping("/save")
+	private Map<String, Object> save(SystemDictionary systemDictionary) {
+		Map<String,Object> map = new HashMap<>();//创建一个map来装返回的信息
+		try {
+			//判断是新建还是更新
+			if (systemDictionary != null && systemDictionary.getId() != null) {
+				systemDictionaryService.update(systemDictionary);
+				map.put("success",true);//添加返回的信息
+				map.put("msg","恭喜您,更新成功!");//添加返回的信息
+			}else {
+				systemDictionaryService.save(systemDictionary);
+				map.put("success",true);
+				map.put("msg","恭喜您,保存成功!");
+			}
+			return map;
+		} catch (Exception e) {
+			e.printStackTrace();
+			map.put("success",false);
+			map.put("msg","保存失败!");
+			return map; //返回失败的信息
+		}
+	}
+}

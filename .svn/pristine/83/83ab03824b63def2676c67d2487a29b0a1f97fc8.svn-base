@@ -1,0 +1,51 @@
+package com.huashidai.weihuotong.service;
+
+import java.util.List;
+
+import com.huashidai.weihuotong.domain.AdPositionId;
+import com.huashidai.weihuotong.domain.Goods;
+import com.huashidai.weihuotong.query.AdPositionIdQuery;
+import com.huashidai.weihuotong.query.PageResult;
+
+public interface IAdPositionIdService {
+	/**
+	 * 添加广告位
+	 */
+	void save(AdPositionId ad);
+	/**
+	 * 更新广告位信息
+	 * type,dayPrice
+	 */
+	void update(AdPositionId ad);
+	/**
+	 * 删除广告位
+	 */
+	void delete(Long id);
+	/**
+	 * 获取单个广告位
+	 */
+	AdPositionId get(Long id);
+	/**
+	 * 查询所有广告位
+	 */
+	List<AdPositionId> getAll();
+	
+	/**
+	 * 查询对应商品类型的广告位(非banner)
+	 */
+	//List<AdPositionId> getByGoodsType(Long goodsTypeId);
+	/**
+	 * 根据广告位和商品类型获取
+	 * @param adTypeId 广告位类型
+	 * @param goodsTypeId 商品类型
+	 * @return
+	 */
+//	List<AdPositionId> getByAdAndGoods(Integer adTypeId,Long goodsTypeId);
+	
+	/**
+	 * 商品高级查询
+	 * @param qu
+	 * @return
+	 */
+	PageResult<AdPositionId> query(AdPositionIdQuery qu);
+}

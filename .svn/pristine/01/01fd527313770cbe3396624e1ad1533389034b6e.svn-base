@@ -1,0 +1,106 @@
+package com.huashidai.weihuotong.service;
+
+import java.io.IOException;
+import java.util.Map;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.huashidai.weihuotong.domain.User;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.query.UserQuery;
+
+public interface IUserService {
+	/**
+	 * 分页获取app端用户
+	 * @param UserQuery
+	 * @return
+	 */
+	PageResult<User> query(UserQuery UserQuery);
+	/**
+	 * 登录校验
+	 * @param username
+	 * @param password
+	 * @param openid 
+	 * @param wechat 
+	 * @return
+	 */
+	User findcheckLogin(String username, String password, String wechat, String openid);
+	/**
+	 * 注册
+	 * @param username
+	 * @param password
+	 * @param invitationCode
+	 * @param openid 
+	 * @param wechat 
+	 */
+	User register(String username, String password, String invitationCode, String wechat, String openid);
+	/**
+	 * 修改密码
+	 * @param username
+	 * @param password
+	 * @param newPassWord
+	 * @return
+	 */
+	User updatePassword(String username, String password, String newPassWord);
+	/**
+	 * 重置密码
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+	User forgetPassword(String username, String password);
+	/**
+	 * 修改背景图
+	 * @param image
+	 * @param userId
+	 */
+	void updateBackground(MultipartFile image, Long userId) throws IOException;
+	/**
+	 * 获取用户信息
+	 * @param userId
+	 * @return
+	 */
+	Map<String, Object> getUserInfo(Long userId);
+	/**
+	 * 停用账户
+	 */
+	void leave(Long id);
+	/**
+	 * 启用账户
+	 * @param id
+	 */
+	void up(Long id);
+	/**
+	 * 删除账户
+	 * @param id
+	 */
+	void delete(Long id);
+	/**
+	 * 我的团队
+	 * @param qu
+	 * @return
+	 */
+	Map<String, Object> userTeam(Long userId);
+	/**
+	 * 微信登录
+	 * @param wechat
+	 * @param openid
+	 * @return
+	 */
+	User checkWechatLogin(String wechat, String openid);
+	/**
+	 * 获取店铺的用户
+	 * @param id
+	 * @return
+	 */
+	User getByStore(Long id);
+	User get(Long id);
+	User getByCode(String useCode);
+	void update(User user);
+	/**
+	 * 取消微信绑定
+	 * @param username
+	 * @param password
+	 */
+	void removeWechat(String username, String password);
+}

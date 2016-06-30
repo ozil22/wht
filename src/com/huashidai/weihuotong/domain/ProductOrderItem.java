@@ -1,0 +1,116 @@
+package com.huashidai.weihuotong.domain;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+/**
+ * 商品订单明细
+ * 
+ * @author ozil
+ *
+ */
+public class ProductOrderItem implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8094829926724874365L;
+	private Long id;
+	private BigDecimal price;// 购买时价格
+	private Integer num;// 购买数量
+	private BigDecimal amount;// 小计
+	private String productName;// 商品名+规格名
+	private String image;// 商品图片
+	// 多对一
+	private ProductOrder productOrder;// 订单
+	private Product product;// 购买的商品
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public BigDecimal getPrice() {
+		return price;
+	}
+
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+
+	public Integer getNum() {
+		return num;
+	}
+
+	public void setNum(Integer num) {
+		this.num = num;
+	}
+
+	public BigDecimal getAmount() {
+		return amount;
+	}
+
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
+	}
+
+	public ProductOrder getProductOrder() {
+		return productOrder;
+	}
+
+	public void setProductOrder(ProductOrder productOrder) {
+		this.productOrder = productOrder;
+	}
+
+	public Product getProduct() {
+		return product;
+	}
+
+	public void setProduct(Product product) {
+		this.product = product;
+	}
+
+	public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
+	@Override
+	public String toString() {
+		return "ProductOrderItem [id=" + id + ", price=" + price + ", num="
+				+ num + ", amount=" + amount + ", productName=" + productName
+				+ ", image=" + image + ", productOrder=" + productOrder
+				+ ", product=" + product + "]";
+	}
+
+	
+
+	public ProductOrderItem(BigDecimal price, Integer num, BigDecimal amount,
+			String productName, String image, ProductOrder productOrder,
+			Product product) {
+		this.price = price;
+		this.num = num;
+		this.amount = amount;
+		this.productName = productName;
+		this.image = image;
+		this.productOrder = productOrder;
+		this.product = product;
+	}
+
+	public ProductOrderItem() {
+	}
+
+}

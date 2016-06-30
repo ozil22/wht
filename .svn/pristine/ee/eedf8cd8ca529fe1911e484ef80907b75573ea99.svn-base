@@ -1,0 +1,351 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css">   
+<link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">   
+<script type="text/javascript" src="easyui/jquery.min.js"></script>   
+<script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>  
+<script type="text/javascript" src="easyui/locale/easyui-lang-zh_CN.js"></script>  
+
+</head>
+<body>
+<script type="text/javascript">
+	$(function(){
+		//在页面加载完毕以后,首先声明组件
+		var PCDatagrid,dlg,dlgForm,searchForm,uploadForm;
+		//放入缓存中
+		PCDatagrid = $("#potentialUserDatagrid");
+		dlg = $("#dlg");
+		dlgForm = $("#dlgForm");
+		searchForm = $("#searchForm");
+		uploadForm = $("#uploadForm");
+		//定义事件对象
+		myBtn = {
+				
+			PCdownload : function() {
+				$.messager.progress();	// 显示进度条
+				uploadForm.form('submit', {
+					url: 'potentialUser/download',
+					onSubmit: function(){
+						var isValid = $(this).form('validate');
+						if (!isValid){
+							$.messager.progress('close');	// 如果表单是无效的则隐藏进度条
+						}
+						return isValid;	// 返回false终止表单提交
+					},
+					success: function(){
+						$.messager.progress('close');	// 如果提交成功则隐藏进度条
+					}
+				});
+			},
+			PCupload : function() {
+				$.messager.progress();	// 显示进度条
+				uploadForm.form('submit', {
+					url: 'potentialUser/upload',
+					onSubmit: function(){
+						var isValid = $(this).form('validate');
+						if (!isValid){
+							$.messager.progress('close');	// 如果表单是无效的则隐藏进度条
+						}
+						return isValid;	// 返回false终止表单提交
+					},
+					success: function(){
+						$.messager.progress('close');	// 如果提交成功则隐藏进度条
+					}
+				});
+
+
+			},
+			PCsave : function() {
+				//保存方法的业务逻辑
+				//首先是清楚form表单中的缓存数据
+				dlg.form("clear");
+				//设置对话框的标题
+				dlg.dialog("setTitle", '保存对话框');
+				//打开对话框
+				dlg.dialog("open");
+			},
+			PCupdate : function() {
+				//修改方法的业务逻辑
+
+				//回显数据
+				var row = PCDatagrid.datagrid("getSelected");
+				if (!row) {
+					$.messager.alert('温馨提示', "你还没有选择数据,不能修改~~：", 'info');
+					return;
+				}
+				//首先是清楚form表单中的缓存数据
+				dlg.form("clear");
+				//设置对话框的标题
+				dlg.dialog("setTitle", '修改对话框');
+				//打开对话框
+				dlg.dialog("open");
+				//加载到表单中
+				if (row.UserSource) {
+					row["UserSource.id"] = row.UserSource.id;
+					dlgForm.form("load", row);
+				}
+			},
+			save : function() {
+				dlgForm.form("submit", {
+					url : 'potentialUser/save',
+					success : function(data) {
+						//把获得的json形式的字符串转换为json对象
+						data = $.parseJSON(data);
+						//保存成功关闭对话框
+						dlg.dialog("close");
+						//显示提示信息
+						$.messager.alert('温馨提示', "操作状态：" + data.message,
+								'info', function() {
+									//在关闭弹窗后的一个回调函数
+									//刷新数据
+									PCDatagrid.datagrid("reload");
+								});
+					}
+				});
+			},
+			cancel : function() {
+				//关闭对话框
+				dlg.dialog("close");
+			},
+			PCreload : function() {
+				//刷新当前的页
+				PCDatagrid.datagrid("reload");
+			},
+			PCreloadAll : function() {
+				//清楚查询表单里面的回显的值
+				searchForm.form("clear");
+				//刷新所有的,并且把高级查询的值设为null
+				PCDatagrid.datagrid("load", {
+					page : 1
+				});
+			},
+			PCdel : function() {
+				//首先判断是否有选中数据
+				var row = PCDatagrid.datagrid("getSelected");
+				if (!row) {
+					$.messager.alert('温馨提示', "你还没有选择需要删除的数据~~", 'info');
+					return;
+				}
+				//做一个弹窗让用户确认删除
+				$.messager.confirm('温馨提示', '亲~确定删除  [<font color="red">'
+						+ row.name + '</font>] 吗?', function(r) {
+					if (r) {
+						$.get("potentialUser_delete", {
+							id : row.id
+						}, function(data) {
+							//把获得的json形式的字符串转换为json对象
+							// 					data = $.parseJSON(data);
+							//显示提示信息
+							$.messager.alert('温馨提示', "操作状态：删除成功~~", 'info',
+									function() {
+										//在关闭弹窗后的一个回调函数
+										//刷新数据
+										PCDatagrid.datagrid("reload");
+									});
+						});
+					} else {
+						$.messager.alert("提示", "删除失败", "error");
+					}
+				});
+			},
+			search : function() {
+				//当点击查询按钮的时候,提交查询表单
+				searchForm.form("submit", {
+					//提交表单的地址
+					url : 'potentialUser/search',
+					//提交完成以后的回调函数
+					success : function(data) {
+						console.debug(data);
+						//在查询以后需要重新的刷新datagrid的数据
+						// 						console.debug(searchForm.serialize());
+						// 						console.debug(searchForm.serializeArray());
+						var paramJson = searchForm.serializeJson();
+						console.debug(paramJson);
+						PCDatagrid.datagrid("load", paramJson);
+					}
+				});
+			}
+		};
+
+		//当我们的按钮被点击的时候出发事件
+		$("a[data-btn]").on("click", function() {
+			//确定点击的按钮需要访问的是什么方法
+			var currentBtn = $(this).data("btn");
+			//如果访问的这个方法不存在的情况...
+			if (currentBtn) {
+				myBtn[currentBtn]();
+			}
+		});
+	});
+</script> 
+<script type="text/javascript">
+	function UserFormatter(value,row,index){
+		//console.debug(arguments);
+		return value?value.name:"";
+	}
+	function inputUserFormatter(v,r,i){
+		return v?v.username:"";
+		
+	}
+</script> 
+	<table class="easyui-datagrid" style="width:500px;height:300px"
+		id="potentialUserDatagrid"
+		data-options="singleSelect:true,
+		url:'potentialUser/search',
+		fit:true,
+		fitColumns:true,
+		pagination:true,
+		rownumbers:true,
+		pageSize:5,
+		pageList:[3,5,10,20,30],
+		toolbar:'#myToolbar'" 
+		>   
+	    <thead>   
+	        <tr>   
+	            <th data-options="field:'name'" width="100">客户名称</th>   
+	            <th data-options="field:'UserSource'" formatter="UserFormatter" width="100">客户来源</th>   
+	            <th data-options="field:'successRate'" width="100">成功几率</th>   
+	            <th data-options="field:'remark'" width="100">简单介绍</th>   
+	            <th data-options="field:'linkMan'" width="100">联系人</th>   
+	            <th data-options="field:'linkManTel'" width="100">联系人电话</th>   
+	            <th data-options="field:'inputUser'" formatter="inputUserFormatter" width="100">创建人 </th>   
+	        </tr>   
+	    </thead>   
+	</table> 
+	<div id="myToolbar" >
+		<div>
+			<a href="javaScript:void(0)" class="easyui-linkbutton" data-btn="PCsave" data-options="iconCls:'icon-add',plain:true">添加</a>  
+			<a href="javaScript:void(0)" class="easyui-linkbutton" data-btn="PCupdate" data-options="iconCls:'icon-edit',plain:true">修改</a>  
+			<a href="javaScript:void(0)" class="easyui-linkbutton" data-btn="PCdel" data-options="iconCls:'icon-remove',plain:true">删除</a>  
+			<a href="javaScript:void(0)" class="easyui-linkbutton" data-btn="PCreload" data-options="iconCls:'icon-reload',plain:true">刷新</a>  
+			<a href="javaScript:void(0)" class="easyui-linkbutton" data-btn="PCreloadAll" data-options="iconCls:'icon-reload',plain:true">查询所有</a>  
+			<form enctype="multipart/form-data" id="uploadForm" method="post">
+				<a href="javaScript:void(0)" class="easyui-linkbutton" data-btn="PCdownload" data-options="iconCls:'icon-reload',plain:true">导出数据</a>  
+<!-- 				 选择文件：　<input id="uploadExcel" name="xsl" class="easyui-filebox" style="width:100px" data-options="prompt:'请选择文件...',plain:true">   -->
+<!-- 				<a href="#" class="easyui-linkbutton" style="width:80px" plain="true" iconCls="icon-ok" data-cmd="PCupload" >导入题库</a> 　 -->
+				<input type="file" name="xsl" /><font color="red">请选择正确的xsl文件</font>
+			</form>
+		</div>
+		<div>
+		  <form id="searchForm" method="post">
+                                       关键字: <input  name="searchKey" style="width:80px">&nbsp;&nbsp;
+                                       成功几率: <input name="minWin"  style="width:80px">-
+                  <input name="maxWin"  style="width:80px">&nbsp;&nbsp;
+                                        客户来源:
+            <select class="easyui-combogrid" name="UserId" style="width:140px" data-options="
+			            panelWidth: 500,
+			            idField: 'id',
+			            textField: 'name',
+			            url: 'systemDictionaryItem/list?id=2',
+			            method: 'get',
+			            columns: [[
+			                {field:'sn',title:'字典名',width:80},
+			                {field:'name',title:'字典编号',width:120},
+			                {field:'intro',title:'介绍',width:80,align:'right'}
+			            ]],
+			            fitColumns: true
+			        	">
+			        </select>&nbsp;&nbsp;
+            <a href="#" class="easyui-linkbutton" data-btn="search" iconCls="icon-search">查询</a>
+        </div>
+      </form>
+	</div>
+	
+	 <div id="dlg" class="easyui-dialog" 
+	 		title="Complex Toolbar on Dialog" 
+	 		style="width:400px;height:260px;padding:10px"
+            data-options="
+                iconCls: 'icon-save',
+                buttons: '#dlg-buttons',
+                closed: true
+            ">
+      <form id="dlgForm" method="post" >
+		<table align="center">
+			<tr>
+				<td>
+			      	<input type="hidden" name="id" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+            		客户名称:
+				</td>
+				<td>
+			      	<input type="hidden" name="id" />
+            		<input name="name" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+            		客户来源:
+				</td>
+				<td>
+            		<select class="easyui-combogrid" name="UserSource.id" style="width:140px" data-options="
+			            panelWidth: 500,
+			            idField: 'id',
+			            textField: 'name',
+			            url: 'systemDictionaryItem/list?id=2',
+			            method: 'get',
+			            columns: [[
+			                {field:'sn',title:'字典名',width:80},
+			                {field:'name',title:'字典编号',width:120},
+			                {field:'intro',title:'介绍',width:80,align:'right'}
+			            ]],
+			            fitColumns: true
+			        	">
+			        </select>
+				</td>
+			</tr>
+			<tr>
+				<td>
+            		成功几率:
+				</td>
+				<td>
+	            	<input name="successRate"  />
+				</td>
+			</tr>
+			<tr>
+				<td>
+            		简单介绍:
+				</td>
+				<td>
+            		<input name="remark" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+            		联系人:
+				</td>
+				<td>
+            		<input name="linkMan" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+            		联系人电话:
+				</td>
+				<td>
+            		<input name="linkManTel" />
+				</td>
+			</tr>
+       </table>
+     </form>
+    </div>
+    
+    <div id="dlg-buttons">
+		<a href="#" class="easyui-linkbutton" data-btn="save" iconCls="icon-save">保存</a>
+		<a href="#" class="easyui-linkbutton" data-btn="cancel" iconCls="icon-cancel">关闭</a>
+	</div>
+
+	 <div style="margin:10px 0;" id="myMessage">
+        <a href="#" class="easyui-linkbutton" onclick="alert1()">Alert</a>
+    </div>
+    
+	
+</body>
+</html>

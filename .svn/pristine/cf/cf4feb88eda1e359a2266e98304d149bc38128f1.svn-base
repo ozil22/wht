@@ -1,0 +1,76 @@
+package com.huashidai.weihuotong.domain;
+
+import java.math.BigDecimal;
+import java.util.Date;
+
+import com.huashidai.weihuotong.utils.ConstUtil;
+/**
+ * 购买广告订单
+ * @author ozil
+ *
+ */
+public class PromotionOrder {
+	private Long id;
+	private Date buyTime;//购买时间
+	private String orderNum;//订单号
+	private Integer state = ConstUtil.PROMOTION_ORDER_WAIT_PAY;//订单状态(0 待付款,1 完成)
+	private BigDecimal totalPrice;//商品总价
+	private BigDecimal payPrice;// 实际付款金额
+	private Store store;//购买的用户
+	private Promotion promotion;//购买的广告
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public Date getBuyTime() {
+		return buyTime;
+	}
+	public void setBuyTime(Date buyTime) {
+		this.buyTime = buyTime;
+	}
+	public String getOrderNum() {
+		return orderNum;
+	}
+	public void setOrderNum(String orderNum) {
+		this.orderNum = orderNum;
+	}
+	public BigDecimal getTotalPrice() {
+		return totalPrice;
+	}
+	public void setTotalPrice(BigDecimal totalPrice) {
+		this.totalPrice = totalPrice;
+	}
+	public BigDecimal getPayPrice() {
+		return payPrice;
+	}
+	public void setPayPrice(BigDecimal payPrice) {
+		this.payPrice = payPrice;
+	}
+	public Integer getState() {
+		return state;
+	}
+	public void setState(Integer state) {
+		this.state = state;
+	}
+	public Store getStore() {
+		return store;
+	}
+	public void setStore(Store store) {
+		this.store = store;
+	}
+	public Promotion getPromotion() {
+		return promotion;
+	}
+	public void setPromotion(Promotion promotion) {
+		this.promotion = promotion;
+	}
+	@Override
+	public String toString() {
+		return "PromotionOrder [id=" + id + ", buyTime=" + buyTime
+				+ ", orderNum=" + orderNum + ", totalPrice=" + totalPrice
+				+ ", payPrice=" + payPrice + ", state=" + state + "]";
+	}
+	
+}

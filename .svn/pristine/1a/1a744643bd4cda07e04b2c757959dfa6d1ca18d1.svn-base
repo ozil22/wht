@@ -1,0 +1,141 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.huashidai.weihuotong.domain.Type;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.mapper.GoodsMapper;
+import com.huashidai.weihuotong.mapper.TypeMapper;
+import com.huashidai.weihuotong.query.GoodsQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.query.TypeQuery;
+import com.huashidai.weihuotong.service.IGoodsService;
+import com.huashidai.weihuotong.service.ITypeService;
+import com.huashidai.weihuotong.utils.FileUtil;
+import com.huashidai.weihuotong.utils.PinYinUtil;
+import com.huashidai.weihuotong.utils.StateCode;
+
+@Service
+public class TypeServiceImpl implements ITypeService {
+	@Autowired
+	private TypeMapper typeMapper;
+	@Autowired
+	private IGoodsService goodsService;
+	@Autowired
+	private GoodsMapper goodsMapper;
+
+	@Override
+	public void save(MultipartFile image, Type type) throws IOException {
+		if (image != null && !image.isEmpty()) {
+			String src = FileUtil.saveFile(image, "typeImage");
+			type.setImage(src);
+		}
+		type.setPinYin(PinYinUtil.getPinYinHeadChar(type.getName()));
+		typeMapper.save(type);
+	}
+
+	@Override
+	public void update(MultipartFile image, Type type) throws IOException {
+		if (image != null && !image.isEmpty()) {
+			String src = FileUtil.saveFile(image, "typeImage");
+			FileUtil.deleteFile(type.getImage());
+			type.setImage(src);
+		}
+		type.setPinYin(PinYinUtil.getPinYinHeadChar(type.getName()));
+		typeMapper.update(type);
+	}
+
+	@Override
+	public void delete(Long id) {
+		List<Type> list = typeMapper.getByParent(id);
+		if (list != null && !list.isEmpty()) {
+			throw new LogicException("删除失败,该分类还有下级分类!",
+					StateCode.TYPE_NOTDELETE);
+		}
+		GoodsQuery qu = new GoodsQuery();
+		qu.setTypeId(id);
+		;
+		Long total = goodsMapper.queryTotal(qu);
+		if (total != null && total > 0) {
+			throw new LogicException("删除失败,还有该分类的商品未删除!",
+					StateCode.TYPE_GOODS_NOTDELETE);
+		}
+		// 删除图片
+		Type type = typeMapper.get(id);
+		FileUtil.deleteFile(type.getImage());
+		typeMapper.delete(id);
+	}
+
+	@Override
+	public List<Type> getByParent(Long parentId) {
+		return typeMapper.getByParent(parentId);
+	}
+
+	@Override
+	public List<Object> getItemByParent(Long parentId) {
+		// 二级分类
+		ArrayList<Object> seconds = new ArrayList<Object>();
+		List<Type> types2 = getByParent(parentId);
+		for (Type type : types2) {
+			Map<String, Object> second = new HashMap<String, Object>();
+			Long secondId = type.getId();
+			second.put("secondId", secondId);
+			second.put("secondName", type.getName());
+			second.put("secondImage", type.getImage());
+			// 三级分类
+			ArrayList<Object> thirds = new ArrayList<Object>();
+			List<Type> types3 = getByParent(secondId);
+			for (Type t : types3) {
+				Map<String, Object> third = new HashMap<String, Object>();
+				Long thirdId = type.getId();
+				third.put("thirdId", thirdId);
+				third.put("thirdName", t.getName());
+				third.put("thirdImage", t.getImage());
+				thirds.add(third);
+			}
+			second.put("thirds", thirds);
+
+			seconds.add(second);
+		}
+		return seconds;
+	}
+
+	@Override
+	public Map<String, Object> enterType(GoodsQuery goodsQuery) {
+		return goodsService.queryMap(goodsQuery);
+	}
+
+	@Override
+	public List<Object> typesByParent(Long parentId) {
+		ArrayList<Object> ts = new ArrayList<Object>();
+		List<Type> types = getByParent(parentId);
+		for (Type type : types) {
+			Map<String, Object> t = new HashMap<String, Object>();
+			t.put("id", type.getId());
+			t.put("name", type.getName());
+			t.put("image", type.getImage());
+			t.put("pinYin", type.getPinYin());
+			ts.add(type);
+		}
+		return ts;
+	}
+
+	@Override
+	public PageResult<Type> query(TypeQuery qu) {
+		// 统计查询
+		Long total = typeMapper.queryTotal(qu);
+		// 分页查询
+		List<Type> rows = typeMapper.query(qu);
+		return new PageResult<Type>(rows, qu.getPageSize(),
+				qu.getCurrentPage(), total.intValue());
+	}
+
+}

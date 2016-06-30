@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.ProductMapper">
+
+	<insert id="save" parameterType="Product" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_product(inventoryNum,specification,version,goods_id) 
+					values(#{inventoryNum},#{specification},#{version},#{goods.id})
+	</insert>
+	<!-- 修改-->
+	<update id="update" parameterType="Product">
+		update t_product set 
+		inventoryNum=#{inventoryNum},
+		specification=#{specification},
+		goods_id=#{goods.id},
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_product where id = #{id}
+	</delete>
+	
+	<resultMap type="Product" id="ProductMap">
+		<id property="id" column="id"/>
+		<result property="inventoryNum" column="inventoryNum"/>
+		<result property="specification" column="specification"/>
+		<association property="goods" javaType="Goods">
+			<id property="id" column="gid"/>
+			<result property="name" column="gname"/>
+			<result property="goodsNum" column="ggoodsNum"/>
+			<result property="details" column="gdetails"/>
+			<result property="price" column="gprice"/>
+			<result property="salePrice" column="gsalePrice"/>
+			<result property="postage" column="gpostage"/>
+			<result property="proxyNum" column="gproxyNum"/>
+			<result property="saleNum" column="gsaleNum"/>
+			<result property="time" column="gtime"/>
+			<association property="store" javaType="Store">
+				<id property="id" column="gstore_id"/>
+			</association>
+		</association>
+	</resultMap>
+	<select id="get" resultMap="ProductMap" parameterType="long">
+		select p.*,g.id gid,g.name gname,g.goodsNum ggoodsNum,g.details gdetails,g.price gprice,
+				g.salePrice gsalePrice,g.postage gpostage,g.state gstate,g.proxyNum gproxyNum,
+				g.saleNum gsaleNum,g.time gtime,g.store_id gstore_id
+		from t_product p
+		left join t_goods g on p.goods_id = g.id
+		where p.id=#{id}
+	</select>
+	
+	<!-- 更新库存-->
+	<update id="updateNum" parameterType="Product">
+		update t_product set 
+		inventoryNum=#{inventoryNum},
+		version=version+1
+		where id = #{id}
+		and version=#{vsersion}
+	</update>
+	
+	<select id="getAll" resultType="Product">
+		select * from t_product
+	</select>
+	<select id="getByGoods" resultType="Product" parameterType="long">
+		select * from t_product
+		where goods_id = #{goodsId}
+	</select>
+	
+	<sql id="whereSql">
+		<where>
+			<if test="state!=-99 and state!=2">
+				and g.state = #{state}
+			</if>
+			<if test="state!=-99 and state==2">
+				and p.inventoryNum = 0
+			</if>
+			<if test="storeId != null and storeId != -1">
+				and g.store_id = #{storeId}
+			</if>
+		</where>
+	</sql>
+	<select id="query" resultMap="ProductMap" parameterType="ProductQuery">
+		select p.*,g.id gid,g.name gname,g.goodsNum ggoodsNum,g.details gdetails,g.price gprice,
+				g.salePrice gsalePrice,g.postage gpostage,g.state gstate,g.proxyNum gproxyNum,
+				g.saleNum gsaleNum,g.time gtime,g.store_id gstore_id
+		from t_product p
+		left join t_goods g on  p.goods_id = g.id
+		<include refid="whereSql"/>
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 获取总记录数 -->
+	<select id="queryTotal" resultType="long" parameterType="ProductQuery">
+		select count(p.id)
+		from t_product p
+		left join t_goods g on  p.goods_id = g.id
+		<include refid="whereSql"/>
+	</select>
+</mapper>

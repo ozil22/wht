@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.StoreMapper">
+	<!-- 保存基本信息 -->
+	<insert id="save" parameterType="Store" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_store(name,linkman,phone,qq,state,headImage,secured,margin,saleNum,hot,
+					city_id) 
+					values(#{name},#{linkman},#{phone},#{qq},#{state},#{headImage},#{secured},#{margin},#{saleNum},#{hot},
+					#{city.id})
+	</insert>
+	<!-- 修改基本信息-->
+	<update id="update" parameterType="Store">
+		update t_store set 
+		name=#{name},
+		intro=#{intro},
+		linkman=#{linkman},
+		phone=#{phone},
+		qq=#{qq},
+		headImage=#{headImage},
+		secured=#{secured},
+		margin=#{margin},
+		city_id=#{city.id}
+		where id = #{id}
+	</update>
+	<!-- 修改状态 -->
+	<update id="updateState" parameterType="Store">
+		update t_store set 
+		state=#{state}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_store where id = #{id}
+	</delete>
+	
+	
+	<select id="get" resultMap="storeMap" parameterType="long">
+		select s.*,c.id cid,c.name cname
+		from t_store s
+		left join t_city c on s.city_id = c.id
+		where s.id=#{id}
+	</select>
+	
+	<select id="getAll" resultType="Store">
+		select * from t_store
+	</select>
+	<!-- 增加销量 -->
+	<update id="addSaleNum" >
+		update t_store set 
+		saleNum= saleNum + #{saleNum}
+		where id = #{id}
+	</update>
+	<!-- 更新热度(收藏量) -->
+	<update id="updateHot" >
+		update t_store set 
+		hot = hot + #{hot}
+		where id = #{id}
+	</update>
+	<!-- 更新保证金 -->
+	<update id="updateSecured" >
+		update t_store set 
+		secured = #{secured}
+		where id = #{id}
+	</update>
+	<!-- 更新所在地 -->
+	<update id="updateStoreCity" >
+		update t_store set 
+		city_id = #{cityId}
+		where id = #{storeId}
+	</update>
+	
+	<!-- 公共的高级查询条件 -->
+	<sql id="whereSql">
+		<where>
+			<if test="storeName!=null and storeName!=''">
+				s.name like concat('%',#{storeName},'%')
+			</if>
+			<if test="state!=-99">
+				and s.state = #{state}
+			</if>
+		</where>
+	</sql>
+	
+	<resultMap type="Store" id="storeMap">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="intro" property="intro"/>
+		<result column="linkman" property="linkman"/>
+		<result column="phone" property="phone"/>
+		<result column="qq" property="qq"/>
+		<result column="saleNum" property="saleNum"/>
+		<result column="secured" property="secured"/>
+		<result column="margin" property="margin"/>
+		<result column="state" property="state"/>
+		<result column="headImage" property="headImage"/>
+		
+		<association property="city" javaType="City">
+			<id column="cid" property="id"/>
+			<result column="cname" property="name"/>
+		</association>
+	</resultMap>
+	
+	<select id="query" resultMap="storeMap" parameterType="StoreQuery">
+		select s.*,c.id cid,c.name cname
+		from t_store s
+		left join t_city c on s.city_id = c.id
+		<include refid="whereSql"/>
+		<if test="sort==1">
+			order by s.saleNum desc
+		</if> 
+		<if test="sort==2">
+			order by s.hot desc
+		</if> 
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 获取总记录数 -->
+	<select id="queryTotal" resultType="long" parameterType="StoreQuery">
+		select count(s.id)
+		from t_store s 
+		<include refid="whereSql"/>
+	</select>
+</mapper>

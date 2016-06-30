@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.AdPositionIdMapper">
+
+	<insert id="save" parameterType="AdPositionId" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_adPositionId(type,goodsType_id,dayPrice) 
+					values(#{type},#{goodsType.id},#{dayPrice})
+	</insert>
+	
+	<update id="update" parameterType="AdPositionId">
+		update t_adPositionId set 
+		type=#{type},
+		dayPrice=#{dayPrice},
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_adPositionId where id = #{id}
+	</delete>
+	
+	<select id="get" resultType="AdPositionId">
+		select * from t_adPositionId
+		where id=#{id}
+	</select>
+	
+	<select id="getAll" resultType="AdPositionId">
+		select * from t_adPositionId
+	</select>
+	
+	<resultMap type="AdPositionId" id="AdPositionIdMap">
+		<id property="id" column="id"/>
+		<result property="type" column="type"/>
+		<result property="dayPrice" column="dayPrice"/>
+		<collection property="goodsType" javaType="Type">
+			<id column="tid" property="id"/>
+			<id column="tname" property="name"/>
+		</collection>
+	</resultMap>
+		<!-- 公共的高级查询条件 -->
+	<sql id="whereSql">
+		<where>
+			<if test="type!=null and type != -99 and type != 0">
+				a.type=#{type}
+			</if>
+			<if test="type!=null and type == 0">
+				a.type != 1
+			</if>
+			<if test="goodsTypeId != null and goodsTypeId != -1">
+				and a.goodsType_id = #{goodsTypeId}
+			</if>
+		</where>
+	</sql>
+	<!-- 高级查询 -->
+	<select id="query" resultMap="AdPositionIdMap" parameterType="AdPositionIdQuery">
+		select a.*,t.id tid,t.name tname
+		from t_adPositionId a
+		left join t_type t on a.goodsType_id = t.id
+		<include refid="whereSql"/>
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 获取总记录数 -->
+	<select id="queryTotal" resultType="long" parameterType="AdPositionIdQuery">
+		select count(id)
+		from t_adPositionId a
+		<include refid="whereSql"/>
+	</select>
+</mapper>

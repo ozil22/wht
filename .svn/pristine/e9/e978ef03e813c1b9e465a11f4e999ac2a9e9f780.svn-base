@@ -1,0 +1,76 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.huashidai.weihuotong.domain.Article;
+import com.huashidai.weihuotong.domain.ArticleComment;
+import com.huashidai.weihuotong.mapper.ArticleCommentMapper;
+import com.huashidai.weihuotong.mapper.ArticleMapper;
+import com.huashidai.weihuotong.query.ArticleQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.service.IArticleService;
+import com.huashidai.weihuotong.utils.FileUtil;
+
+@Service
+public class ArticleServiceImpl implements IArticleService {
+	@Autowired
+	private ArticleMapper articleMapper;
+	@Autowired
+	private ArticleCommentMapper articleCommentMapper;
+
+	@Override
+	public PageResult<Article> query(ArticleQuery qu) {
+		// 统计查询
+		Long total = articleMapper.queryTotal(qu);
+		// 分页查询
+		List<Article> rows = articleMapper.query(qu);
+		return new PageResult<Article>(rows, qu.getPageSize(), qu.getCurrentPage(), total.intValue());
+	}
+
+	@Override
+	public Map<String, Object> queryMap(ArticleQuery qu) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		PageResult<Article> pageResult = query(qu);
+		map.put("total", pageResult.getTotalPage());
+		ArrayList<Object> articles = new ArrayList<Object>();
+		List<Article> datas = pageResult.getRows();
+		for (Article a : datas) {
+			Map<String, Object> article = new HashMap<String, Object>();
+			article.put("name", a.getName());
+			article.put("time", a.getTime());
+			article.put("storeName", a.getStore().getName());
+			article.put("commentNum", a.getCommentNum());
+			articles.add(article);
+		}
+		map.put("articles", articles);
+		return map;
+	}
+
+	@Override
+	public void addArticle(MultipartFile image, Article article) throws IOException {
+		String src = FileUtil.saveFile(image, "article");
+		article.setImage(src);
+		articleMapper.save(article);
+	}
+
+	@Override
+	public void removeArticle(Long articleId) {
+		articleMapper.delete(articleId);
+	}
+
+	@Override
+	public void articleComment(ArticleComment articleComment) {
+		articleComment.setCommentTime(new Date());
+		articleCommentMapper.save(articleComment);
+	}
+
+}

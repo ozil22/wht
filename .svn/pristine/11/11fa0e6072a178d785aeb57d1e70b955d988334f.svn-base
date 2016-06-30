@@ -1,0 +1,239 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.AdPositionId;
+import com.huashidai.weihuotong.domain.Promotion;
+import com.huashidai.weihuotong.domain.Type;
+import com.huashidai.weihuotong.domain.Webpage;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.mapper.PromotionMapper;
+import com.huashidai.weihuotong.query.AdPositionIdQuery;
+import com.huashidai.weihuotong.query.GoodsQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.query.PromotionQuery;
+import com.huashidai.weihuotong.service.IAdPositionIdService;
+import com.huashidai.weihuotong.service.IGoodsService;
+import com.huashidai.weihuotong.service.IPromotionService;
+import com.huashidai.weihuotong.service.IStoreService;
+import com.huashidai.weihuotong.service.ITypeService;
+import com.huashidai.weihuotong.service.IWebpageService;
+import com.huashidai.weihuotong.utils.ConstUtil;
+import com.huashidai.weihuotong.utils.FileUtil;
+import com.huashidai.weihuotong.utils.StateCode;
+
+@Service
+public class PromotionServiceImpl implements IPromotionService {
+
+	@Autowired
+	private PromotionMapper promotionMapper;
+	@Autowired
+	private ITypeService typeService;
+	@Autowired
+	private IWebpageService webpageService;
+	@Autowired
+	private IAdPositionIdService adPositionIdService;
+	@Autowired
+	private IGoodsService goodsService;
+	@Autowired
+	private IStoreService storeService;
+
+	@Override
+	public PageResult<Promotion> query(PromotionQuery qu) {
+		// 统计查询
+		Long total = promotionMapper.queryTotal(qu);
+		// 分页查询
+		List<Promotion> rows = promotionMapper.query(qu);
+		return new PageResult<Promotion>(rows, qu.getPageSize(),
+				qu.getCurrentPage(), total.intValue());
+	}
+
+	@Override
+	public List<Object> getBanner(Long goodsTypeId) {
+		PromotionQuery qu = new PromotionQuery(ConstUtil.ADTYPE_BANNER,
+				goodsTypeId, null, ConstUtil.PROMOTION_NORMAL,
+				ConstUtil.PROMOTION_CURRENT);
+		qu.setPageSize(Integer.MAX_VALUE);
+		PageResult<Promotion> result = query(qu);
+		List<Promotion> promotions = result.getRows();
+		ArrayList<Object> banners = new ArrayList<Object>();
+		for (Promotion promotion : promotions) {
+			Map<String, Object> banner = new HashMap<String, Object>();
+			banner.put("promotionId", promotion.getId());
+			banner.put("image", promotion.getImage());
+			banner.put("contentType", promotion.getContentType());
+			banner.put("contentId", promotion.getContentId());
+			banners.add(banner);
+		}
+		return banners;
+	}
+
+	@Override
+	public List<Map<String, Object>> getByGoodsType(Long goodsTypeId, int size,
+			int page) {
+		List<Map<String, Object>> pros = new ArrayList<Map<String, Object>>();
+		AdPositionIdQuery qu = new AdPositionIdQuery(
+				ConstUtil.ADTYPE_NOTBANNER, goodsTypeId, size, page);
+		// 分页获取广告位
+		PageResult<AdPositionId> result = adPositionIdService.query(qu);
+		List<AdPositionId> rows = result.getRows();
+		int rowsSize = rows.size();
+		//如果没有一个广告位,返回空
+		if (rowsSize == 0) {
+			return null;
+		}
+		for (int i = 0; i < rowsSize; i++) {
+			AdPositionId adPositionId = rows.get(i);
+			PromotionQuery pqu = new PromotionQuery(ConstUtil.ADTYPE_NOTBANNER,
+					null, adPositionId.getId(), ConstUtil.PROMOTION_NORMAL,
+					ConstUtil.PROMOTION_CURRENT);
+			pqu.setPageSize(Integer.MAX_VALUE);
+			PageResult<Promotion> pageResult = query(pqu);
+			if (pageResult.getTotal() != 0
+					&& pageResult.getRows().get(0) != null) {
+				Promotion promotion = pageResult.getRows().get(0);
+				Map<String, Object> pro = new HashMap<String, Object>();
+				pro.put("promotionId", promotion.getId());
+				pro.put("image", promotion.getImage());
+				pro.put("contentType", promotion.getContentType());
+				pro.put("contentId", promotion.getContentId());
+				pros.add(pro);
+			} else {
+				Map<String, Object> pro = new HashMap<String, Object>();
+				pro.put("promotionId", -1);
+				pro.put("contentType", ConstUtil.PROMOTION_COTENTTYPE_NONE);
+				if (i % 3 == 1) {
+					pro.put("image", "/images/promotion/default/width.jpg");
+				} else {
+					pro.put("image", "/images/promotion/default/thin.jpg");
+				}
+				pros.add(pro);
+			}
+		}
+		return pros;
+	}
+
+	@Override
+	public List<Map<String, Object>> getTypeAndAd(int size, int page) {
+		List<Map<String, Object>> typeAndAds = new ArrayList<Map<String, Object>>();
+		List<Type> types = typeService.getByParent(null);
+		int length = types.size();
+		if (length < (page - 1) * 3) {
+			return null;
+		} else if (length < page * 3) {
+			types = types.subList((page - 1) * 3, length - 1);
+		} else {
+			types = types.subList((page - 1) * 3, page * 3);
+		}
+		for (Type type : types) {
+			List<Map<String, Object>> byGoodsType = getByGoodsType(
+					type.getId(), 3, 1);
+			//如果没有广告位,不添加该分类
+			if (byGoodsType == null) {
+				continue;
+			}
+			Map<String, Object> typeAndAd = new HashMap<String, Object>();
+			typeAndAd.put("goodsTypeId", type.getId());
+			typeAndAd.put("goodsType", type.getName());
+			typeAndAd.put("promotions", byGoodsType);
+			typeAndAds.add(typeAndAd);
+		}
+		return typeAndAds;
+	}
+
+	@Override
+	public Map<String, Object> enterPromotion(Long promotionId, Long userId) {
+		Map<String, Object> data = null;
+		Promotion promotion = promotionMapper.get(promotionId);
+		Integer cotentType = promotion.getContentType();
+		Long cotentId = promotion.getContentId();
+		if (cotentType == ConstUtil.PROMOTION_CCOTENTTYPE_GOODS) {
+			data = goodsService.enterGoods(cotentId);
+		} else if (cotentType == ConstUtil.PROMOTION_COTENTTYPE_STORE) {
+			GoodsQuery goodsQuery = new GoodsQuery();
+			goodsQuery.setStoreId(cotentId);
+			goodsQuery.setState(1);
+			data = storeService.enterStore(goodsQuery, userId);
+		}
+		return data;
+	}
+
+	@Override
+	public String getContent(Long promotionId) {
+		Promotion promotion = promotionMapper.get(promotionId);
+		Long cotentId = promotion.getContentId();
+		Webpage webpage = webpageService.get(cotentId);
+		return webpage.getContent();
+	}
+
+	@Override
+	public void updateState(Long id, Integer state) {
+		Promotion pro = promotionMapper.get(id);
+		pro.setState(state);
+		promotionMapper.updateState(pro);
+	}
+
+	@Override
+	public void delete(Long id) {
+		Promotion pro = promotionMapper.get(id);
+		if (pro.getState() == ConstUtil.PROMOTION_NORMAL) {
+			throw new LogicException("审核通过的广告,不能删除!",
+					StateCode.PROMOTION_NOTDELETE);
+		}
+		// 删除图片
+		FileUtil.deleteFile(pro.getImage());
+		promotionMapper.delete(id);
+	}
+
+	@Override
+	public Map<String, Object> getPromotion(int page) {
+		Map<String, Object> data = new HashMap<String, Object>();
+		if (page == 1) {
+			// 首页banner图
+			List<Object> banners = getBanner(null);
+			data.put("banner", banners);
+		}
+		// 首页广告
+		List<Map<String, Object>> typeAndAd = getTypeAndAd(3, page);
+		data.put("promotion", typeAndAd);
+		return data;
+	}
+
+	@Override
+	public Map<String, Object> getPromotionOfType(Long goodsTypeId, int page) {
+		Map<String, Object> data = new HashMap<String, Object>();
+		if (page == 1) {
+			// banner图
+			List<Object> banners = getBanner(goodsTypeId);
+			data.put("banner", banners);
+		}
+		// 广告
+		List<Map<String, Object>> typeAndAd = getByGoodsType(goodsTypeId, 9,
+				page);
+		data.put("promotion", typeAndAd);
+
+		return data;
+	}
+
+	@Override
+	public Long queryTotal(PromotionQuery qu) {
+		return promotionMapper.queryTotal(qu);
+	}
+
+	@Override
+	public void save(Promotion promotion) {
+		promotionMapper.save(promotion);
+	}
+
+	@Override
+	public List<Promotion> getByAd(Long adPositionId) {
+		return promotionMapper.getByAd(adPositionId);
+	}
+
+}

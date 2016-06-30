@@ -1,0 +1,212 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+<script type="text/javascript">
+
+//下架
+function goods_leave(){
+	// 1.获取选中行信息
+	var rowData = $("#goodsDataGrid").datagrid("getSelected");
+	// 2.判断
+	if(!rowData){
+		$.messager.alert("温馨提示","你没有选中任何商品！！","info");
+		return;
+	}
+	if(rowData.state==0){
+		$.messager.alert("温馨提示","请不要重复下架！！","warning");
+		return;
+	}
+	$.messager.confirm("温馨提示","是否确认下架【"+rowData.name+"】?",function(yes){
+		if(yes){
+			// 获取数据的唯一标示
+			var id = rowData.id;
+			// 发送AJAX请求，修改ID对应数据状态
+			$.get("/goods/leave",{id:id},function(data){
+				if(data.success){
+					$.messager.alert("温馨提示",data.message,"info",function(){
+						$("#goodsDataGrid").datagrid("reload");
+					});
+				}
+			},"json");
+		}
+	});
+}
+//上架
+function goods_up(){
+	// 1.获取选中行信息
+	var rowData = $("#goodsDataGrid").datagrid("getSelected");
+	// 2.判断
+	if(!rowData){
+		$.messager.alert("温馨提示","你没有选中任何商品！！","info");
+		return;
+	}
+	if(rowData.state==1){
+		$.messager.alert("温馨提示","请不要重复上架！！","warning");
+		return;
+	}
+	$.messager.confirm("温馨提示","是否确认上架【"+rowData.name+"】?",function(yes){
+		if(yes){
+			// 获取数据的唯一标示
+			var id = rowData.id;
+			// 发送AJAX请求，修改ID对应数据状态
+			$.get("/goods/up",{id:id},function(data){
+				if(data.success){
+					$.messager.alert("温馨提示",data.message,"info",function(){
+						$("#goodsDataGrid").datagrid("reload");
+					});
+				}
+			},"json");
+		}
+	});
+}
+
+//删除
+function goods_del(){
+	// 1.获取选中行信息
+	var rowData = $("#goodsDataGrid").datagrid("getSelected");
+	console.debug(rowData);
+	// 2.判断
+	if(!rowData){
+		$.messager.alert("温馨提示","你没有选中任何数据","info");
+		return;
+	}
+	if(rowData.state==1){
+		$.messager.alert("温馨提示","不能删除未下架商品！！","warning");
+		return;
+	}
+	//提示用户是否删除
+	$.messager.confirm("温馨提示","是否确认删除【"+rowData.name+"】?",function(yes){
+		if(yes){
+			// 获取数据的唯一标示
+			var id = rowData.id;
+			// 发送AJAX请求，修改ID对应数据状态
+			$.get("/goods/delete",{id:id},function(data){
+				if(data.success){
+					$.messager.alert("温馨提示",data.message,"info",function(){
+						$("#goodsDataGrid").datagrid("reload");
+					});
+				}
+			},"json");
+		}
+	});
+	
+} 
+
+//刷新
+function goods_refresh(){
+	$("#goodsDataGrid").datagrid("reload");
+}	
+
+//高级查询
+function goods_search(){
+	var paramObj = {};
+	var paramArr = $("#goods-searchForm").serializeArray();
+	 $.each(paramArr,function(i,data){
+		 //console.debug(arguments);
+		 paramObj[data.name] = data.value;
+	 }); 
+	 $("#goodsDataGrid").datagrid("load",paramObj);
+}
+
+//商品详情图片
+function showImg(goodsId){
+	console.debug('<iframe scrolling="yes" frameborder="0"  src="/app/detailsImages?goodsId='+goodsId+'" style="width:100%;height:98%;"></iframe>');
+	$('#imageWindow').window({ 
+		 title : '图文详情',
+         width :  600,  
+         height :  400,  
+         content : '<iframe scrolling="yes" frameborder="0"  src="/app/detailsImages?goodsId='+goodsId+'" style="width:100%;height:98%;"></iframe>',  
+         modal :true,  
+         shadow : false,  
+         cache : false,  
+         closed : false,  
+         collapsible : false,  
+         resizable : false,  
+         loadingMessage : '正在加载数据，请稍等片刻......' ,
+	});  
+}
+
+</script>
+	<table id="goodsDataGrid" class="easyui-datagrid" style="width: 600px;height: 300px;"
+		data-options="
+			fit:true,
+			border:false,
+			url:'goods/query',
+			singleSelect:true,
+			fitColumns:true,
+			striped:true,
+			rownumbers:true,
+			pagination:true,
+			pageSize:5,
+			pageList:[5,10,20,50],
+			toolbar:'#goods_toolbar'
+		"
+	>
+		<!--
+			定义表格的表头 
+		 -->
+		<thead>
+			<tr>
+				<!-- field：指定需要显示列对应JSON数据属性 -->
+				<th field="name" 		width="60" align="center">名称</th>
+				<!-- formatter:格式化列显示内容 -->    
+				<th field="bannerImages" data-options="formatter:formatGoodsImg" width="60" align="center">图片</th>
+				<th field="brand" data-options="formatter:formatFiledName"  width="70" align="center">品牌</th>
+				<th field="type"  data-options="formatter:formatFiledName"  width="70" align="center">类型</th>
+				<th field="store" data-options="formatter:formatFiledName"  width="70" align="center">商家</th>
+				<th field="state" data-options="formatter:formatGoodsState" width="50" align="center">状态</th>
+				<th field="id" data-options="formatter:formatGoodsDetails" width="40" align="center">商品详情</th>
+				<th field="salePrice"    width="40" align="center">价格</th>
+				<th field="postage"   width="40" align="center">邮费</th>
+				<th field="proxyNum"   width="40" align="center">分销量</th>
+				<th field="saleNum"   width="40" align="center">销量</th> 
+			</tr>
+		</thead>
+	</table>
+	
+	 <div id="goods_toolbar">
+	 	<div>
+		 	<form method="post" id="goods-searchForm">
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="goods_leave();">下架</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="goods_up();">上架</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="goods_del();">删除</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-reload" plain="true" onclick="goods_refresh();">刷新</a>
+				
+				
+				状态：
+				 <select name="state" class="easyui-combobox" style="width:100px">
+						<option value="-99">未选择</option>
+						<option value="1">销售中</option>
+						<option value="0">已下架</option>
+				</select>
+				店铺:<select class="easyui-combobox" 
+				    				id="store"
+						            name="storeId"
+						            style="width:100px"
+						            data-options="
+						                    url:'/store/getAll',
+						                    method:'get',
+						                    valueField:'id',
+						                    textField:'name',
+						                    panelHeight:'auto',
+						                    value:'未选择',
+						                    text:'-1',
+						            ">
+					</select>
+				关键字： <input name="searchKey" class="easyui-textbox" style="width:100px;height:20px;margin-top: 3px">
+				<a href="#" class="easyui-linkbutton" iconCls="icon-search" onclick="goods_search()">  搜索</a> 
+		 	</form>
+		 </div> 
+	</div>
+	
+	<div id="imageWindow" >   
+	</div>  
+	
+</body>
+</html>

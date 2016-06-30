@@ -1,0 +1,50 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.Account;
+import com.huashidai.weihuotong.domain.Withdraw;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.mapper.WithdrawMapper;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.query.WithdrawQuery;
+import com.huashidai.weihuotong.service.IAccountService;
+import com.huashidai.weihuotong.service.IWithdrawService;
+import com.huashidai.weihuotong.utils.StateCode;
+
+@Service
+public class WithdrawServiceImpl implements IWithdrawService {
+	@Autowired
+	private WithdrawMapper withdrawMapper;
+	@Autowired
+	private IAccountService accountService;
+
+	@Override
+	public PageResult<Withdraw> query(WithdrawQuery qu) {
+		// 统计查询
+		Long total = withdrawMapper.queryTotal(qu);
+		// 分页查询
+		List<Withdraw> rows = withdrawMapper.query(qu);
+		return new PageResult<Withdraw>(rows, qu.getPageSize(), qu.getCurrentPage(), total.intValue());
+	}
+
+	@Override
+	public void withdrawApply(Withdraw withdraw) {
+		BigDecimal amount = withdraw.getAmount();
+		
+		Account account = accountService.get(withdraw.getAccount().getId());
+		if (account.getBalance().compareTo(amount) == -1) {
+			throw new LogicException("余额不足！", StateCode.ACCOUNT_NO_BALANCE);
+		}
+		withdraw.setTime(new Date());
+		withdrawMapper.save(withdraw);
+		account.setBalance(account.getBalance().subtract(amount));
+		account.setFreezedAmount(account.getFreezedAmount().add(amount));
+		accountService.update(account);
+	}
+}

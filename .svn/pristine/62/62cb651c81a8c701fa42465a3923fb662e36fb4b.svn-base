@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.StoreMapper">
+	<!-- 保存基本信息 -->
+	<insert id="save" parameterType="Store" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_store(name,linkman,phone,qq,state,headImage,type_id,city_id) 
+					values(#{name},#{linkman},#{phone},#{qq},#{state},#{headImage},
+					#{type.id},#{city.id})
+	</insert>
+	<!-- 修改基本信息-->
+	<update id="update" parameterType="Store">
+		update t_store set 
+		name=#{name},
+		linkman=#{linkman},
+		phone=#{phone},
+		qq=#{qq},
+		headImage=#{headImage},
+		type_id=#{type.id},
+		city_id=#{city.id},
+		where id = #{id}
+	</update>
+	<!-- 修改状态 -->
+	<update id="updateState" parameterType="Store">
+		update t_store set 
+		state=#{state}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_store where id = #{id}
+	</delete>
+	
+	
+	<select id="get" resultType="Store">
+		select * from t_store  
+		where id=#{id}
+	</select>
+	
+	<select id="getAll" resultType="Store">
+		select * from t_store
+	</select>
+	<!-- 增加销量 -->
+	<select id="addSaleNum" resultType="int">
+		update t_store set 
+		saleNum= saleNum + #{saleNum}
+		where id = #{id}
+	</select>
+</mapper>

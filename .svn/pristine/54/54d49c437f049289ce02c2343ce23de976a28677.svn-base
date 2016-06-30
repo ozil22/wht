@@ -1,0 +1,94 @@
+package com.huashidai.weihuotong.app;
+/**
+ * 代理商品相关网页接口
+ */
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.huashidai.weihuotong.domain.Goods;
+import com.huashidai.weihuotong.domain.Product;
+import com.huashidai.weihuotong.domain.ProxyGoods;
+import com.huashidai.weihuotong.domain.User;
+import com.huashidai.weihuotong.mapper.GoodsMapper;
+import com.huashidai.weihuotong.mapper.ProductMapper;
+import com.huashidai.weihuotong.mapper.ProxyGoodsMapper;
+import com.huashidai.weihuotong.utils.AjaxResult;
+import com.huashidai.weihuotong.utils.RandomUtil;
+import com.huashidai.weihuotong.utils.SMSUtil;
+import com.huashidai.weihuotong.utils.UserContext;
+
+@Controller
+@RequestMapping("/proxy")
+public class ProxyController {
+	@Autowired
+	private ProxyGoodsMapper proxyGoodsMapper;
+	@Autowired
+	private GoodsMapper goodsMapper;
+	@Autowired
+	private ProductMapper productMapper;
+	
+	/**
+	 * 代理商品页面
+	 * @return
+	 */
+	@RequestMapping("/enterProxyGoods")
+	public ModelAndView enterProxyGoods(Long proxyGoodsId){
+		ModelAndView modelAndView = new ModelAndView("proxy/proxyGoods");
+		ProxyGoods proxyGoods = proxyGoodsMapper.get(proxyGoodsId);
+		modelAndView.addObject("proxyGoods", proxyGoods);
+		User user = proxyGoods.getUser();
+		modelAndView.addObject("proxyUser", user);
+		Goods goods = proxyGoods.getGoods();
+		goods = goodsMapper.getMap(goods.getId());
+		modelAndView.addObject("goods", goods);
+		List<Product> products = productMapper.getByGoods(goods.getId());
+		modelAndView.addObject("products", products);
+		return modelAndView;
+	}
+	/**
+	 * 订单页面
+	 * @return
+	 */
+	@RequestMapping("/proxyOrder")
+	public ModelAndView proxyOrder(Long productId,Integer productNum,String image,String name,BigDecimal postage,BigDecimal price,Long proxyGoodsId){
+		ModelAndView modelAndView = new ModelAndView("proxy/proxyOrder");
+		modelAndView.addObject("productId", productId);
+		modelAndView.addObject("productNum", productNum);
+		modelAndView.addObject("proxyGoodsId", proxyGoodsId);
+		modelAndView.addObject("proxyGoodsId", proxyGoodsId);
+		modelAndView.addObject("name", name);
+		modelAndView.addObject("image", image);
+		modelAndView.addObject("price", price);
+		modelAndView.addObject("postage", postage);
+		return modelAndView;
+	}
+	
+	/**
+	 * 短信登录验证码
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/customerPassword")
+	@ResponseBody
+	public AjaxResult customerPassword(String phone) {
+		AjaxResult ajaxResult = null;
+		String templateId = "23425";
+		String randomNum = RandomUtil.randomNum(6);
+		String param = randomNum + ",5";
+		try {
+			SMSUtil.sendSMS(templateId, phone, param);
+			UserContext.setCustomerPassword(randomNum);
+			ajaxResult = new AjaxResult("发送成功");
+		} catch (Exception e) {
+			ajaxResult = new AjaxResult("发送失败,请稍后再试!", null);
+		}
+		return ajaxResult;
+	}
+
+}

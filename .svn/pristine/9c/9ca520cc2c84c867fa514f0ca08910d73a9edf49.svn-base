@@ -1,0 +1,29 @@
+package com.huashidai.weihuotong.service;
+
+import java.math.BigDecimal;
+import java.util.Map;
+
+import com.huashidai.weihuotong.domain.Account;
+
+
+public interface IAccountService {
+	/**
+	 * 获取用户的账户信息
+	 * @param userId
+	 * @return
+	 */
+	Map<String,Object> getByUser(Long userId);
+	/**
+	 * 更新店铺账户信息
+	 * @param userId 用户id
+	 * @param amount 交易金额
+	 * @param accountFlowType 流水类型
+	 * @return 更新后的账户
+	 */
+	Account updateByUser(Long userId,BigDecimal amount,Integer accountFlowType);
+	/**
+	 * 保存
+	 * @param account
+	 */
+	void save(Account account);
+}

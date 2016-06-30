@@ -1,0 +1,55 @@
+package com.huashidai.weihuotong.mapper;
+
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.huashidai.weihuotong.domain.Store;
+import com.huashidai.weihuotong.query.StoreQuery;
+
+public interface StoreMapper {
+	/**
+	 * 保存
+	 */
+	void save(Store store);
+	/**
+	 * 更新
+	 */
+	void update(Store store);
+	/**
+	 * 修改状态
+	 */
+	void updateState(Store store);
+	/**
+	 * 删除
+	 */
+	void delete(Long id);
+	/**
+	 * 获取单个
+	 */
+	Store get(Long id);
+	/**
+	 * 查询所有
+	 */
+	List<Store> getAll();
+	/**
+	 * 增加销量
+	 * @param saleNum
+	 */
+	void addSaleNum(@Param("saleNum")Integer saleNum,@Param("id")Long id);
+	/**
+	 * 更新热度(收藏量)
+	 * @param id
+	 */
+	void updateHot(@Param("hot")Integer hot,@Param("id")Long id);
+	
+	/**
+	 * 高级查询
+	 */
+	List<Store> query(StoreQuery qu);
+	/**
+	 * 查询总数
+	 */
+	Long queryTotal(StoreQuery qu);
+}

@@ -1,0 +1,50 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.SecuredOrder;
+import com.huashidai.weihuotong.domain.Store;
+import com.huashidai.weihuotong.domain.TotalOrder;
+import com.huashidai.weihuotong.mapper.SecuredOrderMapper;
+import com.huashidai.weihuotong.mapper.TotalOrderMapper;
+import com.huashidai.weihuotong.service.ISecuredOrderService;
+import com.huashidai.weihuotong.service.IStoreService;
+import com.huashidai.weihuotong.utils.OrderNumUtil;
+
+@Service
+public class SecuredOrderServiceImpl implements ISecuredOrderService {
+
+	@Autowired
+	private SecuredOrderMapper securedOrderMapper;
+	@Autowired
+	private TotalOrderMapper totalOrderMapper;
+	@Autowired
+	private IStoreService storeService;
+
+	@Override
+	public Map<String, Object> createOrderNum(Long storeId) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		String orderNum = OrderNumUtil.SECURED_PRE + OrderNumUtil.getOrderNum(storeId);
+		map.put("orderNum", orderNum);
+		return map;
+	}
+
+	@Override
+	public void completeOrder(Integer amount, Long id,String orderNum) {
+		Store store = storeService.get(id);
+		BigDecimal price = new BigDecimal(amount).divide(new BigDecimal(100));
+		//保存订单信息
+		TotalOrder totalOrder = new TotalOrder(orderNum, price, price);
+		totalOrderMapper.save(totalOrder);
+		SecuredOrder securedOrder = new SecuredOrder(new Date(), orderNum, price, price, store, totalOrder );
+		securedOrderMapper.save(securedOrder);
+		//修改店铺信息
+		storeService.updateSecured(price.intValue(), id);
+	}
+}

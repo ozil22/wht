@@ -1,0 +1,83 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>用户登录</title>
+ <!-- 引入资源 -->
+ <%@ include file="/WEB-INF/pages/common.jsp" %>
+ 
+ 
+<body>
+<script type="text/javascript">
+	// 判断当前页面是否是顶级页面
+	if(window!=window.top){
+		window.top.location.href = window.location.href;  // 把子页面的地址，显示到顶级页面去
+	}
+	
+
+
+	$(function(){
+		$(document.documentElement).bind("keydown",function(e){
+			if(e.keyCode==13){// 回车键
+				submitForm();
+			}
+		});
+	});
+
+ 	function submitForm(){
+ 		$("#loginForm").form("submit",{
+ 			url:"/checkLogin",
+ 			success:function(data){
+ 				data = $.parseJSON(data);
+ 				console.debug(data);
+ 				if(data.success){
+ 					location.href="/index";
+ 				}else{
+ 					$.messager.alert("温馨提示",data.msg,"info",function(){
+						//console.debug($("input[name=username]"));
+ 						if(data.errorCode==-100){// 用户名错误
+ 							$("input[name=username]").focus();
+ 						}else if(data.errorCode==-101){// 密码错误
+ 							$("input[name=password]").focus();
+ 						}
+ 					});
+ 				}
+ 					
+ 			}
+ 			
+ 		});
+ 	}
+ 	function resetForm(){
+ 		$("#loginForm").form("clear");
+ 	}
+ </script>
+
+	<div align="center" style="margin-top: 100px;">
+		<div class="easyui-panel" title="用户登陆" style="width: 350px;height: 190px;" >
+			<form id="loginForm" class="easyui-form" method="post">
+				<table align="center" style="margin-top: 15px;">
+					<tr height="20">
+						<td>用户名:</td>
+					</tr>
+					<tr height="10">
+						<td><input name="username" class="easyui-validatebox" required="true" value="admin"/></td>
+					</tr>
+					<tr height="20">
+						<td>密&emsp;码:</td>
+					</tr>
+					<tr height="10">
+						<td><input name="password" type="password"  class="easyui-validatebox" required="true" value="0"/></td>
+					</tr>
+					<tr height="40">
+						<td align="center">
+							<a href="javascript:;" class="easyui-linkbutton" onclick="submitForm();">登陆</a>
+							<a href="javascript:;" class="easyui-linkbutton" onclick="resetForm();">重置</a>
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+	</div>
+</body>
+</html>

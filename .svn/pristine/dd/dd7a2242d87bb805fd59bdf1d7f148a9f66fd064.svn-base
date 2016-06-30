@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.MarginOrderMapper">
+
+	<insert id="save" parameterType="MarginOrder" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_marginOrder(buyTime,orderNum,totalPrice,payPrice,
+					store_id) 
+					values(#{buyTime},#{orderNum},#{totalPrice},#{payPrice},
+					#{store.id})
+	</insert>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_marginOrder where id = #{id}
+	</delete>
+	
+	<select id="get" resultType="MarginOrder" parameterType="long">
+		select *
+		from t_marginOrder  
+		where id=#{id}
+	</select>
+	<select id="getByOrderNum" resultType="MarginOrder" parameterType="string">
+		select *
+		from t_marginOrder  
+		where orderNum=#{orderNum}
+	</select>
+	
+	<resultMap type="MarginOrder" id="marginOrderMap">
+		<id column="id" property="id"/>
+		<result column="buyTime" property="buyTime"/>
+		<result column="orderNum" property="orderNum"/>
+		<result column="totalPrice" property="totalPrice"/>
+		<result column="payPrice" property="payPrice"/>
+		<association property="store" javaType="Store">
+			<id column="uid" property="id"/>
+			<id column="uname" property="name"/>
+		</association>
+	</resultMap>
+	
+</mapper>

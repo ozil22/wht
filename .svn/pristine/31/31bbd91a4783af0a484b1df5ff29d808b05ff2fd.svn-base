@@ -1,0 +1,95 @@
+package com.huashidai.weihuotong.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.huashidai.weihuotong.domain.User;
+import com.huashidai.weihuotong.exception.LogicException;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.query.UserQuery;
+import com.huashidai.weihuotong.service.IUserService;
+import com.huashidai.weihuotong.utils.AjaxResult;
+import com.huashidai.weihuotong.utils.MethodAnnotation;
+import com.huashidai.weihuotong.utils.MethodAnnotation.ResourceType;
+
+@Controller
+@RequestMapping("/user")
+public class UserController {
+
+	@Autowired
+	IUserService userService;
+
+	@MethodAnnotation(name = "主页", type = ResourceType.用户账号)
+	@RequestMapping("/index")
+	public String index() {
+		return "user/user";
+	}
+
+	@MethodAnnotation(name = "查询", type = ResourceType.用户账号)
+	@RequestMapping("/query")
+	@ResponseBody
+	public PageResult<User> query(UserQuery qu) {
+		PageResult<User> result = userService.query(qu);
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@MethodAnnotation(name = "删除", type = ResourceType.用户账号)
+	@RequestMapping("/delete")
+	@ResponseBody
+	public AjaxResult delete(Long id) {
+		AjaxResult ar;
+		try {
+			userService.delete(id);
+			ar = new AjaxResult("删除成功！！");
+		} catch (LogicException e) {
+
+			ar = new AjaxResult("删除失败:" + e.getMessage(), e.getErrorCode());
+		}
+		return ar;
+	}
+
+	/**
+	 * 
+	 * 停用操作
+	 */
+	@MethodAnnotation(name = "停用", type = ResourceType.用户账号)
+	@RequestMapping("/leave")
+	@ResponseBody
+	public AjaxResult leave(Long id) {
+		AjaxResult ar;
+		try {
+			userService.leave(id);
+			ar = new AjaxResult("停用成功！！");
+		} catch (LogicException e) {
+			ar = new AjaxResult("停用失败:" + e.getMessage(), e.getErrorCode());
+		}
+		return ar;
+	}
+
+	/**
+	 * 
+	 * 启用操作
+	 */
+	@MethodAnnotation(name = "启用", type = ResourceType.用户账号)
+	@RequestMapping("/up")
+	@ResponseBody
+	public AjaxResult up(Long id) {
+		AjaxResult ar;
+		try {
+			userService.up(id);
+
+			ar = new AjaxResult("启用成功！！");
+		} catch (LogicException e) {
+
+			ar = new AjaxResult("启用失败:" + e.getMessage(), e.getErrorCode());
+		}
+		return ar;
+	}
+}

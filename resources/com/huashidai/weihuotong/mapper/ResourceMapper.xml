@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.ResourceMapper">
+	
+	<!-- 查询出所有的资源-->
+	<select id="getAll" resultType="Resource">
+		select * from t_resource
+	</select>
+		
+	<!-- 根据传入的id的值,来查询出对应的资源 -->
+	<select id="get" parameterType="long" resultType="Resource">
+		select * from t_resource
+		where p.id=#{id}
+	</select>
+	
+	<!-- 添加一个资源 -->
+	<insert id="save" parameterType="Resource">
+		insert into t_resource (name)
+		values (#{name})
+	</insert>
+	<!-- 添加全部资源  -->
+	<!-- IGNORE，这个关键字判断每条记录是否存在，是否违反了表中的唯一索引，如果存在就不插入，而不存在的记录就会插入。 -->
+	<insert id="saveAll" parameterType="arraylist">
+		insert ignore into t_resource (name)
+		values
+	    <foreach collection="list" item="item" index="index" separator=",">  
+	        (#{item.name})  
+	    </foreach>  
+	</insert>
+	<!-- 修改一个资源-->
+	<update id="update" parameterType="Resource">
+		update t_resource set name=#{name},
+		where id=#{id}
+	</update>
+	<!-- 删除一个资源-->
+	<update id="delete" parameterType="long">
+		delete from t_resource
+		where id=#{id}
+	</update>
+	
+</mapper>

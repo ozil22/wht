@@ -1,0 +1,22 @@
+package com.huashidai.weihuotong.service;
+
+import java.util.Map;
+
+import com.huashidai.weihuotong.domain.AccountFlow;
+import com.huashidai.weihuotong.query.AccountFlowQuery;
+import com.huashidai.weihuotong.query.PageResult;
+
+public interface IAccountFlowService {
+	/**
+	 * 高级查询
+	 * @param qu
+	 * @return
+	 */
+	PageResult<AccountFlow> query(AccountFlowQuery qu);
+	/**
+	 * 高级查询
+	 * @param qu
+	 * @return 封装好的APP数据
+	 */
+	Map<String,Object> queryMap(AccountFlowQuery qu);
+}

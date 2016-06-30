@@ -1,0 +1,56 @@
+package com.huashidai.weihuotong.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.huashidai.weihuotong.domain.Address;
+
+
+public interface IAddressService {
+	/**
+	 * 添加
+	 */
+	void save(Address address);
+	/**
+	 * 更新
+	 */
+	void update(Address address);
+	/**
+	 * 删除
+	 */
+	void delete(Long addressId);
+	/**
+	 * 设置为默认
+	 */
+	void updateUserDefault(Long addressId);
+	/**
+	 * 设置为默认
+	 */
+	void updateCustomerDefault(Long addressId);
+	/**
+	 * 获取用户默认
+	 */
+	Map<String,Object> getUserDefault(Long userId);
+	/**
+	 * 查询该用户所有地址
+	 * 第一个为默认地址
+	 */
+	List<Object> getByUser(Long userId);
+	/**
+	 * 查询该客户所有地址
+	 * 第一个为默认地址
+	 */
+	List<Address> getByCustomer(Long customerId);
+	/**
+	 * 获取单个
+	 * @param addressId
+	 * @return
+	 */
+	Address get(Long addressId);
+	/**
+	 * 获取单个
+	 * @param orderId
+	 * @return
+	 */
+	Address getByOrder(Long orderId);
+}

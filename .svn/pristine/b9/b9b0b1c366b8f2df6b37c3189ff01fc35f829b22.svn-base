@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.MessageMapper">
+
+	<insert id="save" parameterType="Message" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into t_message(userId,time,title,content,isLook) 
+					values(#{userId},#{time},#{title},#{content},#{isLook})
+	</insert>
+	
+	<delete id="delete" parameterType="long">
+		delete from t_message where id = #{id}
+	</delete>
+	<update id="update" parameterType="Message">
+		update t_message set 
+		isLook=#{isLook}
+		where id = #{id}
+	</update>
+	
+	<select id="get" resultType="Message">
+		select * from t_message
+		where id=#{id}
+	</select>
+	
+	<sql id="whereSql">
+		<where>
+			<if test="userId != null and userId != -1">
+				m.userId = #{userId}
+			</if>
+			<if test="isLook != null and isLook != -99">
+				and m.isLook = #{isLook}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="query" resultType="Message" parameterType="MessageQuery">
+		select * 
+		from t_message m
+		<include refid="whereSql"/>
+		order by m.isLook,m.time desc
+		<if test="pageSize!=-1">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+		<select id="queryTotal" resultType="long" parameterType="MessageQuery">
+		select count(m.id)
+		from t_message m
+		<include refid="whereSql"/>
+	</select>
+	
+</mapper>

@@ -1,0 +1,11 @@
+/**
+  easyui表格相关的  
+*/
+@charset "utf-8";
+/*
+省略表格过长内容
+*/
+.datagrid-cell, .datagrid-cell-group, .datagrid-header-rownumber, .datagrid-cell-rownumber{  
+    -o-text-overflow: ellipsis;  
+    text-overflow: ellipsis;  
+}  

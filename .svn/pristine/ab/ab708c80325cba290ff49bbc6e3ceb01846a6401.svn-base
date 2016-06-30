@@ -1,0 +1,141 @@
+package com.huashidai.weihuotong.domain;
+
+import com.huashidai.weihuotong.utils.ConstUtil;
+
+/**
+ * 店铺
+ * 
+ * @author ozil
+ *
+ */
+public class Store {
+	private Long id;
+	private String name;// 店名
+	private String linkman;// 联系人(经营者)
+	private String phone;// 联系电话
+	private String qq;// QQ号
+	private String headImage;// 店铺头像
+	private Integer saleNum = 0;// 店铺销量
+	private Integer secured = 0;// 担保交易
+	private Integer margin = 0;// 保证金保障
+
+	private City city;// 所在地
+	private Type type;// 经营类目
+
+	/**
+	 * 店铺状态 -2 停用 -1 审核失败 0 待审核 1 正常
+	 */
+	private Integer state = ConstUtil.STORE_PENDING;
+
+	public Store(Long id) {
+		this.id = id;
+	}
+
+	public Store() {
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getLinkman() {
+		return linkman;
+	}
+
+	public void setLinkman(String linkman) {
+		this.linkman = linkman;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getQq() {
+		return qq;
+	}
+
+	public void setQq(String qq) {
+		this.qq = qq;
+	}
+
+	public City getCity() {
+		return city;
+	}
+
+	public void setCity(City city) {
+		this.city = city;
+	}
+
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+	}
+
+	public Integer getState() {
+		return state;
+	}
+
+	public void setState(Integer state) {
+		this.state = state;
+	}
+
+	public String getHeadImage() {
+		return headImage;
+	}
+
+	public void setHeadImage(String headImage) {
+		this.headImage = headImage;
+	}
+
+	public Integer getSaleNum() {
+		return saleNum;
+	}
+
+	public void setSaleNum(Integer saleNum) {
+		this.saleNum = saleNum;
+	}
+
+	public Integer getSecured() {
+		return secured;
+	}
+
+	public void setSecured(Integer secured) {
+		this.secured = secured;
+	}
+
+	public Integer getMargin() {
+		return margin;
+	}
+
+	public void setMargin(Integer margin) {
+		this.margin = margin;
+	}
+
+	@Override
+	public String toString() {
+		return "Store [id=" + id + ", name=" + name + ", linkman=" + linkman
+				+ ", phone=" + phone + ", qq=" + qq + ", headImage="
+				+ headImage + ", saleNum=" + saleNum + ", secured=" + secured
+				+ ", margin=" + margin + ", city=" + city + ", type=" + type
+				+ ", state=" + state + "]";
+	}
+}

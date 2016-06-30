@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashidai.weihuotong.mapper.SystemAccountMapper" >
+  <insert id="save" parameterType="SystemAccount" >
+    insert into t_systemAccount (id,balance)
+  </insert>
+  
+  <update id="update" parameterType="SystemAccount" >
+    update t_systemAccount set
+    where id = #{id}
+  </update>
+  
+  <delete id="delete" parameterType="long" >
+    delete from t_systemAccount
+    where id = #{id}
+  </delete>
+  
+  <select id="get" resultType="SystemAccount" parameterType="long" >
+    select *
+    from t_systemAccount
+       where id = #{id}
+  </select>
+  <select id="getAll" resultType="SystemAccount" parameterType="long" >
+    select *
+    from t_systemAccount
+  </select>
+</mapper>
