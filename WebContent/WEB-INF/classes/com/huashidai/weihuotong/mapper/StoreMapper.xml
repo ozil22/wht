@@ -49,7 +49,8 @@
 	<select id="getByAccount" resultType="Store" parameterType="long">
 		select s.*
 		from t_store s
-		left join t_account a on a.user_id = s.user_id
+		left join t_user u on u.store_id = s.id
+		left join t_account a on a.user_id = u.id
 		where a.id=#{accountId}
 	</select>
 	<select id="getByUser" resultType="Store" parameterType="long">

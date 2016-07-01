@@ -92,7 +92,7 @@ public class WithdrawServiceImpl implements IWithdrawService {
 				ConstUtil.ACCOUNT_ACTIONTYPE_WITHDRAW, amount, account, "账户提现");
 		systemAccountFlowService.createSystemAccountFlow(
 				ConstUtil.ACCOUNT_ACTIONTYPE_WITHDRAW, amount, systemAccount,
-				account.getName() + "账户提现", account);
+				account.getName() + "", account);
 		withdraw.setState(ConstUtil.MONEY_WITHDRAW_TRANSFERED);
 		withdrawMapper.update(withdraw);
 		// 生成店铺消息

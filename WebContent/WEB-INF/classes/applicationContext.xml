@@ -107,6 +107,8 @@
 			<tx:method name="list*" read-only="true" propagation="SUPPORTS" />
 			<tx:method name="query*" read-only="true" propagation="SUPPORTS" />
 			<tx:method name="find*" read-only="true" propagation="SUPPORTS" />
+			<!-- 保存异常信息不使用事物 -->
+			<tx:method name="saveException" propagation="NOT_SUPPORTED" />
 			<!-- 切入点的其它所有方法使用事务 -->
 			<tx:method name="*" />
 		</tx:attributes>

@@ -23,7 +23,7 @@ public class SystemLogQuery extends BaseQuery{
 	}
 
 	public void setEndTime(String endTime) {
-		this.endTime = StringUtils.isBlank(endTime)?null:endTime;;
+		this.endTime = StringUtils.isBlank(endTime)?null:endTime;
 	}
 
 	@Override

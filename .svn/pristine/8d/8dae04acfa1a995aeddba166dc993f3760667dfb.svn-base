@@ -53,22 +53,6 @@
 			}
 		});
 	});
-	//异常详情
-	function showException(id){
-		$('#exceptionWindow').window({ 
-			 title : '文章详情',
-	         width :  800,  
-	         height :  600,  
-	         content : '<iframe scrolling="yes" frameborder="0"  src="/systemException/showException?id='+id+'" style="width:100%;height:98%;"></iframe>',  
-	         modal :true,  
-	         shadow : false,  
-	         cache : false,  
-	         closed : false,  
-	         collapsible : false,  
-	         resizable : false,  
-	         loadingMessage : '正在加载数据，请稍等片刻......' ,
-		});  
-	}
 	</script>
 	<!-- 数据表格 -->
 	<table id="systemExceptionDataGrid" >
@@ -79,7 +63,7 @@
 				<th align="center" field="exceptionCode"    width="40">异常</th>
 				<th align="center" field="function"    width="60">方法</th>
 				<th align="center" field="params"    width="40">参数</th>
-				<th align="center" field="id"  data-options="formatter:formatException"  width="10">异常详情</th>
+				<th align="center" field="exceptionDetail"    width="10">异常详情</th>
 				<th align="center" field="opTime" data-options="formatter:formatDateTime"  width="20">操作时间</th>
 				<th align="center" field="opIP"    width="15">IP</th>
 			</tr>
@@ -95,8 +79,5 @@
       		 </div>
 		</form>
 	</div>
-	
-	<!-- 异常详情窗口 -->
-	<div id="exceptionWindow"></div>
 </body>
 </html>

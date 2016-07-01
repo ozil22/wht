@@ -16,10 +16,10 @@
 	<!-- 公共的高级查询条件 -->
 	<sql id="whereSql">
 		<where>
-			<if test="startTime != null">
+			<if test="startTime != null and startTime != ''">
 				opTime>=#{startTime}			
 			</if>
-			<if test="endTime != null ">
+			<if test="endTime != null and endTime != ''">
 				and opTime&lt;=#{endTime}
 			</if>
 		</where>

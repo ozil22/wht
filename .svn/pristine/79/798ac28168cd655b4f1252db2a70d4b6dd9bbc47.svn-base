@@ -178,20 +178,18 @@ public class SystemLogAOP {
 		if (joinPoint.getArgs() != null && joinPoint.getArgs().length > 0) {
 			for (int i = 0; i < joinPoint.getArgs().length; i++) {
 				Object arg = joinPoint.getArgs()[i];
-				if (i > 0) {
-					params.append(".");
-				}else if (arg == null) {
-					params.append("null");
+				if (arg == null) {
+					params.append(".").append("null");
 
 				} else if (arg instanceof String) {
-					params.append(arg);
+					params.append(".").append(arg);
 				} else if (arg instanceof Integer || arg instanceof Long
 						|| arg instanceof Short) {
-					params.append(arg.toString());
+					params.append(".").append(arg.toString());
 				} else if (arg instanceof Boolean) {
-					params.append(arg.toString());
+					params.append(".").append(arg.toString());
 				} else {
-					params.append(arg.getClass().getSimpleName());
+					params.append(".").append(arg.getClass().getSimpleName());
 				}
 			}
 		}

@@ -32,8 +32,21 @@
 			<if test="accountId != null and accountId != -1">
 				s.account_id  = #{accountId}
 			</if>
+			<if test="startTime != null and startTime != ''">
+				s.operateTime>=#{startTime}			
+			</if>
+			<if test="endTime != null and endTime != ''">
+				and operateTime&lt;=#{endTime}
+			</if>
 		</where>
 	</sql>
+	
+	<select id="queryOfCharts" resultType="systemAccountFlow" parameterType="SystemAccountFlowQuery">
+		select s.amount,s.operateTime
+		from t_systemAccountFlow s
+		<include refid="whereSql"/>
+		order by s.operateTime
+	</select>
 	
 	<select id="query" resultMap="systemAccountFlowMap" parameterType="SystemAccountFlowQuery">
 		select s.*,a.id aid,a.name aname
