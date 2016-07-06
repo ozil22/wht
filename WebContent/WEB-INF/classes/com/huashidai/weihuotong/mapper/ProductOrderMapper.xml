@@ -4,9 +4,11 @@
 <mapper namespace="com.huashidai.weihuotong.mapper.ProductOrderMapper">
 
 	<insert id="save" parameterType="ProductOrder" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-		insert into t_productOrder(productNum,buyTime,orderNum,postage,state,totalPrice,message,payPrice,proxyPrice,
+		insert into t_productOrder(productNum,buyTime,orderNum,postage,state,totalPrice,
+					message,payPrice,proxyPrice,expressCode,expressNum,
 					address_id,user_id,customer_id,proxyUser_id,store_id,totalOrder_id) 
-					values(#{productNum},#{buyTime},#{orderNum},#{postage},#{state},#{totalPrice},#{message},#{payPrice},#{proxyPrice},
+					values(#{productNum},#{buyTime},#{orderNum},#{postage},#{state},#{totalPrice},
+					#{message},#{payPrice},#{proxyPrice},#{expressCode},#{expressNum},
 					#{address.id},#{user.id},#{customer.id},#{proxyUser.id},#{store.id},#{totalOrder.id})
 	</insert>
 	<!-- 修改-->
@@ -31,6 +33,14 @@
 	<update id="updatePrice" >
 		update t_productOrder set 
 		payPrice=#{price}
+		where id = #{productOrderId}
+	</update>
+	<!-- 修改物流信息(改变后状态为待收货)-->
+	<update id="updateExpress" >
+		update t_productOrder set 
+		expressNum=#{expressNum},
+		expressCode=#{expressCode},
+		state=2
 		where id = #{productOrderId}
 	</update>
 	
@@ -77,6 +87,8 @@
 		<result column="message" property="message"/>
 		<result column="payPrice" property="payPrice"/>
 		<result column="proxyPrice" property="proxyPrice"/>
+		<result column="expressCode" property="expressCode"/>
+		<result column="expressNum" property="expressNum"/>
 		<association property="user" javaType="User">
 			<id column="uid" property="id"/>
 			<id column="uusername" property="username"/>

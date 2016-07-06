@@ -4,8 +4,10 @@
 <mapper namespace="com.huashidai.weihuotong.mapper.AddressMapper">
 
 	<insert id="save" parameterType="Address" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-		insert into t_address(name,phone,address,defaultAddress,city_id,user_id,customer_id) 
-					values(#{name},#{phone},#{address},#{defaultAddress},#{city.id},#{user.id},#{customer.id})
+		insert into t_address(name,phone,address,defaultAddress,province,
+					city_id,user_id,customer_id) 
+					values(#{name},#{phone},#{address},#{defaultAddress},#{province},
+					#{city.id},#{user.id},#{customer.id})
 	</insert>
 	
 	<update id="update" parameterType="Address">
@@ -13,6 +15,7 @@
 		name=#{name},
 		phone=#{phone},
 		address=#{address},
+		province=#{province},
 		city_id=#{city.id},
 		<if test="user != null">
 			user_id=#{user.id}
@@ -38,6 +41,7 @@
 		<result column="phone" property="phone"/>
 		<result column="address" property="address"/>
 		<result column="defaultAddress" property="defaultAddress"/>
+		<result column="province" property="province"/>
 		<association property="city" javaType="City">
 			<id column="cid" property="id"/>
 			<result column="cname" property="name"/>
@@ -49,6 +53,7 @@
 		<result column="phone" property="phone"/>
 		<result column="address" property="address"/>
 		<result column="defaultAddress" property="defaultAddress"/>
+		<result column="province" property="province"/>
 		<association property="user" javaType="User">
 			<id column="uid" property="id"/>
 			<result column="uusername" property="username"/>
@@ -60,6 +65,7 @@
 		<result column="phone" property="phone"/>
 		<result column="address" property="address"/>
 		<result column="defaultAddress" property="defaultAddress"/>
+		<result column="province" property="province"/>
 		<association property="customer" javaType="Customer">
 			<id column="cid" property="id"/>
 			<result column="cusername" property="username"/>

@@ -14,8 +14,7 @@
 		one=#{one},
 		other=#{other},
 		freeNumber=#{freeNumber},
-		area=#{area},
-		store_id=#{store.id}
+		area=#{area}
 		where id = #{id}
 	</update>
 	

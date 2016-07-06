@@ -6,6 +6,11 @@
 		select * from t_province
 		where id=#{id}
 	</select>
+	<select id="getByCity" resultType="Province">
+		select * from t_province p
+		left join t_city c on p.id = c.province_id
+		where c.id=#{cityId}
+	</select>
 	<select id="getAll" resultType="Province">
 		select * from t_province
 	</select>
