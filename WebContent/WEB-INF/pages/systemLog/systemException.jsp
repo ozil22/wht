@@ -56,7 +56,7 @@
 	//异常详情
 	function showException(id){
 		$('#exceptionWindow').window({ 
-			 title : '文章详情',
+			 title : '异常详情',
 	         width :  800,  
 	         height :  600,  
 	         content : '<iframe scrolling="yes" frameborder="0"  src="/systemException/showException?id='+id+'" style="width:100%;height:98%;"></iframe>',  

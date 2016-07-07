@@ -34,7 +34,7 @@ public interface ProductOrderMapper {
 	 * @param expressNum
 	 * @param express
 	 */
-	void updateExpress(@Param("productOrderId")Long productOrderId, @Param("expressNum")String expressNum,@Param("express")String express);
+	void updateExpress(@Param("productOrderId")Long productOrderId, @Param("expressNum")String expressNum,@Param("expressCode")String expressCode);
 	/**
 	 * 删除
 	 */

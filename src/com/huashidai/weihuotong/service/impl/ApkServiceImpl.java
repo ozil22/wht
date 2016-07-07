@@ -1,0 +1,81 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.huashidai.weihuotong.domain.Apk;
+import com.huashidai.weihuotong.mapper.ApkMapper;
+import com.huashidai.weihuotong.query.BaseQuery;
+import com.huashidai.weihuotong.query.PageResult;
+import com.huashidai.weihuotong.redis.CacheEvict;
+import com.huashidai.weihuotong.redis.Cacheable;
+import com.huashidai.weihuotong.service.IApkService;
+import com.huashidai.weihuotong.utils.FileUtil;
+import com.huashidai.weihuotong.utils.MatrixToImageWriter;
+import com.huashidai.weihuotong.utils.ReadProperties;
+
+@Service
+public class ApkServiceImpl implements IApkService {
+	@Autowired
+	private ApkMapper apkMapper;
+
+	@Cacheable
+	@Override
+	public PageResult<Apk> query(BaseQuery qu) {
+		// 统计查询
+		Long total = apkMapper.queryTotal(qu);
+		// 分页查询
+		List<Apk> rows = apkMapper.query(qu);
+		return new PageResult<Apk>(rows, qu.getPageSize(), qu.getCurrentPage(),
+				total.intValue());
+	}
+
+	@CacheEvict
+	@Override
+	public void save(Apk apk, MultipartFile file) throws IOException {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+		Date date = new Date();
+		String path = "apk/" + sdf.format(date);
+		String src = FileUtil.saveFile(file, path);
+		apk.setTime(date);
+		apk.setSrc(src);
+
+		String filename = file.getOriginalFilename();
+		String extension = FilenameUtils.getExtension(filename);
+		String baseName = FilenameUtils.getBaseName(filename);
+		apk.setName(baseName);
+		// 生成二维码
+		String baseUrl = ReadProperties.getBaseUrl();
+		MatrixToImageWriter.create(baseUrl + src, path, 300, 300, "png",
+				baseName);
+		apk.setImage(src.replace("." + extension, ".png"));
+		apkMapper.save(apk);
+	}
+
+	@CacheEvict
+	@Override
+	public void delete(Long id) {
+		Apk apk = apkMapper.get(id);
+		if (apk != null) {
+			FileUtil.deleteFile(apk.getSrc());
+			FileUtil.deleteFile(apk.getImage());
+			// 删除文件夹
+			FileUtil.deleteParent(apk.getImage());
+			apkMapper.delete(id);
+		}
+	}
+
+	@Cacheable
+	@Override
+	public Apk getNewest() {
+		return apkMapper.getNewest();
+	}
+
+}

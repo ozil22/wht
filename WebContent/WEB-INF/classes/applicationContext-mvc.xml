@@ -41,6 +41,7 @@
 			<mvc:exclude-mapping path="/app/**" />
 			<mvc:exclude-mapping path="/proxy/**" />
 			<mvc:exclude-mapping path="/pay/**" />
+			<mvc:exclude-mapping path="/apk/**" />
 			<!-- 拦截器的全类名 -->
 			<bean class="com.huashidai.weihuotong.interceptor.LoginInterceptor" />
 		</mvc:interceptor>
