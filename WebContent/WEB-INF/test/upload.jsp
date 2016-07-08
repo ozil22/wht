@@ -5,13 +5,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="keywords"
-	content="html5,jquery,ui,widgets,ajax,ria,web framekwork,web development,easy,easyui,datagrid,treegrid,tree">
-<meta name="description"
-	content="jQuery EasyUI will show you the live demo of components.">
-<title>Live Demo - jQuery EasyUI</title>
-<link rel="stylesheet" href="/css/main.css" type="text/css" />
-<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<title>Demo</title>
 </head>
 <script type="text/javascript">  
 $(function() {  
@@ -159,7 +153,7 @@ function isvalidatefile(obj) {
 	</body> 
 	<body>  
 		<h1>计算邮费</h1>  
-		<form action="/app/postage" method="post">  
+		<form action="/app/postages" method="post">  
     	地址id<input type="text" name="addressId">
     	店铺id<input type="text" name="storeIds[0]">
     	数量<input type="text" name="nums[0]">
@@ -167,6 +161,24 @@ function isvalidatefile(obj) {
     	数量<input type="text" name="nums[1]">
     	店铺id<input type="text" name="storeIds[2]">
     	数量<input type="text" name="nums[2]">
+    	<input type="submit" value="确定"/>  
+		</form>  
+	</body> 
+	<body>  
+		<h1>添加运费模板</h1>  
+		<form action="/app/savePostageTemplate" method="post">  
+    	店铺id<input type="text" name="templates[0].store.id">
+    	价格<input type="text" name="templates[0].one">
+    	数量<input type="text" name="templates[0].oneNum">
+    	续件价格<input type="text" name="templates[0].other">
+    	续件数量<input type="text" name="templates[0].otherNum">
+    	地区<input type="text" name="templates[0].area">
+    	店铺id<input type="text" name="templates[1].store.id">
+    	价格<input type="text" name="templates[1].one">
+    	数量<input type="text" name="templates[1].oneNum">
+    	续件价格<input type="text" name="templates[1].other">
+    	续件数量<input type="text" name="templates[1].otherNum">
+    	地区<input type="text" name="templates[1].area">
     	<input type="submit" value="确定"/>  
 		</form>  
 	</body> 

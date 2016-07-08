@@ -268,18 +268,9 @@ public class GoodsAPP {
 	}
 
 	/**
-	 * 获取邮费和默认地址
-	 * 
-	 * @param items
-	 *            订单明细集合
-	 * @param userId
-	 *            app购买用户id
+	 * 计算邮费
 	 * @param addressId
-	 *            地址id
-	 * @param customerId
-	 *            网页购买客户id
-	 * @param proxyGoodsId
-	 *            代理商品id
+	 * @param postItemList
 	 * @return
 	 */
 	@RequestMapping("/postages")

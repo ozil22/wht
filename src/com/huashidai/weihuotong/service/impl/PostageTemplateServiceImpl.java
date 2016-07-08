@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import com.huashidai.weihuotong.domain.Address;
 import com.huashidai.weihuotong.domain.PostageTemplate;
 import com.huashidai.weihuotong.domain.paramList.PostItemList;
+import com.huashidai.weihuotong.domain.paramList.PostageTemplateList;
 import com.huashidai.weihuotong.mapper.PostageTemplateMapper;
+import com.huashidai.weihuotong.redis.CacheEvict;
 import com.huashidai.weihuotong.redis.Cacheable;
 import com.huashidai.weihuotong.service.IAddressService;
 import com.huashidai.weihuotong.service.IPostageTemplateService;
@@ -38,6 +40,12 @@ public class PostageTemplateServiceImpl implements IPostageTemplateService {
 		return PostageTemplates;
 	}
 
+	@CacheEvict
+	@Override
+	public void deleteByStore(Long storeId) {
+		postageTemplateMapper.delteByStore(storeId);
+	}
+
 	@Cacheable
 	@Override
 	public Map<String, Object> get(Long postageTemplateId) {
@@ -52,19 +60,21 @@ public class PostageTemplateServiceImpl implements IPostageTemplateService {
 	private Map<String, Object> buildMap(PostageTemplate postageTemplate) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("id", postageTemplate.getId());
-		map.put("name", postageTemplate.getName());
 		map.put("one", postageTemplate.getOne());
+		map.put("oneNum", postageTemplate.getOneNum());
 		map.put("other", postageTemplate.getOther());
-		map.put("freeNumber", postageTemplate.getFreeNumber());
-		map.put("area", postageTemplate.getArea().split(","));
+		map.put("otherNum", postageTemplate.getOtherNum());
+		map.put("area", postageTemplate.getArea());
 		return map;
 	}
 
+	@CacheEvict
 	@Override
 	public void save(PostageTemplate postageTemplate) {
 		postageTemplateMapper.save(postageTemplate);
 	}
 
+	@CacheEvict
 	@Override
 	public void update(PostageTemplate postageTemplate) {
 		postageTemplateMapper.update(postageTemplate);
@@ -94,21 +104,41 @@ public class PostageTemplateServiceImpl implements IPostageTemplateService {
 		List<PostageTemplate> template = postageTemplateMapper
 				.getByStore(storeId);
 		BigDecimal p = ConstUtil.ZERO;
-		for (PostageTemplate pt : template) {
+
+		boolean flag = true;
+		for (int i = 1; i < template.size(); i++) {
+			PostageTemplate pt = template.get(i);
 			if (pt.getArea().contains(province)) {
-				Integer freeNumber = pt.getFreeNumber();
-				if (num > freeNumber) {
-					num -= freeNumber;
-					if (num == 1) {
-						p.add(pt.getOne()).add(pt.getOther());
-					}
-					if (num > 1) {
-						p.add(pt.getOther().multiply(
-								new BigDecimal(num - 1)));
-					}
+				Integer oneNum = pt.getOneNum();
+				p = p.add(pt.getOne().multiply(new BigDecimal(oneNum)));
+				if (num > oneNum) {
+					Integer otherNum = pt.getOtherNum();
+					int number = (int)Math.ceil((double)(num - oneNum)/otherNum);
+					p = p.add(pt.getOther().multiply(
+							new BigDecimal(number)));
 				}
+				flag = false;
 			}
 		}
-		return p; 
+		if (flag) {
+			PostageTemplate pt = template.get(0);
+			Integer oneNum = pt.getOneNum();
+			p = p.add(pt.getOne().multiply(new BigDecimal(oneNum)));
+			if (num > oneNum) {
+				Integer otherNum = pt.getOtherNum();
+				int number = (int)Math.ceil((double)(num - oneNum)/otherNum);
+				p = p.add(pt.getOther().multiply(
+						new BigDecimal(number)));
+			}
+		}
+		return p;
+	}
+
+	@CacheEvict
+	@Override
+	public void saveAll(PostageTemplateList templates) {
+		postageTemplateMapper.delteByStore(templates.getTemplates().get(0).getStore().getId());
+		List<PostageTemplate> pt = templates.getTemplates();
+		postageTemplateMapper.saveAll(pt);
 	}
 }

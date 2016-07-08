@@ -13,6 +13,10 @@ public interface PostageTemplateMapper {
 	 */
 	void save(PostageTemplate postageTemplate);
 	/**
+	 * 批量添加
+	 */
+	void saveAll(List<PostageTemplate> postageTemplates);
+	/**
 	 * 更新
 	 */
 	void update(PostageTemplate postageTemplate);
@@ -28,4 +32,8 @@ public interface PostageTemplateMapper {
 	 * 获取店铺所有
 	 */
 	List<PostageTemplate> getByStore(@Param("storeId")Long storeId);
+	/**
+	 * 删除店铺所有
+	 */
+	void delteByStore(@Param("storeId")Long storeId);
 }

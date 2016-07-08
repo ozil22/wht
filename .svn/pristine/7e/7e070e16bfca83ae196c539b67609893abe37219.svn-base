@@ -1,0 +1,84 @@
+package com.huashidai.weihuotong.mapper;
+
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.huashidai.weihuotong.domain.ProductOrder;
+import com.huashidai.weihuotong.query.ProductOrderQuery;
+
+public interface ProductOrderMapper {
+	/**
+	 * 保存
+	 */
+	void save(ProductOrder productOrder);
+	/**
+	 * 更新
+	 */
+	void update(ProductOrder productOrder);
+	/**
+	 * 修改状态
+	 */
+	void updateState(@Param("productOrderId")Long productOrderId, @Param("state")Integer state);
+	/**
+	 * 修改订单金额
+	 * @param productOrderId
+	 * @param price
+	 */
+	void updatePrice(@Param("productOrderId")Long productOrderId, @Param("price")BigDecimal price);
+	/**
+	 * 修改物流信息
+	 * @param productOrderId 
+	 * @param expressNum
+	 * @param express
+	 */
+	void updateExpress(@Param("productOrderId")Long productOrderId, @Param("expressNum")String expressNum,@Param("expressCode")String expressCode);
+	/**
+	 * 删除
+	 */
+	void delete(Long id);
+	/**
+	 * 获取单个
+	 */
+	ProductOrder get(Long id);
+	/**
+	 * 根据总订单号获取
+	 */
+	List<ProductOrder> getByTotalOrderNum(@Param("totalOrderNum")String totalOrderNum);
+	/**
+	 * 查询day天前状态为state的订单
+	 * @param day
+	 * @return
+	 */
+	List<ProductOrder> getDueOrder(@Param("day")Integer day,@Param("state")Integer state);
+	/**
+	 * 查询所有
+	 */
+	List<ProductOrder> getAll();
+	/**
+	 * 高级查询
+	 * @param qu
+	 * @return
+	 */
+	List<ProductOrder> query(ProductOrderQuery qu);
+	/**
+	 * 统计查询
+	 * @param qu
+	 * @return
+	 */
+	Long queryTotal(ProductOrderQuery qu);
+	/**
+	 * 获取单个（包含关联对象）
+	 * @param productOrderId
+	 * @return
+	 */
+	ProductOrder getMap(Long productOrderId);
+	/**
+	 * 根据订单号获取
+	 * @param orderNum
+	 * @return
+	 */
+	ProductOrder getByOrderNum(@Param("orderNum")String orderNum);
+}

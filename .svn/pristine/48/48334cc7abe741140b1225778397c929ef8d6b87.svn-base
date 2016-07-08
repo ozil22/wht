@@ -1,0 +1,144 @@
+package com.huashidai.weihuotong.service.impl;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.huashidai.weihuotong.domain.Address;
+import com.huashidai.weihuotong.domain.PostageTemplate;
+import com.huashidai.weihuotong.domain.paramList.PostItemList;
+import com.huashidai.weihuotong.domain.paramList.PostageTemplateList;
+import com.huashidai.weihuotong.mapper.PostageTemplateMapper;
+import com.huashidai.weihuotong.redis.CacheEvict;
+import com.huashidai.weihuotong.redis.Cacheable;
+import com.huashidai.weihuotong.service.IAddressService;
+import com.huashidai.weihuotong.service.IPostageTemplateService;
+import com.huashidai.weihuotong.utils.ConstUtil;
+
+@Service
+public class PostageTemplateServiceImpl implements IPostageTemplateService {
+	@Autowired
+	private PostageTemplateMapper postageTemplateMapper;
+	@Autowired
+	private IAddressService addressService;
+
+	@Cacheable
+	@Override
+	public List<Map<String, Object>> getByStore(Long storeId) {
+		List<Map<String, Object>> PostageTemplates = new ArrayList<Map<String, Object>>();
+		List<PostageTemplate> templates = postageTemplateMapper
+				.getByStore(storeId);
+		for (PostageTemplate postageTemplate : templates) {
+			Map<String, Object> map = buildMap(postageTemplate);
+			PostageTemplates.add(map);
+		}
+		return PostageTemplates;
+	}
+
+	@CacheEvict
+	@Override
+	public void deleteByStore(Long storeId) {
+		postageTemplateMapper.delteByStore(storeId);
+	}
+
+	@Cacheable
+	@Override
+	public Map<String, Object> get(Long postageTemplateId) {
+		PostageTemplate postageTemplate = postageTemplateMapper
+				.get(postageTemplateId);
+		return buildMap(postageTemplate);
+	}
+
+	/**
+	 * 构建APP需要的数据格式
+	 */
+	private Map<String, Object> buildMap(PostageTemplate postageTemplate) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("id", postageTemplate.getId());
+		map.put("one", postageTemplate.getOne());
+		map.put("oneNum", postageTemplate.getOneNum());
+		map.put("other", postageTemplate.getOther());
+		map.put("otherNum", postageTemplate.getOtherNum());
+		map.put("area", postageTemplate.getArea());
+		return map;
+	}
+
+	@CacheEvict
+	@Override
+	public void save(PostageTemplate postageTemplate) {
+		postageTemplateMapper.save(postageTemplate);
+	}
+
+	@CacheEvict
+	@Override
+	public void update(PostageTemplate postageTemplate) {
+		postageTemplateMapper.update(postageTemplate);
+	}
+
+	@Override
+	public List<Object> postages(Long addressId, PostItemList postItemList) {
+		Address address = addressService.get(addressId);
+		String province = address.getProvince();
+		List<Long> storeIds = postItemList.getStoreIds();
+		List<Integer> nums = postItemList.getNums();
+		List<Object> postages = new ArrayList<Object>();
+		for (int i = 0; i < storeIds.size(); i++) {
+			Map<String, Object> postage = new HashMap<String, Object>();
+			Long storeId = storeIds.get(i);
+			Integer num = nums.get(i);
+			BigDecimal p = postage(province, storeId, num);
+			postage.put("storeId", storeId);
+			postage.put("postage", p);
+			postages.add(postage);
+		}
+		return postages;
+	}
+
+	@Override
+	public BigDecimal postage(String province, Long storeId, Integer num) {
+		List<PostageTemplate> template = postageTemplateMapper
+				.getByStore(storeId);
+		BigDecimal p = ConstUtil.ZERO;
+
+		boolean flag = true;
+		for (int i = 1; i < template.size(); i++) {
+			PostageTemplate pt = template.get(i);
+			if (pt.getArea().contains(province)) {
+				Integer oneNum = pt.getOneNum();
+				p = p.add(pt.getOne().multiply(new BigDecimal(oneNum)));
+				if (num > oneNum) {
+					Integer otherNum = pt.getOtherNum();
+					int number = (int)Math.ceil((double)(num - oneNum)/otherNum);
+					p = p.add(pt.getOther().multiply(
+							new BigDecimal(number)));
+				}
+				flag = false;
+			}
+		}
+		if (flag) {
+			PostageTemplate pt = template.get(0);
+			Integer oneNum = pt.getOneNum();
+			p = p.add(pt.getOne().multiply(new BigDecimal(oneNum)));
+			if (num > oneNum) {
+				Integer otherNum = pt.getOtherNum();
+				int number = (int)Math.ceil((double)(num - oneNum)/otherNum);
+				p = p.add(pt.getOther().multiply(
+						new BigDecimal(number)));
+			}
+		}
+		return p;
+	}
+
+	@CacheEvict
+	@Override
+	public void saveAll(PostageTemplateList templates) {
+		postageTemplateMapper.delteByStore(templates.getTemplates().get(0).getStore().getId());
+		List<PostageTemplate> pt = templates.getTemplates();
+		postageTemplateMapper.saveAll(pt);
+	}
+}

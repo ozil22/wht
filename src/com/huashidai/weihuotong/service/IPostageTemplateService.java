@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.huashidai.weihuotong.domain.PostageTemplate;
 import com.huashidai.weihuotong.domain.paramList.PostItemList;
+import com.huashidai.weihuotong.domain.paramList.PostageTemplateList;
 
 
 public interface IPostageTemplateService {
@@ -14,6 +15,10 @@ public interface IPostageTemplateService {
 	 * 获取店铺所有运费模板
 	 */
 	List<Map<String, Object>> getByStore(Long storeId);
+	/**
+	 * 删除店铺所有运费模板
+	 */
+	void deleteByStore(Long storeId);
 	/**
 	 * 获取单个运费模板
 	 * @param postageTemplateId
@@ -25,6 +30,11 @@ public interface IPostageTemplateService {
 	 * @param postageTemplate
 	 */
 	void save(PostageTemplate postageTemplate);
+	/**
+	 * 批量添加运费模板
+	 * @param templates
+	 */
+	void saveAll(PostageTemplateList templates);
 	/**
 	 * 修改
 	 * @param postageTemplate

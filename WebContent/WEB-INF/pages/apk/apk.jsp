@@ -139,21 +139,17 @@ $(function(){
 	</div>
 
 	<!-- 录入窗口 -->
-	<div id="apkDialog" class="easyui-dialog" style="width: 330px;height: 260px;"
+	<div id="apkDialog" class="easyui-dialog" style="width: 350px;height: 280px;"
 	data-options="title:'上传安装包',modal:true,iconCls:'icon-edit',buttons:'#apk_bs',closed:true">
 			<form id="apkForm" method="post" enctype="multipart/form-data">
 			<div style="margin-top: 10px;margin-left: 35px" >
-			 			版本：
-			 			<input  name="version"  class="easyui-textbox" data-options="required:true" style="width: 200px">
-			</div>		
-			<div style="margin-top: 10px;margin-left: 35px" >
 			 			文件：
-			 			<input class="easyui-filebox" name="file" style="width: 200px" >
+			 			<input class="easyui-filebox" name="file" style="width: 220px" >
 			</div>
 			<div style="margin-top: 10px;margin-left: 35px" >
 			 			备注：
 			 			<input  name="note"  class="easyui-textbox" 
-			 			data-options="required:true,multiline:true" style="width: 200px;height:100px">
+			 			data-options="required:true,multiline:true" style="width: 220px;height:150px">
 			</div>		
 			</form>
 		</div>

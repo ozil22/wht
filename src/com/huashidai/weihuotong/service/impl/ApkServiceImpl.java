@@ -17,9 +17,11 @@ import com.huashidai.weihuotong.query.PageResult;
 import com.huashidai.weihuotong.redis.CacheEvict;
 import com.huashidai.weihuotong.redis.Cacheable;
 import com.huashidai.weihuotong.service.IApkService;
+import com.huashidai.weihuotong.utils.AnalysisApk;
 import com.huashidai.weihuotong.utils.FileUtil;
 import com.huashidai.weihuotong.utils.MatrixToImageWriter;
 import com.huashidai.weihuotong.utils.ReadProperties;
+import com.huashidai.weihuotong.utils.UserContext;
 
 @Service
 public class ApkServiceImpl implements IApkService {
@@ -56,6 +58,10 @@ public class ApkServiceImpl implements IApkService {
 		MatrixToImageWriter.create(baseUrl + src, path, 300, 300, "png",
 				baseName);
 		apk.setImage(src.replace("." + extension, ".png"));
+		//获取版本号
+		String realPath = UserContext.getRealPath();
+		String version = AnalysisApk.getVersion(realPath + src);
+		apk.setVersion(version);
 		apkMapper.save(apk);
 	}
 

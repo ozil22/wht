@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.huashidai.weihuotong.domain.PostageTemplate;
 import com.huashidai.weihuotong.domain.Store;
+import com.huashidai.weihuotong.domain.paramList.PostageTemplateList;
 import com.huashidai.weihuotong.exception.LogicException;
 import com.huashidai.weihuotong.query.GoodsQuery;
 import com.huashidai.weihuotong.query.StoreFavoritesQuery;
@@ -359,12 +360,13 @@ public class StoreAPP {
 	 */
 	@RequestMapping("/savePostageTemplate")
 	@ResponseBody
-	public AppResult savePostageTemplate(PostageTemplate postageTemplate) {
+	public AppResult savePostageTemplate(PostageTemplateList templates) {
 		AppResult appResult = null;
 		try {
-			postageTemplateService.save(postageTemplate);
+			postageTemplateService.saveAll(templates);
 			appResult = new AppResult(null);
 		} catch (Exception e) {
+			e.printStackTrace();
 			appResult = new AppResult();
 		}
 		return appResult;
