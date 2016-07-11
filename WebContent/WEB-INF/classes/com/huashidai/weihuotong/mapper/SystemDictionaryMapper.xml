@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.SystemDictionaryMapper">
+	<!-- 关联查询结果集 -->
+	<resultMap type="SystemDictionary" id="systemDictionaryMap">
+		<id property="id" column="id"/>
+		<result  property="sn" column="sn"/>
+		<result  property="name" column="name"/>
+		<result  property="intro" column="intro"/>
+		<result  property="state" column="state"/>
+		<collection property="details" javaType="arraylist" ofType="SystemDictionaryItem">
+			<id property="id" column="iid"/>
+			<result  property="sn" column="isn"/>
+			<result  property="name" column="iname"/>
+			<result  property="intro" column="iintro"/>
+		</collection>
+	</resultMap>
+	<!-- 查询单个 -->
+	<select id="get" parameterType="long" resultMap="systemDictionaryMap">
+		select s.*,i.id iid,i.sn isn,i.name iname,i.intro iintro
+			from t_systemDictionary s left join t_systemDictionaryItem i
+			on(s.id=i.parent_id) 
+			where s.id=#{id}
+	</select>
+	<!-- 查询所有 -->
+	<select id="getAll" resultMap="systemDictionaryMap">
+		select s.*,i.id iid,i.sn isn,i.name iname,i.intro iintro
+			from t_systemDictionary s left join t_systemDictionaryItem i
+			on(s.id=i.parent_id) 
+	</select>
+	<!-- 保存 -->
+	<insert id="save" parameterType="SystemDictionary">
+		insert into t_systemDictionary (name,sn,intro,state)
+		values(#{name},#{sn},#{intro},#{state})
+	</insert>
+	<!-- 更新 -->
+	<update id="update" parameterType="SystemDictionary">
+		update t_systemDictionary set
+		name=#{name},sn=#{sn},intro=#{intro},state=#{state}
+		where id=#{id}
+	</update>
+	<!-- 删除 -->
+	<delete id="delete" parameterType="long">
+		delete from t_systemDictionary 
+		where id=#{id}
+	</delete>
+</mapper>

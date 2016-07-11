@@ -48,7 +48,7 @@ html, body {
 					${address.address}
 				</c:if>
 				<c:if test="${address==null}">
-					+选择收货地址
+					选择收货地址
 				</c:if>
 			</div>
 
@@ -64,7 +64,7 @@ html, body {
 						<br />
 
 						<p class="z_orderInfoBoxCenterBottom">
-							<span class="z_orderInfoBoxCenterPrice"style="color:red">￥ ${price}</span>
+							<span class="z_orderInfoBoxCenterPrice">￥ ${price}</span>
 						</p>
 					</div>
 					<div class="z_orderInfoBoxRight">
@@ -107,10 +107,10 @@ html, body {
 			</div>
 
 		</div>
-<!-- 		<div class="J_cartItems J_cartItems1" -->
-<!-- 			style="margin-top: 0px; border: 0px; padding: 10px 0px;"> -->
-<!-- 			<input type="text" class="w5" placeholder="给商家留言" /> -->
-<!-- 		</div> -->
+		<div class="J_cartItems J_cartItems1"
+			style="margin-top: 0px; border: 0px; padding: 10px 0px;">
+			<input type="text" class="w5" placeholder="给商家留言" />
+		</div>
 	</div>
 
 	<div class="J_payments">
@@ -175,13 +175,13 @@ html, body {
 					onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" /></li>
 				<li class="borB1Sccc"><span class="dispInB">所在地：</span> 
 				<select class="z_resuleAddre w30" >
-					<option value="-1">&nbsp;&nbsp;请选择▽</option>
+					<option value="-1">请选择</option>
 					<c:forEach items="${provinces}" var="province">
 						<option value="${province.id}">${province.name}</option>
 					</c:forEach>
 				</select> 
 				<select class="z_resuleAddre text_l w30" id="select" name="city.id">
-						<option value="">&nbsp;&nbsp;请选择▽</option>
+						<option value="">请选择</option>
 						<input type="hidden" class="z_resuleAddreHid" />
 				</select></li>
 				<li class="borB1Sccc"><span class="dispInB verticalTop">详细地址:</span>
@@ -227,7 +227,7 @@ html, body {
 		</c:forEach>
 
 		<div class="btn-addressbtn">
-			<div class="address" style="background:#ff5236;color: #fff;">+新增收货地址</div>
+			<div class="address" style="color: #fff;">+新增收货地址</div>
 		</div>
 	</div>
 </body>

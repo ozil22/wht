@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huashidai.weihuotong.mapper.SystemDictionaryItemMapper">
+	<!-- 关联查询结果集 -->
+	<resultMap type="SystemDictionaryItem" id="systemDictionaryItemMap">
+		<id property="id" column="id"/>
+		<result  property="sn" column="sn"/>
+		<result  property="name" column="name"/>
+		<result  property="intro" column="intro"/>
+		<association property="parent" javaType="SystemDictionary">
+			<id property="id" column="sid"/>
+			<result  property="sn" column="ssn"/>
+			<result  property="name" column="sname"/>
+			<result  property="state" column="sstate"/>
+		</association>
+	</resultMap>
+	<!-- 查询单个 -->
+	<select id="get" parameterType="long" resultMap="systemDictionaryItemMap">
+		select i.*,s.id sid,s.sn ssn,s.name sname,s.state sstate
+			from t_systemDictionaryItem i left join t_systemDictionary s
+			on(s.id=i.parent_id) 
+			where i.id=#{id}
+	</select>
+	<!-- 查询对应目录的 -->
+	<select id="getList" resultMap="systemDictionaryItemMap">
+		select i.*,s.id sid,s.sn ssn,s.name sname,s.state sstate
+			from t_systemDictionaryItem i left join t_systemDictionary s
+			on(s.id=i.parent_id) 
+		where parent_id=#{id};
+	</select>
+	<!-- 查询所有 -->
+	<select id="getAll" resultMap="systemDictionaryItemMap">
+		select i.*,s.id sid,s.sn ssn,s.name sname,s.state sstate
+			from t_systemDictionaryItem i left join t_systemDictionary s
+			on(s.id=i.parent_id) 
+	</select>
+	<!-- 保存 -->
+	<insert id="save" parameterType="SystemDictionaryItem">
+		insert into t_systemDictionaryItem (name,sn,intro,parent_id)
+		values(#{name},#{sn},#{intro},#{parent.id})
+	</insert>
+	<!-- 更新 -->
+	<update id="update" parameterType="SystemDictionaryItem">
+		update t_systemDictionaryItem set
+		name=#{name},sn=#{sn},intro=#{intro},parent_id=#{parent.id}
+		where id=#{id}
+	</update>
+	<!-- 删除 -->
+	<delete id="delete" parameterType="long">
+		delete from t_systemDictionaryItem 
+		where id=#{id}
+	</delete>
+</mapper>
