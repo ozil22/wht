@@ -6,7 +6,7 @@
 	<resultMap type="SystemDictionaryItem" id="systemDictionaryItemMap">
 		<id property="id" column="id"/>
 		<result  property="sn" column="sn"/>
-		<result  property="name" column="name"/>
+		<result  property="value" column="value"/>
 		<result  property="intro" column="intro"/>
 		<association property="parent" javaType="SystemDictionary">
 			<id property="id" column="sid"/>
@@ -23,27 +23,29 @@
 			where i.id=#{id}
 	</select>
 	<!-- 查询对应目录的 -->
-	<select id="getList" resultMap="systemDictionaryItemMap">
+	<select id="getByParent" resultMap="systemDictionaryItemMap">
 		select i.*,s.id sid,s.sn ssn,s.name sname,s.state sstate
 			from t_systemDictionaryItem i left join t_systemDictionary s
 			on(s.id=i.parent_id) 
-		where parent_id=#{id};
+		where i.parent_id=#{id}
+		order by i.sn
 	</select>
 	<!-- 查询所有 -->
 	<select id="getAll" resultMap="systemDictionaryItemMap">
-		select i.*,s.id sid,s.sn ssn,s.name sname,s.state sstate
+		select i.*,s.id sid,s.sn ssn,s.value sname,s.state sstate
 			from t_systemDictionaryItem i left join t_systemDictionary s
 			on(s.id=i.parent_id) 
+		order by i.sn
 	</select>
 	<!-- 保存 -->
 	<insert id="save" parameterType="SystemDictionaryItem">
-		insert into t_systemDictionaryItem (name,sn,intro,parent_id)
-		values(#{name},#{sn},#{intro},#{parent.id})
+		insert into t_systemDictionaryItem (value,sn,intro,parent_id)
+		values(#{value},#{sn},#{intro},#{parent.id})
 	</insert>
 	<!-- 更新 -->
 	<update id="update" parameterType="SystemDictionaryItem">
 		update t_systemDictionaryItem set
-		name=#{name},sn=#{sn},intro=#{intro},parent_id=#{parent.id}
+		value=#{value},sn=#{sn},intro=#{intro},parent_id=#{parent.id}
 		where id=#{id}
 	</update>
 	<!-- 删除 -->

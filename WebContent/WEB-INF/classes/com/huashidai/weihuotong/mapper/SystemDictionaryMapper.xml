@@ -12,20 +12,20 @@
 		<collection property="details" javaType="arraylist" ofType="SystemDictionaryItem">
 			<id property="id" column="iid"/>
 			<result  property="sn" column="isn"/>
-			<result  property="name" column="iname"/>
+			<result  property="value" column="ivalue"/>
 			<result  property="intro" column="iintro"/>
 		</collection>
 	</resultMap>
 	<!-- 查询单个 -->
 	<select id="get" parameterType="long" resultMap="systemDictionaryMap">
-		select s.*,i.id iid,i.sn isn,i.name iname,i.intro iintro
+		select s.*,i.id iid,i.sn isn,i.value ivalue,i.intro iintro
 			from t_systemDictionary s left join t_systemDictionaryItem i
 			on(s.id=i.parent_id) 
 			where s.id=#{id}
 	</select>
 	<!-- 查询所有 -->
 	<select id="getAll" resultMap="systemDictionaryMap">
-		select s.*,i.id iid,i.sn isn,i.name iname,i.intro iintro
+		select s.*,i.id iid,i.sn isn,i.value ivalue,i.intro iintro
 			from t_systemDictionary s left join t_systemDictionaryItem i
 			on(s.id=i.parent_id) 
 	</select>

@@ -14,20 +14,20 @@ import com.huashidai.weihuotong.system.MethodAnnotation.ResourceType;
 import com.huashidai.weihuotong.utils.AjaxResult;
 
 @Controller
-@RequestMapping("/systemDictionary")
-public class SystemDictionaryCotroller {
+@RequestMapping("/systemParam")
+public class SystemParamCotroller {
 	@Autowired
 	ISystemDictionaryService systemDictionaryService;
 
-	// 数据字典主页面
-	@MethodAnnotation(name = "主页", type = ResourceType.数据字典)
+	// 系统参数主页面
+	@MethodAnnotation(name = "主页", type = ResourceType.系统参数)
 	@RequestMapping("/index")
 	private String index() {
-		return "systemDictionary/systemDictionary";
+		return "systemDictionary/systemParam";
 	}
 
 	// 返回列表数据
-	@MethodAnnotation(name = "列表", type = ResourceType.数据字典)
+	@MethodAnnotation(name = "列表", type = ResourceType.系统参数)
 	@ResponseBody
 	@RequestMapping("/list")
 	private List<SystemDictionary> systemDictionaryList() {
@@ -35,7 +35,7 @@ public class SystemDictionaryCotroller {
 	}
 	
 	//删除
-	@MethodAnnotation(name = "删除", type = ResourceType.数据字典)
+	@MethodAnnotation(name = "删除", type = ResourceType.系统参数)
 	@ResponseBody
 	@RequestMapping("/delete")
 	private AjaxResult delete(Long id) {
@@ -44,15 +44,16 @@ public class SystemDictionaryCotroller {
 			if (id != null) {
 				systemDictionaryService.delete(id);
 				ar = new AjaxResult();
+			}else {
+				ar = new AjaxResult("删除失败", null);
 			}
-			ar = new AjaxResult("删除失败", null);
 		} catch (Exception e) {
 			ar = new AjaxResult("删除失败", null);
 		}
 		return ar;
 	}
 	//保存和更新
-	@MethodAnnotation(name = "编辑", type = ResourceType.数据字典)
+	@MethodAnnotation(name = "编辑", type = ResourceType.系统参数)
 	@ResponseBody
 	@RequestMapping("/save")
 	private AjaxResult save(SystemDictionary systemDictionary) {
